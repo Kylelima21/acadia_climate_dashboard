@@ -1,0 +1,49 @@
+/* Set core root defaults */
+
+@import url('https://fonts.googleapis.com/css?family=Montserrat:100,200,300,400,500,600,700,800,900');
+
+:root {
+  --clr-base-blue: rgb(146, 206, 208, 1);
+  --clr-base-green: rgb(85, 143, 94, 1);
+  --clr-base-purple: rgba(13, 4, 42, 1);
+
+  --clr-opaque-green: rgb(85, 143, 94, 0.7);
+  --clr-opaque-purple: rgba(13, 4, 42, 0.7);
+
+  --clr-body-boxes: rgba(122, 154, 157, 0.6);
+  
+  --main-text-size: 22px;
+  --header-text-size: 55px;
+}
+
+
+
+
+/* Navigation */
+
+.main-header .logo {
+  font-family: 'Montserrat', Sans-Serif;
+  font-weight: 500;
+}
+
+
+.extra {
+  font-family: 'Montserrat', Sans-Serif;
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 22px;
+  padding-top: 3px;
+}
+
+
+@media (max-width: 767px) {
+  
+  .m {
+  font-size: 20px;
+  line-height: 50px;
+  padding-top: none;
+  }
+  
+}
+
+
