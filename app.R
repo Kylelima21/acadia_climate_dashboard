@@ -1,8 +1,11 @@
 library(shiny)
 library(shinydashboard)
+library(fresh)
 
 
 ui <- dashboardPage(
+  
+  skin = "blue",
   
   dashboardHeader(
     title = "Acadia Climate Dashboard",
