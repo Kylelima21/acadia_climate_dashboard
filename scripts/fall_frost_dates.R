@@ -102,16 +102,65 @@ dat %>%
 #---------------------------------------------#
 
 
-read.csv("data/nClimGrid_daily_clean.csv") %>% 
+noaadat <- read.csv("data/nClimGrid_daily_clean.csv") %>% 
   as_tibble()
 
+noaafrost <- noaadat %>% 
+  # group_by(date, month, year) %>% 
+  # summarise(mi = min(tmp_degc), .groups = "drop") %>% 
+  filter(month(date) > 7) %>% 
+  group_by(year) %>% 
+  filter(tmin <= 0) %>% 
+  slice(1)
+
+## Edit dataframe for plotting
+plotnoaa <- noaafrost %>% 
+  # mutate(first.frost = str_remove(date, "\\d\\d\\d\\d\\-")) %>% 
+  mutate(first.frost = str_replace(date, "\\d\\d\\d\\d\\-", "2000-"),
+         first.frost = as.Date(first.frost)) %>%
+  dplyr::select(-date)
+
+## Get 2024 so we can distinguish this year's point
+noaa24 <- data.frame(first.frost = as.Date("2000-10-17"),
+                  year = 2024)
+
+
+## Plot
+plotnoaa %>% 
+  ggplot(aes(x = year, y = first.frost)) +
+  geom_point(color = "grey40") +
+  geom_point(aes(x = year, y = first.frost), color = "#f22e28", data = noaa24) +
+  geom_text(data = noaa24, label = "2024", vjust = -1, size = 10/.pt,
+            fontface = "bold") +
+  geom_smooth(aes(group = 1), fullrange = T,
+              method = "lm", se = F, color = "black") +
+  scale_x_continuous(limits = c(1950, 2025), breaks = c(1950, 1960, 1970,
+                                                        1980, 1990, 2000,
+                                                        2010, 2020)) +
+  scale_y_date(date_breaks = "1 week", date_labels = "%b-%d",
+               limits = as.Date(c("2000-09-20","2000-11-16"))) +
+  labs(x = "Year", 
+       y = "Date of first fall frost") +
+  theme_bw() +
+  theme(panel.grid = element_blank(),
+        panel.border = element_rect(linewidth = 1),
+        text = element_text(family = "Arial"),
+        axis.text = element_text(size = 10),
+        axis.title = element_text(size = 12),
+        axis.title.y = element_text(margin = margin(0,15,0,0)),
+        axis.title.x = element_text(margin = margin(15,0,0,0)))
+
+## Save plot
+ggsave("outputs/frost_date_figure.png", dpi = 700, height = 5, width = 6)
 
 
 
+### Quick linear model to get some stats
+moddat <- plotnoaa %>% 
+  mutate(jul.date = yday(first.frost))
 
-
-
-
+mod <- lm(jul.date ~ year, data = moddat)
+summary(mod)
 
 
 
