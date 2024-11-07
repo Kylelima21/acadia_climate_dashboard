@@ -48,6 +48,39 @@ print(ResidualsPlot)
 
 #### Temperature trends over time ------------------------------
 
+#yearly temperature trends
+yearly_data <- noaa.data %>%
+  group_by(year) %>% 
+  summarize(YearlyAvgTemp = mean(tmean, na.rm = TRUE),
+            YearlyAvgMax = mean(tmax, na.rm = TRUE),
+            YearlyAvgMin = mean(tmin, na.rm = TRUE))
+
+# Reshape data to long format for easier plotting
+yearly_data_long <- yearly_data %>%
+  pivot_longer(cols = c(YearlyAvgTemp, YearlyAvgMax, YearlyAvgMin),
+               names_to = "TemperatureType",
+               values_to = "Temperature")
+
+#plot yearly temp data - average, max, and min
+ggplot(yearly_data_long, aes(x = year, y = Temperature, color = TemperatureType)) +
+  geom_line(size = 1) +
+  labs(title = "Yearly Temperature Trends",
+       x = "Year",
+       y = "Temperature (°C)",
+       color = "Temperature Type") +
+  theme_minimal()
+
+
+#plot yearly temperature trends
+#ggplot(yearly_data, aes(x = as.numeric(year), y = YearlyAvgTemp)) +
+ # geom_line(color = "blue") +
+ # labs(title = "Average Yearly Temperature",
+  #     x = "Year",
+  #     y = "Average Temperature (°F)") +
+#  theme_minimal()
+
+
+#monthly temperature trends
 monthly_data <- noaa.data %>%
   group_by(year, month) %>%
   summarize(MonthlyAvgTemp = mean(tmean, na.rm = TRUE)) 
@@ -57,12 +90,12 @@ monthly_data <- noaa.data %>%
 #  group_by(YearMonth) %>%
 #  summarize(MonthlyAvgTemp = mean(tmean, na.rm = TRUE)) %>% 
   
-
+#plot monthly temperature trends
 ggplot(monthly_data, aes(x = as.numeric(year), y = MonthlyAvgTemp)) +
   geom_line(color = "blue") +
   labs(title = "Average Monthly Temperature",
        x = "Date",
-       y = "Average Temperature (°F)") +
+       y = "Average Temperature (°C)") +
   theme_minimal()
 
 
@@ -72,7 +105,7 @@ ggplot(monthly_data, aes(x = as.numeric(year), y = MonthlyAvgTemp)) +
 # Check and convert the Date column to Date format
 noaa.data$date <- as.Date(noaa.data$date)
 
-# Extract Day of Year
+# extract day of year
 new.noaa.data <- noaa.data %>%
  mutate(DayOfYear = format(date, "%j"))
 
@@ -81,11 +114,11 @@ daily.baseline <- new.noaa.data %>%
   group_by(DayOfYear) %>%
   summarize(BaselineTemp = mean(tmean, na.rm = TRUE))
 
-# Join the baseline with the original data
+# join the baseline with the original data
 new.noaa.data <- new.noaa.data %>%
   left_join(daily.baseline, by = "DayOfYear")
 
-# Calculate the daily temperature anomaly
+# calculate the daily temperature anomaly
 new.noaa.data  <- new.noaa.data %>%
   mutate(TempAnomaly = tmean - BaselineTemp)
 
@@ -95,14 +128,14 @@ ggplot(new.noaa.data , aes(x = year, y = TempAnomaly)) +
   geom_line(color = "blue") +
   geom_hline(yintercept = 0, linetype = "solid", color = "red") +
   labs(title = "Daily Temperature Anomalies Over Time",
-       x = "Year", y = "Temperature Anomaly (°F)") +
+       x = "Year", y = "Temperature Anomaly (°C)") +
   theme_minimal()
 
 
 
 # Calculate a baseline average temperature
 
-# baseline as the average temperature per day across years
+# baseline as the average temperature per month across years
 monthly_data <- noaa.data %>%
   group_by(year, month) %>%
   summarize(MonthlyAvgTemp = mean(tmean, na.rm = TRUE))
@@ -125,7 +158,7 @@ ggplot(new.monthly.data, aes(x = year, y = TempAnomaly)) +
   geom_line(color = "blue") +
   geom_hline(yintercept = 0, linetype = "solid", color = "red") +
   labs(title = "Monthly Temperature Anomalies Over Time",
-       x = "year", y = "Temperature Anomaly (°F)") +
+       x = "year", y = "Temperature Anomaly (°C)") +
   theme_minimal()
 
 
