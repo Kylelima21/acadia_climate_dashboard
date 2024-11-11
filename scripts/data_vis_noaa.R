@@ -225,12 +225,23 @@ temp.with.anomalies <- temp.with.climatology %>%
   mutate(TempAnomaly = tmean - climatology)
 
 # visualize the anomalies over time using ggplot2
-ggplot(new.monthly.data, aes(x = year, y = TempAnomaly)) +
-  geom_line(color = "blue") +
-  geom_hline(yintercept = 0, linetype = "solid", color = "red") +
+ggplot(temp.with.anomalies, aes(x = year, y = TempAnomaly, fill = TempAnomaly > 0)) +
+  geom_bar(stat = "identity") +
+  geom_hline(yintercept = 0, linetype = "solid", color = "black") +
+  #annotate("text", x = min(temp.with.anomalies$year), y = 0.1, label = "Average baseline", hjust = 0, color = "black") +
+  scale_fill_manual(values = c("TRUE" = "red", "FALSE" = "blue"),
+                    labels = c("TRUE" = "Below baseline", "FALSE" = "Above Baseline")) +
+  scale_x_continuous(
+    breaks = seq(1895, 2024, by = 5),
+    limits = c(1895, 2024))   +
   labs(title = "Monthly Temperature Anomalies Over Time",
-       x = "year", y = "Temperature Anomaly (°C)") +
-  theme_minimal()
+       x = "Year", 
+       y = "Temperature Anomaly (°C)") +
+  theme_minimal() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 
 
 ###attempting this - https://www.youtube.com/watch?v=DrNQMaIVEVo #graphing temperature anomalies 
@@ -269,14 +280,24 @@ record.precip <- daily.noaa.data %>%
 #number of record highs per year - days above a certain threshold (above the average/baseline??)
 #average daily max temp across all years and then for each year, calculate the number of days above that average
 
-#highest max
+#mean highest max temp
 temp.max.mean <- daily.noaa.data %>% 
   summarise(mean.max = mean(tmax, na.rm = TRUE))
 
-#top 10 highest max
-top10_highest_temps <- daily.noaa.data %>% 
+#top 20 highest max temps
+top20_highest_temps <- daily.noaa.data %>% 
   arrange(desc(tmax)) %>%    
-  slice_head(n = 10)
+  slice_head(n = 20)
+
+#graph of max temps
+ggplot(top20_highest_temps, aes(x = date, y = tmax)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  labs(
+       x = "Date",
+       y = "Record High Temperatures") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
 
 #summarizing the number of days each year with temp maximums above the average temp maximum
 temp.highs <- daily.noaa.data %>% 
