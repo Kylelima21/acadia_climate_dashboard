@@ -132,19 +132,52 @@ ggplot(yearly_data_long, aes(x = year, y = Temperature, color = TemperatureType)
 #FRANCY - plot yearly temp data - average, max, and min
 ggplot(yearly_data_long, aes(x = year, y = Temperature, color = TemperatureType)) +
   geom_point(size = 1) +
-  geom_line(size = 1) +
+  geom_line(size = 1, alpha = 0.5) +
   geom_smooth(method = "lm", se = FALSE) +
   scale_x_continuous(breaks = pretty(yearly_data_long$year)) +
+  scale_color_manual(values = c("YearlyAvgMax" = "#CC3300", "YearlyAvgMin" = "#003399", "YearlyAvgTemp" = "#000000")) +
   labs(title = "Average Temperature (1895-2024)",
        x = "Year",
        y = "Temperature (°C)",
        color = "Temperature Type") +
   theme_minimal()
 
+#monthly temperature trends
+#monthly_data <- monthly.noaa.data %>%
+ # group_by(year, month) %>% 
+  #summarize(MonthlyAvgTemp = mean(tmean, na.rm = TRUE),
+   #         MonthlyAvgMax = mean(tmax, na.rm = TRUE),
+    #        MonthlyAvgMin = mean(tmin, na.rm = TRUE))
+
+# Reshape data to long format for easier plotting
+#monthly_data_long <- monthly_data %>%
+ # pivot_longer(cols = c(MonthlyAvgTemp, MonthlyAvgMax, MonthlyAvgMin),
+  #             names_to = "TemperatureType",
+   #            values_to = "Temperature") %>% 
+#  mutate(year_month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+ #        year_month = as.Date(year_month))
+
+
+#FRANCY - plot monthly temp data - average, max, and min
+#ggplot(monthly_data_long, aes(x = year_month, y = Temperature, color = TemperatureType)) +
+ # geom_point(size = 1) +
+  #geom_line(size = 1, alpha = 0.5) +
+  #geom_smooth(method = "lm", se = FALSE) +
+  #scale_x_continuous(breaks = pretty(monthly_data_long$year)) +
+#  scale_color_manual(values = c("MonthlyAvgMax" = "#CC3300",
+ #                               "MonthlyAvgMin" = "#003399",
+  #                              "MonthlyAvgTemp" = "#000000")) +
+#  scale_x_date(breaks = "1 year", labels = scales::date_format("%Y")) +
+ # labs(title = "Average Temperature (1895-2024)",
+  #     x = "Year-month",
+   #    y = "Temperature (°C)",
+    #   color = "Temperature Type") +
+#  theme_minimal()
+
 
 # Temperature anomalies --------------------------------------------
 #source: https://rpubs.com/zmalesker2/1139127 
-
+  
 # Check and convert the Date column to Date format
 noaa.data$date <- as.Date(noaa.data$date)
 
@@ -200,18 +233,67 @@ ggplot(new.monthly.data, aes(x = year, y = TempAnomaly)) +
   theme_minimal()
 
 
-#attempting this - https://www.youtube.com/watch?v=DrNQMaIVEVo 
-new.monthly.data <- temp.with.anomalies %>% 
-  mutate(month = as.numeric(month),
+###attempting this - https://www.youtube.com/watch?v=DrNQMaIVEVo #graphing temperature anomalies 
+
+  #manipulate data to get month abbreviations and make month column factor class
+  new.monthly.data <- temp.with.anomalies %>% 
+    mutate(month = as.numeric(month),
          year = as.numeric(year),
          month = month.abb[month],
-         month = factor(month, levels = month.abb))
+         month = factor(month, levels = month.abb),
+         month_anom = tmean + TempAnomaly) %>% 
+    group_by(year) %>% 
+    mutate(ave = mean(month_anom)) %>% 
+    ungroup()
+  
+  #graph temp anomalies 
+  new.monthly.data %>% 
+    ggplot(aes(x = month, y = month_anom, group = year, color = ave)) + 
+      geom_line() +
+    scale_color_gradient2(low = "darkblue", mid = "white", high = "darkred", midpoint = 0, guide = "none")
+    
+  
 
-new.monthly.data %>% 
-  ggplot(aes(x = month, y = TempAnomaly, group = year, color = year)) + 
-  geom_line()
+#### Temperature and precipitation  records -------------------------
 
-#### Precipitation trends over time -------------
+#day with highest temp in historical record
+record.temp <- daily.noaa.data %>% 
+    select(tmax, ppt, date) %>%
+    filter(tmax == max(tmax, na.rm = TRUE))
+
+#day with highest precip in historical record
+record.precip <- daily.noaa.data %>% 
+    select(tmax, ppt, date) %>%
+    filter(ppt == max(ppt, na.rm = TRUE))
+
+#number of record highs per year - days above a certain threshold (above the average/baseline??)
+#average daily max temp across all years and then for each year, calculate the number of days above that average
+
+#highest max
+temp.max.mean <- daily.noaa.data %>% 
+  summarise(mean.max = mean(tmax, na.rm = TRUE))
+
+#top 10 highest max
+top10_highest_temps <- daily.noaa.data %>% 
+  arrange(desc(tmax)) %>%    
+  slice_head(n = 10)
+
+#summarizing the number of days each year with temp maximums above the average temp maximum
+temp.highs <- daily.noaa.data %>% 
+  group_by(year) %>% 
+  summarise(days.above.mean.max = sum(tmax > 12.10306, na.rm = TRUE))
+  
+# Create a bar graph using ggplot2
+ggplot(temp.highs, aes(x = factor(year), y = days.above.mean.max)) +
+  geom_bar(stat = "identity", fill = "skyblue", color = "black") +
+  labs(title = "Number of Days Above Average Max Each Year",
+       x = "Year",
+       y = "Days Above Average Max") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+#### Precipitation trends over time ---------------------------------
 
 #yearly precipitation trends
 precip_yearly <- monthly.noaa.data %>%
@@ -220,7 +302,10 @@ precip_yearly <- monthly.noaa.data %>%
 
 #BASIC - plot yearly precip data 
 ggplot(precip_yearly, aes(x = year, y = YearlyAvgPrecip)) +
-  geom_line(size = 1) +
+  geom_line(size = 1, alpha = 0.5) +
+  geom_point(size = 1) +
+  #geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(breaks = pretty(precip_yearly$year)) +
   labs(title = "Average Precipitation (1895-2024)",
        x = "Year",
        y = "Precipitation (in)") +
