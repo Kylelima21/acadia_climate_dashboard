@@ -143,35 +143,35 @@ ggplot(yearly_data_long, aes(x = year, y = Temperature, color = TemperatureType)
   theme_minimal()
 
 #monthly temperature trends
-#monthly_data <- monthly.noaa.data %>%
- # group_by(year, month) %>% 
-  #summarize(MonthlyAvgTemp = mean(tmean, na.rm = TRUE),
-   #         MonthlyAvgMax = mean(tmax, na.rm = TRUE),
-    #        MonthlyAvgMin = mean(tmin, na.rm = TRUE))
-
-# Reshape data to long format for easier plotting
-#monthly_data_long <- monthly_data %>%
- # pivot_longer(cols = c(MonthlyAvgTemp, MonthlyAvgMax, MonthlyAvgMin),
-  #             names_to = "TemperatureType",
-   #            values_to = "Temperature") %>% 
-#  mutate(year_month = paste(year, sprintf("%02d", month), "01", sep = "-"),
- #        year_month = as.Date(year_month))
-
-
-#FRANCY - plot monthly temp data - average, max, and min
-#ggplot(monthly_data_long, aes(x = year_month, y = Temperature, color = TemperatureType)) +
- # geom_point(size = 1) +
-  #geom_line(size = 1, alpha = 0.5) +
-  #geom_smooth(method = "lm", se = FALSE) +
-  #scale_x_continuous(breaks = pretty(monthly_data_long$year)) +
-#  scale_color_manual(values = c("MonthlyAvgMax" = "#CC3300",
- #                               "MonthlyAvgMin" = "#003399",
-  #                              "MonthlyAvgTemp" = "#000000")) +
-#  scale_x_date(breaks = "1 year", labels = scales::date_format("%Y")) +
- # labs(title = "Average Temperature (1895-2024)",
-  #     x = "Year-month",
-   #    y = "Temperature (°C)",
-    #   color = "Temperature Type") +
+# monthly_data <- monthly.noaa.data %>%
+# group_by(year, month) %>%
+# summarize(MonthlyAvgTemp = mean(tmean, na.rm = TRUE),
+#         MonthlyAvgMax = mean(tmax, na.rm = TRUE),
+#        MonthlyAvgMin = mean(tmin, na.rm = TRUE))
+# 
+# # Reshape data to long format for easier plotting
+# monthly_data_long <- monthly_data %>%
+#   pivot_longer(cols = c(MonthlyAvgTemp, MonthlyAvgMax, MonthlyAvgMin),
+#                names_to = "TemperatureType",
+#                values_to = "Temperature") %>%
+#   mutate(year_month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+#         year_month = as.Date(year_month))
+# 
+# 
+# #FRANCY - plot monthly temp data - average, max, and min
+# ggplot(monthly_data_long, aes(x = year_month, y = Temperature, color = TemperatureType)) +
+#   geom_point(size = 1) +
+#   geom_line(size = 1, alpha = 0.5) +
+#   geom_smooth(method = "lm", se = FALSE) +
+#   scale_x_continuous(breaks = pretty(monthly_data_long$year)) +
+#   scale_color_manual(values = c("MonthlyAvgMax" = "#CC3300",
+#                                 "MonthlyAvgMin" = "#003399",
+#                                 "MonthlyAvgTemp" = "#000000")) +
+#  scale_x_date(breaks = "10 years", labels = scales::date_format("%Y")) +
+# labs(title = "Average Temperature (1895-2024)",
+#     x = "Year-month",
+#    y = "Temperature (°C)",
+#   color = "Temperature Type") +
 #  theme_minimal()
 
 
@@ -208,7 +208,6 @@ ggplot(new.noaa.data , aes(x = year, y = TempAnomaly)) +
   theme_minimal()
 
 
-
 # Calculate temp anomaly from monthly data
 
 # baseline as the average temperature per month across years
@@ -222,10 +221,12 @@ temp.with.climatology <- monthly.noaa.data %>%
 
 # Calculate the monthly temperature anomaly
 temp.with.anomalies <- temp.with.climatology %>%
-  mutate(TempAnomaly = tmean - climatology)
+  mutate(TempAnomaly = tmean - climatology) %>%
+  mutate(year_month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+         year_month = as.Date(year_month))
 
 # visualize the anomalies over time using ggplot2
-ggplot(temp.with.anomalies, aes(x = year, y = TempAnomaly, fill = TempAnomaly > 0)) +
+ggplot(temp.with.anomalies, aes(x = year_month, y = TempAnomaly, fill = TempAnomaly > 0)) +
   geom_bar(stat = "identity") +
   geom_hline(yintercept = 0, linetype = "solid", color = "black") +
   #annotate("text", x = min(temp.with.anomalies$year), y = 0.1, label = "Average baseline", hjust = 0, color = "black") +
@@ -234,6 +235,7 @@ ggplot(temp.with.anomalies, aes(x = year, y = TempAnomaly, fill = TempAnomaly > 
   scale_x_continuous(
     breaks = seq(1895, 2024, by = 5),
     limits = c(1895, 2024))   +
+  scale_x_date(breaks = "10 years", labels = scales::date_format("%Y")) +
   labs(title = "Monthly Temperature Anomalies Over Time",
        x = "Year", 
        y = "Temperature Anomaly (°C)") +
