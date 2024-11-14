@@ -40,6 +40,10 @@ clean.McFarland <- McFarland.data %>%
   )
 
 
+##save outputs as csv
+write.csv(clean.McFarland, "data/McFarland_clean.csv", row.names = FALSE)
+
+
 
 
 
