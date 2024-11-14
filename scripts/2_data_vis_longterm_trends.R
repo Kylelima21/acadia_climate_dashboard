@@ -59,12 +59,15 @@ temp.McFarland <- clean.McFarland %>%
   yearly_data_long_source <- yearly_data_long %>% 
     mutate(source = "NOAA")
 #McFarland
-  temp.McFarland.source <- temp.McFarland %>% 
+  temp.McFarland.source <- temp.McFarland %>%
     mutate(source = "McFarland",
            temp.type = "McFarlandYearlyAvgTemp")
 
 #merge data sets together
 merged.temp.noaa.McFarland <- bind_rows(yearly_data_long_source, temp.McFarland.source)
+
+##save outputs as csv
+#write.csv(merged.temp.noaa.McFarland, "data/merged_temp_noaa_McFarland.csv", row.names = FALSE)
 
 # Plot all yearly temp data on one graph  
 ggplot(merged.temp.noaa.McFarland, aes(x = year, y = temp, color = temp.type)) +
@@ -80,6 +83,17 @@ ggplot(merged.temp.noaa.McFarland, aes(x = year, y = temp, color = temp.type)) +
        y = "Temperature (°C)",
        color = "Temperature Type") +
   theme_minimal()
+
+#manipulate merged data set for R shiny dashboard graph
+shiny.merged.temp <- yearly_data %>% 
+  left_join(temp.McFarland %>% select(year, temp), by = "year") %>% 
+  rename(max.noaa = YearlyAvgMax,
+         min.noaa = YearlyAvgMin,
+         temp.noaa = YearlyAvgTemp,
+         mcfarland = temp)
+
+##save outputs as csv
+# write.csv(shiny.merged.temp, "data/shiny_merged_temp.csv", row.names = FALSE)
 
 #### Precipitation trends overtime -----------------------------
 
