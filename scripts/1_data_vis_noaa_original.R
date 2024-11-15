@@ -333,3 +333,20 @@ ggplot(precip_yearly, aes(x = year, y = YearlyAvgPrecip)) +
        x = "Year",
        y = "Precipitation (in)") +
   theme_minimal()
+
+# #monthly precipitation trends
+# precip_monthly <- monthly.noaa.data %>%
+#   group_by(year, month) %>% 
+#   summarize(MonthlyAvgPrecip = mean(ppt, na.rm = TRUE)) %>%
+#   mutate(year_month = as.Date(paste(year, sprintf("%02d", month), "01", sep = "-")))
+# 
+# #BASIC - plot monthly precip data 
+# ggplot(precip_monthly, aes(x = year_month, y = MonthlyAvgPrecip)) +
+#   geom_line(size = 0.5, alpha = 0.5) +
+#   geom_point(size = 1) +
+#   #geom_smooth(method = "lm", se = FALSE) +
+#   scale_x_date(breaks = "5 years", labels = scales::date_format("%Y")) +
+#   labs(title = "Average Precipitation (1895-2024)",
+#        x = "Year",
+#        y = "Precipitation (in)") +
+#   theme_minimal()

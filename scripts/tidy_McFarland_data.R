@@ -36,7 +36,10 @@ clean.McFarland <- McFarland.data %>%
     day = day(DATE_TIME),
     
     #replace -999 values with NAs across the entire data set
-    across(everything(), ~ case_when(is.numeric(.) & . == -999 ~ NA, TRUE ~ .))
+    across(everything(), ~ case_when(is.numeric(.) & . == -999 ~ NA, TRUE ~ .)),
+    
+    #combine temp columns into one column
+    TMP_DEGC_combined = coalesce(TMP_DEGC, TMP_2_DEGC)
   )
 
 

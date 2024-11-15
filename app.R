@@ -87,7 +87,7 @@ server <- function(input, output) {
     
     #Base plot
     p <- ggplot(shiny.merged.temp, aes(x = year)) +
-             scale_x_continuous(breaks = pretty(merged.temp.noaa.McFarland$year)) +
+             scale_x_continuous(breaks = pretty(shiny.merged.temp$year)) +
              labs(title = "Average Temperature (1895-2024)",
                   x = "Year",
                   y = "Temperature (°C)") +
@@ -99,7 +99,7 @@ server <- function(input, output) {
         geom_point(aes(
           y = temp.noaa, 
           color = "NOAA Average Temp.",
-          text = paste("Year:", year, "Average Temp:", temp.noaa)))
+          text = paste("Year:", year, "<br>Average Temp:", round(temp.noaa, 2))))
     }
     
     if("max.noaa" %in% input$linesToShow && "max.noaa" %in% colnames(shiny.merged.temp)) {
@@ -107,7 +107,7 @@ server <- function(input, output) {
         geom_point(aes(
           y = max.noaa, 
           color = "NOAA Average Maximum Temp.",
-          text = paste("Year:", year, "Average Max Temp:", max.noaa)))
+          text = paste("Year:", year, "<br>Average Max Temp:", round(max.noaa, 2))))
     }
     
     if("min.noaa" %in% input$linesToShow && "min.noaa" %in% colnames(shiny.merged.temp)) {
@@ -115,7 +115,7 @@ server <- function(input, output) {
         geom_point(aes(
           y = min.noaa, 
           color = "NOAA Average Minimum Temp.",
-          text = paste("Year:", year, "Average Min Temp:", min.noaa)))
+          text = paste("Year:", year, "<br>Average Min Temp:", round(min.noaa, 2))))
     }
     
     if("mcfarland" %in% input$linesToShow && "mcfarland" %in% colnames(shiny.merged.temp)) {
@@ -123,7 +123,7 @@ server <- function(input, output) {
         geom_point(aes(
           y = mcfarland, 
           color = "McFarland Average Temp.",
-          text = paste("Year:", year, "McFarland Average Temp:", mcfarland)))
+          text = paste("Year:", year, "<br>McFarland Average Temp:", round(mcfarland, 2))))
     }
     
     # Customize the legend and colors

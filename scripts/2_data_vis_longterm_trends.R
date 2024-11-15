@@ -49,10 +49,21 @@ yearly_data_long <- yearly_data %>%
                values_to = "temp")
 
 #isolate temperature data and get the yearly mean temperature from McFarland data
-temp.McFarland <- clean.McFarland %>% 
-  drop_na(TMP_DEGC, year) %>% 
-  group_by(year) %>% 
-  summarize(temp = mean(TMP_DEGC))
+temp.McFarland <- clean.McFarland %>%
+  drop_na(TMP_DEGC_combined, year) %>%
+  group_by(year) %>%
+  summarize(temp = mean(TMP_DEGC_combined))
+
+# #Check if any rows have NAs for each year 
+# na_summary <- clean.McFarland %>% 
+#   group_by(year, month, day) %>% 
+#   summarize(has_na = any(is.na(TMP_DEGC_combined)))
+# 
+# #isolate temperature data and get the yearly mean temperature from McFarland data
+# temp.McFarland <- clean.McFarland %>% 
+#   group_by(year) %>% 
+#   filter(all(!is.na(TMP_DEGC_combined))) %>% 
+#   summarize(temp = mean(TMP_DEGC_combined))
 
 #add column for data source
 #NOAA
@@ -84,7 +95,7 @@ ggplot(merged.temp.noaa.McFarland, aes(x = year, y = temp, color = temp.type)) +
        color = "Temperature Type") +
   theme_minimal()
 
-#manipulate merged data set for R shiny dashboard graph
+#manipulate data and create  merged data set for R shiny dashboard graph
 shiny.merged.temp <- yearly_data %>% 
   left_join(temp.McFarland %>% select(year, temp), by = "year") %>% 
   rename(max.noaa = YearlyAvgMax,
@@ -98,43 +109,32 @@ shiny.merged.temp <- yearly_data %>%
 #### Precipitation trends overtime -----------------------------
 
 #NOAA yearly precipitation trends
-precip_yearly <- monthly.noaa.data %>%
+precip.noaa <- monthly.noaa.data %>%
+  mutate(ppt_IN_HR = ppt * 0.0393701) %>% #convert mm of rain into inches of rain
   group_by(year) %>% 
-  summarize(YearlyAvgPrecip = mean(ppt, na.rm = TRUE))
+  summarize(noaa.precip = sum(ppt_IN_HR, na.rm = TRUE))
 
 #isolate precip data and get the yearly mean precip from McFarland data
 precip.McFarland <- clean.McFarland %>% 
-  drop_na(RNF_MM_HR, year) %>% 
+  drop_na(RNF_MM_HR, year) %>%
+  mutate(RNF_IN_HR = RNF_MM_HR * 0.0393701) %>% #convert mm of rain into inches of rain
   group_by(year) %>% 
-  summarize(temp = mean(TMP_DEGC))
+  summarize(McFarland.precip = sum(RNF_IN_HR, na.rm = TRUE))
 
 
 #BASIC - plot yearly precip data 
-ggplot(precip_yearly, aes(x = year, y = YearlyAvgPrecip)) +
+ggplot(precip.noaa, aes(x = year, y = noaa.precip)) +
   geom_line(linewidth = 1, alpha = 0.5) +
   geom_point(size = 1) +
   #geom_smooth(method = "lm", se = FALSE) +
-  scale_x_continuous(breaks = pretty(precip_yearly$year)) +
-  labs(title = "Average Precipitation (1895-2024)",
+  scale_x_continuous(breaks = pretty(precip.noaa$year)) +
+  labs(title = "Total Precipitation (1895-2024)",
        x = "Year",
        y = "Precipitation (in)") +
   theme_minimal()
 
-#monthly precipitation trends
-precip_monthly <- monthly.noaa.data %>%
-  group_by(year, month) %>% 
-  summarize(MonthlyAvgPrecip = mean(ppt, na.rm = TRUE)) %>%
-  mutate(year_month = as.Date(paste(year, sprintf("%02d", month), "01", sep = "-")))
-
-#BASIC - plot monthly precip data 
-ggplot(precip_monthly, aes(x = year_month, y = MonthlyAvgPrecip)) +
-  geom_line(size = 0.5, alpha = 0.5) +
-  geom_point(size = 1) +
-  #geom_smooth(method = "lm", se = FALSE) +
-  scale_x_date(breaks = "5 years", labels = scales::date_format("%Y")) +
-  labs(title = "Average Precipitation (1895-2024)",
-       x = "Year",
-       y = "Precipitation (in)") +
-  theme_minimal()
+#create merged data set for R shiny dashboard graph
+shiny.merged.precip <- precip.noaa %>% 
+  left_join(precip.McFarland %>% select(year, McFarland.precip), by = "year")
 
 
