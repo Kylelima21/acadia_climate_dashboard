@@ -1,3 +1,9 @@
+#### R shiny dashboard displaying climate data from NOAA (nClimGrid) and McFarland Hill station in Acadia NP ####
+
+#---------------------------------------------#
+####        Load Required Packages         ####
+#---------------------------------------------#
+
 library(shiny)
 library(shinydashboard)
 library(fresh)
@@ -5,8 +11,21 @@ library(ggplot2)
 library(readr)
 library(plotly)
 
-#load data
+#-----------------------#
+####    Read Data    ####
+#-----------------------#
+
 shiny.merged.temp <- read.csv("data/shiny_merged_temp.csv")
+
+shiny.merged.precip <- read.csv("data/shiny_merged_precip.csv")
+
+shiny.merged.anom <- read.csv("data/shiny_merged_anom.csv")
+
+#--------------------------------------#
+####    Build R Shiny Dashboard     ####
+#--------------------------------------# 
+
+#### User interface (ui)
 
 ui <- dashboardPage(
   
@@ -23,7 +42,8 @@ ui <- dashboardPage(
    # Add sidebar menu with tabs
      sidebarMenu(
       menuItem("Dashboard Overview", tabName = "overview", icon = icon("dashboard")),
-      menuItem("Long-Term Temperature Trends", tabName = "plot", icon = icon("chart-line"))
+      menuItem("Long-Term Temperature Trends", tabName = "temp", icon = icon("chart-line")),
+      menuItem("Long-Term Precipitation Trends", tabName = "precip", icon = icon("chart-line"))
      )
     ),
     
@@ -33,14 +53,14 @@ ui <- dashboardPage(
     
     # Define tab items
     tabItems(
-      # Tab for Dashboard Overview (can add content here later)
+      # Tab for dashboard overview (add content here later)
       tabItem(tabName = "overview",
               h2("Dashboard Overview"),
               p("Content for the dashboard overview can go here.")
       ),
       
-      # Tab for Interactive Plot
-      tabItem(tabName = "plot",
+      # Tab for interactive temperature plot
+      tabItem(tabName = "temp",
               
               # Add fluidRow for the checkbox group and plot
               fluidRow(
@@ -77,10 +97,47 @@ ui <- dashboardPage(
               )
             )
           )
-        )
+        ),
+      
+      #Tab for interactive precipitation plot
+      tabItem(tabName = "precip",
+              
+              fluidRow(
+                column(
+                  width = 4,
+                  box(
+                    title = "Select Precipitation Data to Display:",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    checkboxGroupInput(
+                      inputId = "linesToShow",
+                      label = NULL,
+                      choices = c("NOAA Total Precip." = "noaa.precip",
+                                  "McFarland Total Precip." = "McFarland.precip"),
+                      selected = c("noaa.precip", "McFarland.precip")
+                    )
+                  )
+                ),
+                
+                column(
+                  width = 8,
+                  box(
+                    title = "Long-Term Precipitation Trends",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    plotlyOutput("PrecipPlot", height = "600px")
+                  )
+                )
+              )
+            )
+      
       )
     )
   )
+
+#### Server function (server)
 
 server <- function(input, output) {
   output$myInteractivePlot <- renderPlotly({
@@ -142,7 +199,49 @@ server <- function(input, output) {
     
   })
   
+  output$PrecipPlot <- renderPlotly({
+    
+    #Base plot
+    p2 <- ggplot(shiny.merged.precip, aes(x = year)) +
+      scale_x_continuous(breaks = pretty(shiny.merged.precip$year)) +
+      labs(title = "Total Precipitation (1895-2024)",
+           x = "Year",
+           y = "Total Precipitation (in)") +
+      theme_minimal()
+    
+    #Add lines based on checkbox input
+    if("noaa.precip" %in% input$linesToShow && "noaa.precip" %in% colnames(shiny.merged.precip)) {
+      p2 <- p2 + geom_line(aes(y = noaa.precip, color = "NOAA Total Precip.")) +
+        geom_point(aes(
+          y = noaa.precip, 
+          color = "NOAA Total Precip.",
+          text = paste("Year:", year, "<br>Total Precip:", round(noaa.precip, 2))))
+    }
+    
+    if("McFarland.precip" %in% input$linesToShow && "McFarland.precip" %in% colnames(shiny.merged.precip)) {
+      p2 <- p2 + geom_line(aes(y = McFarland.precip, color = "McFarland Total Precip.")) +
+        geom_point(aes(
+          y = McFarland.precip, 
+          color = "McFarland Total Precip.",
+          text = paste("Year:", year, "<br>Total Precip:", round(McFarland.precip, 2))))
+    }
+    
+    # Customize the legend and colors
+    p2 <- p2 + scale_color_manual(
+      values = c(
+        "NOAA Total Precip." = "#000000", 
+        "McFarland Total Precip." = "#00CC00"
+      ),
+      name = "Precipitation Data"
+    )
+    
+    # Convert ggplot2 plot to an interactive plotly plot
+    ggplotly(p2, tooltip = "text")
+    
+  })
+  
 }
 
+#### shinyApp function (fuse ui and server)
 
 shinyApp(ui, server)

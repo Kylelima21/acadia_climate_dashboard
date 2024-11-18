@@ -54,6 +54,11 @@ temp.McFarland <- clean.McFarland %>%
   group_by(year) %>%
   summarize(temp = mean(TMP_DEGC_combined))
 
+## Look at temp data outliers
+# temp.McFarland %>% 
+#    ggplot(aes(x=year, y=temp)) +
+#    geom_line()
+
 # #Check if any rows have NAs for each year 
 # na_summary <- clean.McFarland %>% 
 #   group_by(year, month, day) %>% 
@@ -104,7 +109,7 @@ shiny.merged.temp <- yearly_data %>%
          mcfarland = temp)
 
 ##save outputs as csv
-# write.csv(shiny.merged.temp, "data/shiny_merged_temp.csv", row.names = FALSE)
+#write.csv(shiny.merged.temp, "data/shiny_merged_temp.csv", row.names = FALSE)
 
 #### Precipitation trends overtime -----------------------------
 
@@ -137,4 +142,5 @@ ggplot(precip.noaa, aes(x = year, y = noaa.precip)) +
 shiny.merged.precip <- precip.noaa %>% 
   left_join(precip.McFarland %>% select(year, McFarland.precip), by = "year")
 
-
+##save outputs as csv
+#write.csv(shiny.merged.precip, "data/shiny_merged_precip.csv", row.names = FALSE)
