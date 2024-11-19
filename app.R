@@ -113,9 +113,9 @@ ui <- dashboardPage(
                     checkboxGroupInput(
                       inputId = "linesToShow",
                       label = NULL,
-                      choices = c("NOAA Total Precip." = "noaa.precip",
-                                  "McFarland Total Precip." = "McFarland.precip"),
-                      selected = c("noaa.precip", "McFarland.precip")
+                      choices = c("NOAA Total Precip." = "NOAA Precip",
+                                  "McFarland Total Precip." = "McFarland Precip"),
+                      selected = c("NOAA Precip", "McFarland Precip")
                     )
                   )
                 ),
@@ -136,6 +136,7 @@ ui <- dashboardPage(
       )
     )
   )
+
 
 #### Server function (server)
 
@@ -201,29 +202,32 @@ server <- function(input, output) {
   
   output$PrecipPlot <- renderPlotly({
     
+    #Revised data - column naming for plot
+    precip.rev <- shiny.merged.precip %>% 
+      rename(Year = year, `NOAA Precip` = noaa.precip,`McFarland Precip` = McFarland.precip) 
+    
     #Base plot
-    p2 <- ggplot(shiny.merged.precip, aes(x = year)) +
-      scale_x_continuous(breaks = pretty(shiny.merged.precip$year)) +
+    p2 <- precip.rev %>% 
+      ggplot(., aes(x = Year)) +
+      scale_x_continuous(breaks = pretty(precip.rev$Year)) +
       labs(title = "Total Precipitation (1895-2024)",
            x = "Year",
            y = "Total Precipitation (in)") +
       theme_minimal()
     
     #Add lines based on checkbox input
-    if("noaa.precip" %in% input$linesToShow && "noaa.precip" %in% colnames(shiny.merged.precip)) {
-      p2 <- p2 + geom_line(aes(y = noaa.precip, color = "NOAA Total Precip.")) +
+    if("NOAA Precip" %in% input$linesToShow && "NOAA Precip" %in% colnames(precip.rev)) {
+      p2 <- p2 + geom_line(aes(y = `NOAA Precip`, color = "NOAA Total Precip.")) +
         geom_point(aes(
-          y = noaa.precip, 
-          color = "NOAA Total Precip.",
-          text = paste("Year:", year, "<br>Total Precip:", round(noaa.precip, 2))))
+          y = `NOAA Precip`, 
+          color = "NOAA Total Precip."))
     }
     
-    if("McFarland.precip" %in% input$linesToShow && "McFarland.precip" %in% colnames(shiny.merged.precip)) {
-      p2 <- p2 + geom_line(aes(y = McFarland.precip, color = "McFarland Total Precip.")) +
+    if("McFarland Precip" %in% input$linesToShow && "McFarland Precip" %in% colnames(precip.rev)) {
+      p2 <- p2 + geom_line(aes(y = `McFarland Precip`, color = "McFarland Total Precip.")) +
         geom_point(aes(
-          y = McFarland.precip, 
-          color = "McFarland Total Precip.",
-          text = paste("Year:", year, "<br>Total Precip:", round(McFarland.precip, 2))))
+          y = `McFarland Precip`, 
+          color = "McFarland Total Precip."))
     }
     
     # Customize the legend and colors
@@ -236,7 +240,7 @@ server <- function(input, output) {
     )
     
     # Convert ggplot2 plot to an interactive plotly plot
-    ggplotly(p2, tooltip = "text")
+    ggplotly(p2, tooltip = c("Year", "NOAA Precip", "McFarland Precip"))
     
   })
   
