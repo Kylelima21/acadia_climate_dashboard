@@ -15,11 +15,11 @@ library(plotly)
 ####    Read Data    ####
 #-----------------------#
 
-shiny.merged.temp <- read.csv("data/shiny_merged_temp.csv")
+shiny.merged.temp <- read.csv("data/processed_data/shiny_merged_temp.csv")
 
-shiny.merged.precip <- read.csv("data/shiny_merged_precip.csv")
+shiny.merged.precip <- read.csv("data/processed_data/shiny_merged_precip.csv")
 
-shiny.merged.anom <- read.csv("data/shiny_merged_anom.csv")
+shiny.merged.anom <- read.csv("data/processed_data/shiny_merged_anom.csv")
 
 #--------------------------------------#
 ####    Build R Shiny Dashboard     ####
@@ -62,6 +62,11 @@ ui <- dashboardPage(
       # Tab for interactive temperature plot
       tabItem(tabName = "temp",
               
+              tabsetPanel(
+                tabPanel(
+                  "Temperature Trends",
+                
+              
               # Add fluidRow for the checkbox group and plot
               fluidRow(
                 # Column for the checkbox group input
@@ -98,6 +103,41 @@ ui <- dashboardPage(
             )
           )
         ),
+        tabPanel(
+          "Temperature Anomalies", 
+          
+          fluidRow(
+            column(
+              width = 4,
+              box(
+                title = "Select Temperature Anomaly Data to Display:",
+                status = "primary",
+                solidHeader = TRUE,
+                width = 12,
+                checkboxGroupInput(
+                  inputId = "linesToShow",
+                  label = NULL,
+                  choices = c("NOAA Temp Anomaly" = "NOAA Temp Anom",
+                              "McFarland Temp Anomaly" = "McFarland Temp Anom"),
+                  selected = c("NOAA Temp Anom", "McFarland Temp Anom")
+                )
+              )
+            ),
+            
+            column(
+              width = 8,
+              box(
+                title = "Temperature Anomalies",
+                status = "primary",
+                solidHeader = TRUE,
+                width = 12,
+                plotlyOutput("AnomPlot", height = "600px")
+              )
+            )
+          )
+      )
+    )
+  ),
       
       #Tab for interactive precipitation plot
       tabItem(tabName = "precip",
@@ -134,13 +174,15 @@ ui <- dashboardPage(
             )
       
       )
-    )
   )
+)
 
 
 #### Server function (server)
 
 server <- function(input, output) {
+  
+#### Temp plot
   output$myInteractivePlot <- renderPlotly({
     
     #Revised data - column naming for plot
@@ -157,31 +199,35 @@ server <- function(input, output) {
     
     #Add lines based on checkbox input
     if("NOAA Average Temp" %in% input$linesToShow && "NOAA Average Temp" %in% colnames(temp.rev)) {
-      p <- p + geom_line(aes(y = `NOAA Average Temp`, color = "NOAA Average Temp.")) +
+      p <- p + geom_line(aes(y = `NOAA Average Temp`, color = "NOAA Average Temp."), alpha = 0.5) +
         geom_point(aes(
           y = `NOAA Average Temp`, 
-          color = "NOAA Average Temp."))
+          color = "NOAA Average Temp."),
+          size = 0.8)
     }
     
     if("NOAA Average Max Temp" %in% input$linesToShow && "NOAA Average Max Temp" %in% colnames(temp.rev)) {
-      p <- p + geom_line(aes(y = `NOAA Average Max Temp`, color = "NOAA Average Maximum Temp.")) +
+      p <- p + geom_line(aes(y = `NOAA Average Max Temp`, color = "NOAA Average Maximum Temp."), alpha = 0.5) +
         geom_point(aes(
           y = `NOAA Average Max Temp`, 
-          color = "NOAA Average Maximum Temp."))
+          color = "NOAA Average Maximum Temp."),
+          size = 0.8)
     }
     
     if("NOAA Average Min Temp" %in% input$linesToShow && "NOAA Average Min Temp" %in% colnames(temp.rev)) {
-      p <- p + geom_line(aes(y = `NOAA Average Min Temp`, color = "NOAA Average Minimum Temp.")) +
+      p <- p + geom_line(aes(y = `NOAA Average Min Temp`, color = "NOAA Average Minimum Temp."), alpha = 0.5) +
         geom_point(aes(
           y = `NOAA Average Min Temp`, 
-          color = "NOAA Average Minimum Temp."))
+          color = "NOAA Average Minimum Temp."),
+          size = 0.8)
     }
     
     if("McFarland Average Temp" %in% input$linesToShow && "McFarland Average Temp" %in% colnames(temp.rev)) {
-      p <- p + geom_line(aes(y = `McFarland Average Temp`, color = "McFarland Average Temp.")) +
+      p <- p + geom_line(aes(y = `McFarland Average Temp`, color = "McFarland Average Temp."), alpha = 0.5) +
         geom_point(aes(
           y = `McFarland Average Temp`, 
-          color = "McFarland Average Temp."))
+          color = "McFarland Average Temp."),
+          size = 0.8)
     }
     
     # Customize the legend and colors
@@ -199,7 +245,54 @@ server <- function(input, output) {
     ggplotly(p, tooltip = c("Year", "NOAA Average Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp"))
     
   })
-  
+
+#### Temp anom plot 
+  output$AnomPlot <- renderPlotly({
+    
+    #Revised data - column naming for plot
+    anom.rev <- shiny.merged.anom %>% 
+      rename(Year = year, `Year-Month` = noaa.year.month, `NOAA Temp Anom` = noaa.anom,`McFarland Temp Anom` = mcfarland.anom) 
+    
+    #Base plot
+    p2 <- ggplot(anom.rev, aes(x = `Year-Month`)) +
+      scale_x_date(
+        breaks = seq(from = min(anom.rev$`Year-Month`), 
+                     to = max(anom.rev$`Year-Month`), 
+                     by = "10 years"),
+        labels = scales::date_format("%Y"),
+        limits = c(min(anom.rev$`Year-Month`), max(anom.rev$`Year-Month`))
+      ) +
+      labs(title = "Monthly Temperature Anomalies (1895-2024)",
+           x = "Year",
+           y = "Temperature Anomaly (°C)") +
+      theme_minimal()
+    
+    #Add lines based on checkbox input
+    if("NOAA Temp Anom" %in% input$linesToShow && "NOAA Temp Anom" %in% colnames(anom.rev)) {
+      p2 <- p2 + geom_bar(aes(y = `NOAA Temp Anom`, fill = factor(`NOAA Temp Anom` > 0, labels = c("NOAA below baseline", "NOAA above baseline"))), stat = "identity") +
+        geom_hline(yintercept = 0, linetype = "solid", color = "black")
+    }
+    
+    if("McFarland Temp Anom" %in% input$linesToShow && "McFarland Temp Anom" %in% colnames(anom.rev)) {
+      p2 <- p2 + geom_bar(aes(y = `McFarland Temp Anom`, fill = factor(`McFarland Temp Anom` > 0, labels = c("McFarland below baseline", "McFarland above baseline"))), stat = "identity")
+    }
+    
+    # Customize the legend and colors
+    p2 <- p2 +
+      scale_fill_manual(
+        values = c("NOAA above baseline" = "red", 
+                   "NOAA below baseline" = "blue",
+                   "McFarland above baseline" = "#990000",
+                   "McFarland below baseline" = "#000066"),
+      name = "Anomaly Data"
+    )
+    
+    # Convert ggplot2 plot to an interactive plotly plot
+    ggplotly(p2, tooltip = c("Year-Month", "NOAA Temp Anom", "McFarland Temp Anom"))
+    
+  })
+
+#### Precip plots  
   output$PrecipPlot <- renderPlotly({
     
     #Revised data - column naming for plot
@@ -207,7 +300,7 @@ server <- function(input, output) {
       rename(Year = year, `NOAA Precip` = noaa.precip,`McFarland Precip` = McFarland.precip) 
     
     #Base plot
-    p2 <- precip.rev %>% 
+    p3 <- precip.rev %>% 
       ggplot(., aes(x = Year)) +
       scale_x_continuous(breaks = pretty(precip.rev$Year)) +
       labs(title = "Total Precipitation (1895-2024)",
@@ -217,21 +310,23 @@ server <- function(input, output) {
     
     #Add lines based on checkbox input
     if("NOAA Precip" %in% input$linesToShow && "NOAA Precip" %in% colnames(precip.rev)) {
-      p2 <- p2 + geom_line(aes(y = `NOAA Precip`, color = "NOAA Total Precip.")) +
+      p3 <- p3 + geom_line(aes(y = `NOAA Precip`, color = "NOAA Total Precip."), alpha = 0.5) +
         geom_point(aes(
           y = `NOAA Precip`, 
-          color = "NOAA Total Precip."))
+          color = "NOAA Total Precip."),
+          size = 0.8)
     }
     
     if("McFarland Precip" %in% input$linesToShow && "McFarland Precip" %in% colnames(precip.rev)) {
-      p2 <- p2 + geom_line(aes(y = `McFarland Precip`, color = "McFarland Total Precip.")) +
+      p3 <- p3 + geom_line(aes(y = `McFarland Precip`, color = "McFarland Total Precip."), alpha = 0.5) +
         geom_point(aes(
           y = `McFarland Precip`, 
-          color = "McFarland Total Precip."))
+          color = "McFarland Total Precip."),
+          size = 0.8)
     }
     
     # Customize the legend and colors
-    p2 <- p2 + scale_color_manual(
+    p3 <- p3 + scale_color_manual(
       values = c(
         "NOAA Total Precip." = "#000000", 
         "McFarland Total Precip." = "#00CC00"
@@ -240,7 +335,7 @@ server <- function(input, output) {
     )
     
     # Convert ggplot2 plot to an interactive plotly plot
-    ggplotly(p2, tooltip = c("Year", "NOAA Precip", "McFarland Precip"))
+    ggplotly(p3, tooltip = c("Year", "NOAA Precip", "McFarland Precip"))
     
   })
   

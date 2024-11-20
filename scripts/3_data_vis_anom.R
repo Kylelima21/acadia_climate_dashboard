@@ -16,15 +16,15 @@ library(ggplot2)
 #Reading in CSVs as a tibble
 
 #daily 
-daily.noaa.data <- read.csv("data/nClimGrid_daily_clean.csv") %>%
+daily.noaa.data <- read.csv("data/processed_data/nClimGrid_daily_clean.csv") %>%
   as_tibble()
 
 #monthly
-monthly.noaa.data <- read.csv("data/nClimGrid_monthly_clean.csv") %>%
+monthly.noaa.data <- read.csv("data/processed_data/nClimGrid_monthly_clean.csv") %>%
   as_tibble()
 
 #McFarland
-clean.McFarland <- read.csv("data/McFarland_clean.csv")
+clean.McFarland <- read.csv("data/processed_data/McFarland_clean.csv")
 
 #-----------------------#
 ####    Data Manip   ####
