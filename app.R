@@ -76,11 +76,11 @@ ui <- dashboardPage(
                   checkboxGroupInput(
                     inputId = "linesToShow",
                     label = NULL,
-                    choices = c("NOAA Average Temp." = "temp.noaa",
-                                "NOAA Average Maximum Temp." = "max.noaa",
-                                "NOAA Average Minimum Temp." = "min.noaa",
-                                "McFarland Average Temp." = "mcfarland"),
-                    selected = c("temp.noaa", "max.noaa", "min.noaa", "mcfarland")
+                    choices = c("NOAA Average Temp." = "NOAA Average Temp",
+                                "NOAA Average Maximum Temp." = "NOAA Average Max Temp",
+                                "NOAA Average Minimum Temp." = "NOAA Average Min Temp",
+                                "McFarland Average Temp." = "McFarland Average Temp"),
+                    selected = c("NOAA Average Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp")
                     )
                   )
                 ),
@@ -143,45 +143,45 @@ ui <- dashboardPage(
 server <- function(input, output) {
   output$myInteractivePlot <- renderPlotly({
     
+    #Revised data - column naming for plot
+    temp.rev <- shiny.merged.temp %>% 
+      rename(`Year` = year, `NOAA Average Temp` = temp.noaa,`NOAA Average Max Temp` = max.noaa, `NOAA Average Min Temp` = min.noaa, `McFarland Average Temp` = mcfarland) 
+    
     #Base plot
-    p <- ggplot(shiny.merged.temp, aes(x = year)) +
-             scale_x_continuous(breaks = pretty(shiny.merged.temp$year)) +
+    p <- ggplot(temp.rev, aes(x = Year)) +
+             scale_x_continuous(breaks = pretty(temp.rev$Year)) +
              labs(title = "Average Temperature (1895-2024)",
                   x = "Year",
                   y = "Temperature (°C)") +
              theme_minimal()
     
     #Add lines based on checkbox input
-    if("temp.noaa" %in% input$linesToShow && "temp.noaa" %in% colnames(shiny.merged.temp)) {
-      p <- p + geom_line(aes(y = temp.noaa, color = "NOAA Average Temp.")) +
+    if("NOAA Average Temp" %in% input$linesToShow && "NOAA Average Temp" %in% colnames(temp.rev)) {
+      p <- p + geom_line(aes(y = `NOAA Average Temp`, color = "NOAA Average Temp.")) +
         geom_point(aes(
-          y = temp.noaa, 
-          color = "NOAA Average Temp.",
-          text = paste("Year:", year, "<br>Average Temp:", round(temp.noaa, 2))))
+          y = `NOAA Average Temp`, 
+          color = "NOAA Average Temp."))
     }
     
-    if("max.noaa" %in% input$linesToShow && "max.noaa" %in% colnames(shiny.merged.temp)) {
-      p <- p + geom_line(aes(y = max.noaa, color = "NOAA Average Maximum Temp.")) +
+    if("NOAA Average Max Temp" %in% input$linesToShow && "NOAA Average Max Temp" %in% colnames(temp.rev)) {
+      p <- p + geom_line(aes(y = `NOAA Average Max Temp`, color = "NOAA Average Maximum Temp.")) +
         geom_point(aes(
-          y = max.noaa, 
-          color = "NOAA Average Maximum Temp.",
-          text = paste("Year:", year, "<br>Average Max Temp:", round(max.noaa, 2))))
+          y = `NOAA Average Max Temp`, 
+          color = "NOAA Average Maximum Temp."))
     }
     
-    if("min.noaa" %in% input$linesToShow && "min.noaa" %in% colnames(shiny.merged.temp)) {
-      p <- p + geom_line(aes(y = min.noaa, color = "NOAA Average Minimum Temp.")) +
+    if("NOAA Average Min Temp" %in% input$linesToShow && "NOAA Average Min Temp" %in% colnames(temp.rev)) {
+      p <- p + geom_line(aes(y = `NOAA Average Min Temp`, color = "NOAA Average Minimum Temp.")) +
         geom_point(aes(
-          y = min.noaa, 
-          color = "NOAA Average Minimum Temp.",
-          text = paste("Year:", year, "<br>Average Min Temp:", round(min.noaa, 2))))
+          y = `NOAA Average Min Temp`, 
+          color = "NOAA Average Minimum Temp."))
     }
     
-    if("mcfarland" %in% input$linesToShow && "mcfarland" %in% colnames(shiny.merged.temp)) {
-      p <- p + geom_line(aes(y = mcfarland, color = "McFarland Average Temp.")) +
+    if("McFarland Average Temp" %in% input$linesToShow && "McFarland Average Temp" %in% colnames(temp.rev)) {
+      p <- p + geom_line(aes(y = `McFarland Average Temp`, color = "McFarland Average Temp.")) +
         geom_point(aes(
-          y = mcfarland, 
-          color = "McFarland Average Temp.",
-          text = paste("Year:", year, "<br>McFarland Average Temp:", round(mcfarland, 2))))
+          y = `McFarland Average Temp`, 
+          color = "McFarland Average Temp."))
     }
     
     # Customize the legend and colors
@@ -196,7 +196,7 @@ server <- function(input, output) {
     )
     
     # Convert ggplot2 plot to an interactive plotly plot
-    ggplotly(p, tooltip = "text")
+    ggplotly(p, tooltip = c("Year", "NOAA Average Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp"))
     
   })
   
