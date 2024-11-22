@@ -10,6 +10,8 @@ library(fresh)
 library(ggplot2)
 library(readr)
 library(plotly)
+library(tidyverse)
+library(dplyr)
 
 #-----------------------#
 ####    Read Data    ####
@@ -42,8 +44,8 @@ ui <- dashboardPage(
    # Add sidebar menu with tabs
      sidebarMenu(
       menuItem("Dashboard Overview", tabName = "overview", icon = icon("dashboard")),
-      menuItem("Long-Term Temperature Trends", tabName = "temp", icon = icon("chart-line")),
-      menuItem("Long-Term Precipitation Trends", tabName = "precip", icon = icon("chart-line"))
+      menuItem("Temperature Trends", tabName = "temp", icon = icon("chart-line")),
+      menuItem("Precipitation Trends", tabName = "precip", icon = icon("chart-line"))
      )
     ),
     
@@ -246,18 +248,31 @@ server <- function(input, output) {
     
   })
 
-#### Temp anom plot 
+#### Temp anom plot
   output$AnomPlot <- renderPlotly({
-    
+
     #Revised data - column naming for plot
-    anom.rev <- shiny.merged.anom %>% 
-      rename(Year = year, `Year-Month` = noaa.year.month, `NOAA Temp Anom` = noaa.anom,`McFarland Temp Anom` = mcfarland.anom) 
-    
+    anom.rev <- shiny.merged.anom %>%
+      rename(Year = year, `Year-Month` = noaa.year.month, `NOAA Temp Anom` = noaa.anom,`McFarland Temp Anom` = mcfarland.anom) %>%
+      mutate(
+        `Year-Month` = as.Date(`Year-Month`),
+        hover_text = case_when(
+          !is.na(`NOAA Temp Anom`) ~ paste(
+            "Year-Month:", format(`Year-Month`, "%Y-%m"),
+            "<br>NOAA Temp Anomaly:", round(`NOAA Temp Anom`, 4)
+          ),
+          !is.na(`McFarland Temp Anom`) ~ paste(
+            "Year-Month:", format(`Year-Month`, "%Y-%m"),
+            "<br>McFarland Temp Anomaly:", round(`McFarland Temp Anom`, 4)
+            )
+          )
+        )
+
     #Base plot
     p2 <- ggplot(anom.rev, aes(x = `Year-Month`)) +
       scale_x_date(
-        breaks = seq(from = min(anom.rev$`Year-Month`), 
-                     to = max(anom.rev$`Year-Month`), 
+        breaks = seq(from = min(anom.rev$`Year-Month`),
+                     to = max(anom.rev$`Year-Month`),
                      by = "10 years"),
         labels = scales::date_format("%Y"),
         limits = c(min(anom.rev$`Year-Month`), max(anom.rev$`Year-Month`))
@@ -266,31 +281,33 @@ server <- function(input, output) {
            x = "Year",
            y = "Temperature Anomaly (°C)") +
       theme_minimal()
-    
+
     #Add lines based on checkbox input
     if("NOAA Temp Anom" %in% input$linesToShow && "NOAA Temp Anom" %in% colnames(anom.rev)) {
-      p2 <- p2 + geom_bar(aes(y = `NOAA Temp Anom`, fill = factor(`NOAA Temp Anom` > 0, labels = c("NOAA below baseline", "NOAA above baseline"))), stat = "identity") +
+      p2 <- p2 + geom_bar(aes(y = `NOAA Temp Anom`, fill = factor(`NOAA Temp Anom` > 0, labels = c("NOAA below baseline", "NOAA above baseline")), text = hover_text), stat = "identity") +
         geom_hline(yintercept = 0, linetype = "solid", color = "black")
     }
-    
+
     if("McFarland Temp Anom" %in% input$linesToShow && "McFarland Temp Anom" %in% colnames(anom.rev)) {
-      p2 <- p2 + geom_bar(aes(y = `McFarland Temp Anom`, fill = factor(`McFarland Temp Anom` > 0, labels = c("McFarland below baseline", "McFarland above baseline"))), stat = "identity")
+      p2 <- p2 + geom_bar(aes(y = `McFarland Temp Anom`, fill = factor(`McFarland Temp Anom` > 0, labels = c("McFarland below baseline", "McFarland above baseline")), text = hover_text), stat = "identity")
     }
-    
+
     # Customize the legend and colors
     p2 <- p2 +
       scale_fill_manual(
-        values = c("NOAA above baseline" = "red", 
+        values = c("NOAA above baseline" = "red",
                    "NOAA below baseline" = "blue",
                    "McFarland above baseline" = "#990000",
                    "McFarland below baseline" = "#000066"),
       name = "Anomaly Data"
     )
-    
+
     # Convert ggplot2 plot to an interactive plotly plot
-    ggplotly(p2, tooltip = c("Year-Month", "NOAA Temp Anom", "McFarland Temp Anom"))
-    
+    ggplotly(p2, tooltip = "text")
+
   })
+  
+
 
 #### Precip plots  
   output$PrecipPlot <- renderPlotly({

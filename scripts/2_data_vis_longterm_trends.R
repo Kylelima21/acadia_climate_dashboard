@@ -83,7 +83,7 @@ temp.McFarland <- clean.McFarland %>%
 merged.temp.noaa.McFarland <- bind_rows(yearly_data_long_source, temp.McFarland.source)
 
 ##save outputs as csv
-#write.csv(merged.temp.noaa.McFarland, "data/merged_temp_noaa_McFarland.csv", row.names = FALSE)
+#write.csv(merged.temp.noaa.McFarland, "data/processed_data/merged_temp_noaa_McFarland.csv", row.names = FALSE)
 
 # Plot all yearly temp data on one graph  
 ggplot(merged.temp.noaa.McFarland, aes(x = year, y = temp, color = temp.type)) +
@@ -100,16 +100,23 @@ ggplot(merged.temp.noaa.McFarland, aes(x = year, y = temp, color = temp.type)) +
        color = "Temperature Type") +
   theme_minimal()
 
-#manipulate data and create  merged data set for R shiny dashboard graph
+#manipulate data and create merged temp data set for R shiny dashboard graph
+# create filter for current year - first get current year
+current_year <- as.numeric(format(Sys.Date(), "%Y"))
+
+# create shiny data set
 shiny.merged.temp <- yearly_data %>% 
   left_join(temp.McFarland %>% select(year, temp), by = "year") %>% 
   rename(max.noaa = YearlyAvgMax,
          min.noaa = YearlyAvgMin,
          temp.noaa = YearlyAvgTemp,
-         mcfarland = temp)
+         mcfarland = temp) %>% 
+  filter(year < current_year) %>% 
+  mutate(
+    mcfarland = if_else(year == 1998, NA_real_, mcfarland))
 
 ##save outputs as csv
-#write.csv(shiny.merged.temp, "data/shiny_merged_temp.csv", row.names = FALSE)
+#write.csv(shiny.merged.temp, "data/processed_data/shiny_merged_temp.csv", row.names = FALSE)
 
 #### Precipitation trends overtime -----------------------------
 
@@ -140,7 +147,8 @@ ggplot(precip.noaa, aes(x = year, y = noaa.precip)) +
 
 #create merged data set for R shiny dashboard graph
 shiny.merged.precip <- precip.noaa %>% 
-  left_join(precip.McFarland %>% select(year, McFarland.precip), by = "year")
+  left_join(precip.McFarland %>% select(year, McFarland.precip), by = "year")%>% 
+  filter(year < current_year)
 
 ##save outputs as csv
-#write.csv(shiny.merged.precip, "data/shiny_merged_precip.csv", row.names = FALSE)
+#write.csv(shiny.merged.precip, "data/processed_data/shiny_merged_precip.csv", row.names = FALSE)

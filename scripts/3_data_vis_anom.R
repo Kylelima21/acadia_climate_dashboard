@@ -78,10 +78,10 @@ McFarland.temp.with.anomalies <- McFarland.temp.with.baseline %>%
          year.month = as.Date(year.month))
 
 # Combine both data sets into one but keep separated by source
-merged.anom <- bind_rows(
-  temp.with.anomalies %>% mutate(source = "NOAA"),
-  McFarland.temp.with.anomalies %>% mutate(source = "McFarland")
-)
+# merged.anom <- bind_rows(
+#   temp.with.anomalies %>% mutate(source = "NOAA"),
+#   McFarland.temp.with.anomalies %>% mutate(source = "McFarland")
+# )
 
 # Graph temp anomalies over time using ggplot2
 ggplot(temp.with.anomalies, aes(x = year.month, y = temp.anomaly, fill = temp.anomaly > 0)) +
@@ -131,23 +131,30 @@ ggplot(temp.with.anomalies, aes(x = year.month, y = temp.anomaly, fill = temp.an
 #     legend.position = "bottom",
 #     axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 
-##manipulate data and create  merged data set for R shiny dashboard graph
+##manipulate data and create merged temp anom data set for R shiny dashboard graph
+# create filter for current year - first get current year
+current_year <- as.numeric(format(Sys.Date(), "%Y"))
+
 #NOAA
 shiny.noaa.anom <- temp.with.anomalies %>% 
   select(year, month, year.month, temp.anomaly) %>% 
   rename(noaa.anom = temp.anomaly,
-         noaa.year.month = year.month)
+         noaa.year.month = year.month) %>% 
+  filter(year < current_year)
+
 #McFarland
 shiny.mcfarland.anom <- McFarland.temp.with.anomalies %>% 
   select(year, month, year.month, temp.anomaly) %>% 
   rename(mcfarland.anom = temp.anomaly,
-         mcfarland.year.month = year.month)
+         mcfarland.year.month = year.month) %>% 
+  filter(year < current_year)
+  
 #Merged anomaly data
 shiny.merged.anom <- shiny.noaa.anom  %>% 
   left_join(shiny.mcfarland.anom, by = c("year", "month"))
 
 ##save outputs as csv
-# write.csv(shiny.merged.anom, "data/shiny_merged_anom.csv", row.names = FALSE)
+# write.csv(shiny.merged.anom, "data/processed_data/shiny_merged_anom.csv", row.names = FALSE)
 
 
 #### Temp anomalies graph type two ---------------------------------------------
@@ -172,4 +179,74 @@ new.monthly.data %>%
   scale_color_gradient2(low = "darkblue", mid = "white", high = "darkred", midpoint = 0, guide = "none")
 
 
+#### Precip anomalies graph type one -------------------------------------------
+
+## Calculate precip anomaly from monthly NOAA data
+# First calculate the baseline as the average temperature per month across all years
+monthly.precip.baseline <- monthly.noaa.data %>%
+  group_by(month) %>%
+  summarize(baseline = mean(ppt, na.rm = TRUE))
+
+# Join baseline with original data
+precip.with.baseline <- monthly.noaa.data %>%
+  left_join(monthly.precip.baseline, by = "month")
+
+# Calculate the monthly temperature anomaly by subtracting the monthly baseline from the actual mean temperature of each month
+precip.with.anomalies <- precip.with.baseline %>%
+  mutate(precip.anomaly = ppt - baseline) %>%
+  
+  # Create a year_month column for graphing
+  mutate(year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+         year.month = as.Date(year.month))
+
+
+## Calculate precip anomaly for McFarland data
+
+#First calculate monthly temperature means
+McFarland.monthly.precip.data <- clean.McFarland %>%
+  group_by(year, month) %>%
+  summarize(ppt = mean(RNF_MM_HR, na.rm = TRUE))
+
+# Calculate the baseline as the average temperature per month across all years
+McFarland.precip.baseline <- McFarland.monthly.precip.data %>%
+  group_by(month) %>%
+  summarize(baseline = mean(ppt, na.rm = TRUE))
+
+# Join baseline with original data
+McFarland.precip.with.baseline <- McFarland.monthly.precip.data %>%
+  left_join(McFarland.precip.baseline, by = "month")
+
+# Calculate the monthly temperature anomaly by subtracting the monthly baseline from the actual mean temperature of each month
+McFarland.precip.with.anomalies <- McFarland.precip.with.baseline %>%
+  mutate(precip.anomaly = ppt - baseline) %>%
+  filter(!is.na(year) & !is.na(month)) %>% 
+  
+  # Create a year_month column for graphing
+  mutate(year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+         year.month = as.Date(year.month))
+
+##manipulate data and create merged precip anom data set for R shiny dashboard graph
+# create filter for current year - first get current year
+current_year <- as.numeric(format(Sys.Date(), "%Y"))
+
+#NOAA
+shiny.noaa.precip.anom <- precip.with.anomalies %>% 
+  select(year, month, year.month, precip.anomaly) %>% 
+  rename(noaa.precip.anom = precip.anomaly,
+         noaa.year.month = year.month) %>% 
+  filter(year < current_year)
+
+#McFarland
+shiny.mcfarland.precip.anom <- McFarland.precip.with.anomalies %>% 
+  select(year, month, year.month, precip.anomaly) %>% 
+  rename(mcfarland.precip.anom = precip.anomaly,
+         mcfarland.year.month = year.month) %>% 
+  filter(year < current_year)
+
+#Merged anomaly data
+shiny.merged.precip.anom <- shiny.noaa.precip.anom  %>% 
+  left_join(shiny.mcfarland.precip.anom, by = c("year", "month"))
+
+##save outputs as csv
+# write.csv(shiny.merged.precip.anom, "data/processed_data/shiny_merged_precip_anom.csv", row.names = FALSE)
 
