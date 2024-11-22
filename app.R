@@ -86,7 +86,12 @@ ui <- dashboardPage(
                     choices = c("NOAA Average Temp." = "NOAA Average Temp",
                                 "NOAA Average Maximum Temp." = "NOAA Average Max Temp",
                                 "NOAA Average Minimum Temp." = "NOAA Average Min Temp",
-                                "McFarland Average Temp." = "McFarland Average Temp"),
+                                "McFarland Average Temp." = "McFarland Average Temp",
+                                "Linear Model for NOAA Average Temp" = "lm_noaa_temp",
+                                "Linear Model for NOAA Average Max Temp" = "lm_noaa_max_temp",
+                                "Linear Model for NOAA Average Min Temp" = "lm_noaa_min_temp",
+                                "Linear Model for McFarland Average Temp" = "lm_mcfarland_temp"
+                                ),
                     selected = c("NOAA Average Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp")
                     )
                   )
@@ -156,7 +161,9 @@ ui <- dashboardPage(
                       inputId = "linesToShow",
                       label = NULL,
                       choices = c("NOAA Total Precip." = "NOAA Precip",
-                                  "McFarland Total Precip." = "McFarland Precip"),
+                                  "McFarland Total Precip." = "McFarland Precip",
+                                  "Linear Model for NOAA Precip" = "lm_noaa_precip",
+                                  "Linear Model for McFarland Precip" = "lm_mcfarland_precip"),
                       selected = c("NOAA Precip", "McFarland Precip")
                     )
                   )
@@ -206,6 +213,17 @@ server <- function(input, output) {
           y = `NOAA Average Temp`, 
           color = "NOAA Average Temp."),
           size = 0.8)
+      
+      #add linear model for noaa avg
+      if ("lm_noaa_temp" %in% input$linesToShow) {
+        p <- p + 
+          geom_smooth(
+            aes(y = `NOAA Average Temp`),
+            method = "lm", 
+            se = TRUE,
+            color = "black"
+          )
+      }
     }
     
     if("NOAA Average Max Temp" %in% input$linesToShow && "NOAA Average Max Temp" %in% colnames(temp.rev)) {
@@ -214,6 +232,17 @@ server <- function(input, output) {
           y = `NOAA Average Max Temp`, 
           color = "NOAA Average Maximum Temp."),
           size = 0.8)
+      
+      # add linear model for noaa max
+      if ("lm_noaa_max_temp" %in% input$linesToShow) {
+        p <- p + 
+          geom_smooth(
+            aes(y = `NOAA Average Max Temp`),
+            method = "lm", 
+            se = TRUE,
+            color = "black"
+          )
+      }
     }
     
     if("NOAA Average Min Temp" %in% input$linesToShow && "NOAA Average Min Temp" %in% colnames(temp.rev)) {
@@ -222,6 +251,17 @@ server <- function(input, output) {
           y = `NOAA Average Min Temp`, 
           color = "NOAA Average Minimum Temp."),
           size = 0.8)
+      
+      # Add linear model for noaa min
+      if ("lm_noaa_min_temp" %in% input$linesToShow) {
+        p <- p + 
+          geom_smooth(
+            aes(y = `NOAA Average Min Temp`),
+            method = "lm", 
+            se = TRUE,
+            color = "black"
+          )
+      }
     }
     
     if("McFarland Average Temp" %in% input$linesToShow && "McFarland Average Temp" %in% colnames(temp.rev)) {
@@ -230,6 +270,17 @@ server <- function(input, output) {
           y = `McFarland Average Temp`, 
           color = "McFarland Average Temp."),
           size = 0.8)
+      
+      # Add linear model for mcfarland 
+      if ("lm_mcfarland_temp" %in% input$linesToShow) {
+        p <- p + 
+          geom_smooth(
+            aes(y = `McFarland Average Temp`),
+            method = "lm", 
+            se = TRUE,
+            color = "black"
+          )
+      }
     }
     
     # Customize the legend and colors
@@ -332,6 +383,17 @@ server <- function(input, output) {
           y = `NOAA Precip`, 
           color = "NOAA Total Precip."),
           size = 0.8)
+      
+      # add linear model for noaa precip
+      if ("lm_noaa_precip" %in% input$linesToShow) {
+        p3 <- p3 + 
+          geom_smooth(
+            aes(y = `NOAA Precip`),
+            method = "lm", 
+            se = TRUE,
+            color = "black"
+          )
+      }
     }
     
     if("McFarland Precip" %in% input$linesToShow && "McFarland Precip" %in% colnames(precip.rev)) {
@@ -340,6 +402,17 @@ server <- function(input, output) {
           y = `McFarland Precip`, 
           color = "McFarland Total Precip."),
           size = 0.8)
+      
+      # add linear model for mcfarland precip
+      if ("lm_mcfarland_precip" %in% input$linesToShow) {
+        p3 <- p3 + 
+          geom_smooth(
+            aes(y = `McFarland Precip`),
+            method = "lm", 
+            se = TRUE,
+            color = "black"
+          )
+      }
     }
     
     # Customize the legend and colors

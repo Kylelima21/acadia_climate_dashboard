@@ -175,6 +175,94 @@ ggplot(yearly_data_long, aes(x = year, y = Temperature, color = TemperatureType)
 #  theme_minimal()
 
 
+
+## Graph long-term temperature trends using monthly NOAA climate data
+
+# Find the average mean, max, and min temp for each year 
+yearly_data <- monthly.noaa.data %>%
+  group_by(year) %>% 
+  summarize(YearlyAvgTemp = mean(tmean, na.rm = TRUE),
+            YearlyAvgMax = mean(tmax, na.rm = TRUE),
+            YearlyAvgMin = mean(tmin, na.rm = TRUE))
+
+# Reshape data to long format for easier plotting
+yearly_data_long <- yearly_data %>%
+  pivot_longer(cols = c(YearlyAvgTemp, YearlyAvgMax, YearlyAvgMin),
+               names_to = "temp.type",
+               values_to = "temp")
+
+#isolate temperature data and get the yearly mean temperature from McFarland data
+temp.McFarland <- clean.McFarland %>%
+  drop_na(TMP_DEGC_combined, year) %>%
+  group_by(year) %>%
+  summarize(temp = mean(TMP_DEGC_combined))
+
+## Look at temp data outliers
+# temp.McFarland %>% 
+#    ggplot(aes(x=year, y=temp)) +
+#    geom_line()
+
+# #Check if any rows have NAs for each year 
+# na_summary <- clean.McFarland %>% 
+#   group_by(year, month, day) %>% 
+#   summarize(has_na = any(is.na(TMP_DEGC_combined)))
+# 
+# #isolate temperature data and get the yearly mean temperature from McFarland data
+# temp.McFarland <- clean.McFarland %>% 
+#   group_by(year) %>% 
+#   filter(all(!is.na(TMP_DEGC_combined))) %>% 
+#   summarize(temp = mean(TMP_DEGC_combined))
+
+#add column for data source
+#NOAA
+yearly_data_long_source <- yearly_data_long %>% 
+  mutate(source = "NOAA")
+#McFarland
+temp.McFarland.source <- temp.McFarland %>%
+  mutate(source = "McFarland",
+         temp.type = "McFarlandYearlyAvgTemp")
+
+#merge data sets together
+merged.temp.noaa.McFarland <- bind_rows(yearly_data_long_source, temp.McFarland.source)
+
+##save outputs as csv
+#write.csv(merged.temp.noaa.McFarland, "data/processed_data/merged_temp_noaa_McFarland.csv", row.names = FALSE)
+
+# Plot all yearly temp data on one graph  
+ggplot(merged.temp.noaa.McFarland, aes(x = year, y = temp, color = temp.type)) +
+  geom_point(size = 1) +
+  geom_line(size = 1, alpha = 0.5) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_x_continuous(breaks = pretty(merged.temp.noaa.McFarland$year)) +
+  scale_color_manual(
+    values = c("YearlyAvgMax" = "#CC3300", "YearlyAvgMin" = "#003399", "YearlyAvgTemp" = "#000000", "McFarlandYearlyAvgTemp" = "#00CC00"),
+    labels = c("YearlyAvgMax" = "Average Maximum Temp.", "YearlyAvgTemp" = "Average Temp.", "YearlyAvgMin" = "Average Minimum Temp.", "McFarlandYearlyAvgTemp" = "McFarland Average Temp.")) +
+  labs(title = "Average Temperature (1895-2024)",
+       x = "Year",
+       y = "Temperature (°C)",
+       color = "Temperature Type") +
+  theme_minimal()
+
+#manipulate data and create merged temp data set for R shiny dashboard graph
+# create filter for current year - first get current year
+current_year <- as.numeric(format(Sys.Date(), "%Y"))
+
+# create shiny data set
+shiny.merged.temp <- yearly_data %>% 
+  left_join(temp.McFarland %>% select(year, temp), by = "year") %>% 
+  rename(max.noaa = YearlyAvgMax,
+         min.noaa = YearlyAvgMin,
+         temp.noaa = YearlyAvgTemp,
+         mcfarland = temp) %>% 
+  filter(year < current_year) %>% 
+  mutate(
+    mcfarland = if_else(year == 1998, NA_real_, mcfarland))
+
+##save outputs as csv
+#write.csv(shiny.merged.temp, "data/processed_data/shiny_merged_temp.csv", row.names = FALSE)
+
+
+
 # Temperature anomalies --------------------------------------------
 #source: https://rpubs.com/zmalesker2/1139127 
   

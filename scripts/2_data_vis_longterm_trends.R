@@ -54,21 +54,6 @@ temp.McFarland <- clean.McFarland %>%
   group_by(year) %>%
   summarize(temp = mean(TMP_DEGC_combined))
 
-## Look at temp data outliers
-# temp.McFarland %>% 
-#    ggplot(aes(x=year, y=temp)) +
-#    geom_line()
-
-# #Check if any rows have NAs for each year 
-# na_summary <- clean.McFarland %>% 
-#   group_by(year, month, day) %>% 
-#   summarize(has_na = any(is.na(TMP_DEGC_combined)))
-# 
-# #isolate temperature data and get the yearly mean temperature from McFarland data
-# temp.McFarland <- clean.McFarland %>% 
-#   group_by(year) %>% 
-#   filter(all(!is.na(TMP_DEGC_combined))) %>% 
-#   summarize(temp = mean(TMP_DEGC_combined))
 
 #add column for data source
 #NOAA
@@ -89,7 +74,7 @@ merged.temp.noaa.McFarland <- bind_rows(yearly_data_long_source, temp.McFarland.
 ggplot(merged.temp.noaa.McFarland, aes(x = year, y = temp, color = temp.type)) +
   geom_point(size = 1) +
   geom_line(size = 1, alpha = 0.5) +
-  geom_smooth(method = "lm", se = FALSE) +
+  geom_smooth(method = "lm", se = TRUE) +
   scale_x_continuous(breaks = pretty(merged.temp.noaa.McFarland$year)) +
   scale_color_manual(
     values = c("YearlyAvgMax" = "#CC3300", "YearlyAvgMin" = "#003399", "YearlyAvgTemp" = "#000000", "McFarlandYearlyAvgTemp" = "#00CC00"),
@@ -117,6 +102,23 @@ shiny.merged.temp <- yearly_data %>%
 
 ##save outputs as csv
 #write.csv(shiny.merged.temp, "data/processed_data/shiny_merged_temp.csv", row.names = FALSE)
+
+### significance tests - linear regression model
+#noaa max
+LR.max <- lm(max.noaa ~ year, data = shiny.merged.temp)
+summary(LR.max)
+
+#noaa min
+LR.min <- lm(min.noaa ~ year, data = shiny.merged.temp)
+summary(LR.min)
+
+#noaa mean
+LR.temp <- lm(temp.noaa ~ year, data = shiny.merged.temp)
+summary(LR.temp)
+
+#mcfarland mean
+LR.mcfarland <- lm(mcfarland ~ year, data = shiny.merged.temp)
+summary(LR.mcfarland)
 
 #### Precipitation trends overtime -----------------------------
 
@@ -146,9 +148,22 @@ ggplot(precip.noaa, aes(x = year, y = noaa.precip)) +
   theme_minimal()
 
 #create merged data set for R shiny dashboard graph
+# create filter for current year - first get current year
+current_year <- as.numeric(format(Sys.Date(), "%Y"))
+
 shiny.merged.precip <- precip.noaa %>% 
   left_join(precip.McFarland %>% select(year, McFarland.precip), by = "year")%>% 
   filter(year < current_year)
 
 ##save outputs as csv
 #write.csv(shiny.merged.precip, "data/processed_data/shiny_merged_precip.csv", row.names = FALSE)
+
+### significance tests - linear regression model
+#noaa max
+LR.noaa.precip <- lm(noaa.precip ~ year, data = shiny.merged.precip)
+summary(LR.noaa.precip)
+
+#noaa min
+LR.mcfarland.precip <- lm(McFarland.precip ~ year, data = shiny.merged.precip)
+summary(LR.mcfarland.precip)
+
