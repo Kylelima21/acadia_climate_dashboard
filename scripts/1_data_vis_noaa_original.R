@@ -357,6 +357,9 @@ ggplot(temp.with.anomalies, aes(x = year_month, y = TempAnomaly, fill = TempAnom
 
 #### Temperature and precipitation  records -------------------------
 
+# create filter for current year - first get current year
+current_year <- as.numeric(format(Sys.Date(), "%Y"))
+  
 #day with highest temp in historical record
 record.temp <- daily.noaa.data %>% 
     select(tmax, ppt, date) %>%
@@ -388,11 +391,46 @@ ggplot(top20_highest_temps, aes(x = date, y = tmax)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+#top 20 highest mean temps
+top20_mean_temps <- daily.noaa.data %>% 
+  arrange(desc(tmean)) %>%    
+  slice_head(n = 50) %>% 
+  mutate(highlight = ifelse(row_number() <= 10, "Top 10", "Other"),
+         date = as.Date(date))
+  
+
+#graph of high mean temps
+ggplot(top20_mean_temps, aes(x = date, y = tmean, color = highlight)) +
+  geom_segment(aes(xend = date, y = 15.5, yend = tmean), linetype = "solid", alpha = 0.6) +
+  geom_point(size = 3, aes(color = highlight)) +
+  scale_color_manual(values = c("Top 10" = "darkred", "Other" = "orange")) +
+  scale_x_date(
+    breaks = seq(from = min(top20_mean_temps$date), 
+                 to = max(top20_mean_temps$date), 
+                 by = "10 years"),
+    labels = scales::date_format("%Y"),
+    limits = c(min(top20_mean_temps$date), max(top20_mean_temps$date))
+  ) +
+  labs(
+    title = "Highest Global Average Temperatures",
+    x = "Year",
+    y = "Daily average temperature (°C)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 12),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+
+
 
 #summarizing the number of days each year with temp maximums above the average temp maximum
 temp.highs <- daily.noaa.data %>% 
   group_by(year) %>% 
-  summarise(days.above.mean.max = sum(tmax > 12.10306, na.rm = TRUE))
+  summarise(days.above.mean.max = sum(tmax > 12.10306, na.rm = TRUE)) %>% 
+  filter(year < current_year)
   
 # Create a bar graph using ggplot2
 ggplot(temp.highs, aes(x = factor(year), y = days.above.mean.max)) +
@@ -403,6 +441,141 @@ ggplot(temp.highs, aes(x = factor(year), y = days.above.mean.max)) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 
+# Create a line graph using ggplot2
+ggplot(temp.highs, aes(x = year, y = days.above.mean.max)) +
+  geom_line(size = 1, alpha = 0.5) +
+  geom_point(size = 1) +
+  scale_x_continuous(breaks = pretty(temp.highs$year, n = 10)) +
+  labs(title = "Number of Days Above Average Max Each Year",
+       x = "Year",
+       y = "Days Above Average Max") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+#Pat Riffomonas Project temp records summaries
+## 95% confidence intervals on the day tells extremes
+record.temp.summary <- daily.noaa.data %>% 
+  group_by(month, day) %>% 
+  summarise(ave_high = mean(tmax, na.rm=T),
+            lci_high = quantile(tmax, prob = 0.025, na.rm=T),
+            uci_high = quantile(tmax, prob=0.975),
+            ave_low = mean(tmin, na.rm=T),
+            lci_low = quantile(tmin, prob = 0.025, na.rm=T),
+            uci_low = quantile(tmin, prob=0.975),
+            n=n())
+
+#### Record temperatures plot
+
+#highest daily average temps
+highest_mean_daily_temps <- daily.noaa.data %>%
+  mutate(year = lubridate::year(date)) %>% 
+  group_by(year) %>%
+  filter(tmean == max(tmean, na.rm = TRUE)) %>% 
+  ungroup() %>%
+  arrange(desc(tmean)) %>% 
+  mutate(highlight = ifelse(row_number() <= 10, "Top 10", "Other"),
+         date = as.Date(date))
+
+#graph of high mean temps
+ggplot(highest_mean_daily_temps, aes(x = date, y = tmean, color = highlight)) +
+  geom_segment(aes(xend = date, y = min(tmean), yend = tmean), linetype = "solid", alpha = 0.6) +
+  geom_point(size = 3, aes(color = highlight)) +
+  scale_color_manual(values = c("Top 10" = "darkred", "Other" = "orange")) +
+  scale_x_date(
+    breaks = seq(from = min(highest_mean_daily_temps$date), 
+                 to = max(highest_mean_daily_temps$date), 
+                 by = "10 years"),
+    labels = scales::date_format("%Y"),
+    limits = c(min(highest_mean_daily_temps$date), max(highest_mean_daily_temps$date))
+  ) +
+  labs(
+    x = "Year",
+    y = "Daily average temperature (°C)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 12),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+
+#highest monthly average temps
+highest_mean_monthly_temps <- monthly.noaa.data %>%
+  # Create a year_month column for graphing
+  mutate(year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+         year.month = as.Date(year.month)) %>% 
+  group_by(year) %>%
+  filter(tmean == max(tmean, na.rm = TRUE)) %>% 
+  ungroup() %>%
+  arrange(desc(tmean)) %>% 
+  mutate(highlight = ifelse(row_number() <= 10, "Top 10", "Other"))
+
+#graph of high mean temps
+ggplot(highest_mean_monthly_temps, aes(x = year.month, y = tmean, color = highlight)) +
+  geom_segment(aes(xend = year.month, y = min(tmean), yend = tmean), linetype = "solid", alpha = 0.6) +
+  geom_point(size = 3, aes(color = highlight)) +
+  scale_color_manual(values = c("Top 10" = "darkred", "Other" = "orange")) +
+  scale_x_date(
+    breaks = seq(from = min(highest_mean_monthly_temps$year.month), 
+                 to = max(highest_mean_monthly_temps$year.month), 
+                 by = "10 years"),
+    labels = scales::date_format("%Y"),
+    limits = c(min(highest_mean_monthly_temps$year.month), max(highest_mean_monthly_temps$year.month))
+  ) +
+  labs(
+    x = "Year",
+    y = "Monthly average temperature (°C)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 12),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+
+#highest monthly average max temps
+highest_max_monthly_temps <- monthly.noaa.data %>%
+  # Create a year_month column for graphing
+  mutate(year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+         year.month = as.Date(year.month)) %>% 
+  group_by(year) %>%
+  filter(tmax == max(tmax, na.rm = TRUE)) %>% 
+  ungroup() %>%
+  arrange(desc(tmax)) %>% 
+  mutate(highlight.max = ifelse(row_number() <= 10, "Top 10", "Other"))
+
+#graph of highest max temps
+ggplot(highest_max_monthly_temps, aes(x = year.month, y = tmax, color = highlight)) +
+  geom_segment(aes(xend = year.month, y = min(tmax), yend = tmax), linetype = "solid", alpha = 0.6) +
+  geom_point(size = 3, aes(color = highlight)) +
+  scale_color_manual(values = c("Top 10" = "darkred", "Other" = "orange")) +
+  scale_x_date(
+    breaks = seq(from = min(highest_max_monthly_temps$year.month), 
+                 to = max(highest_max_monthly_temps$year.month), 
+                 by = "10 years"),
+    labels = scales::date_format("%Y"),
+    limits = c(min(highest_max_monthly_temps$year.month), max(highest_max_monthly_temps$year.month))
+  ) +
+  labs(
+    x = "Year",
+    y = "Monthly average max temperature (°C)"
+  ) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = "bold", size = 16),
+    plot.subtitle = element_text(size = 12),
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "none"
+  )
+
+#combined data table for R shiny app
+shiny.merged.record.high.temps <- highest_mean_monthly_temps %>% 
+  left_join(highest_max_monthly_temps %>% select(year, tmax, highlight.max), by = "year")
+
+##save outputs as csv
+#write.csv(shiny.merged.record.high.temps, "data/processed_data/shiny_merged_record_high_temps.csv", row.names = FALSE)
 
 #### Precipitation trends over time ---------------------------------
 

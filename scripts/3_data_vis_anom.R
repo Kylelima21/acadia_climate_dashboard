@@ -193,7 +193,8 @@ precip.with.baseline <- monthly.noaa.data %>%
 
 # Calculate the monthly temperature anomaly by subtracting the monthly baseline from the actual mean temperature of each month
 precip.with.anomalies <- precip.with.baseline %>%
-  mutate(precip.anomaly = ppt - baseline) %>%
+  mutate(precip.anomaly = ppt - baseline,
+         anomaly.percent = (ppt - baseline)/baseline * 100) %>%
   
   # Create a year_month column for graphing
   mutate(year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
@@ -218,7 +219,8 @@ McFarland.precip.with.baseline <- McFarland.monthly.precip.data %>%
 
 # Calculate the monthly temperature anomaly by subtracting the monthly baseline from the actual mean temperature of each month
 McFarland.precip.with.anomalies <- McFarland.precip.with.baseline %>%
-  mutate(precip.anomaly = ppt - baseline) %>%
+  mutate(precip.anomaly = ppt - baseline,
+         anomaly.percent = (ppt - baseline)/baseline * 100) %>%
   filter(!is.na(year) & !is.na(month)) %>% 
   
   # Create a year_month column for graphing
@@ -231,15 +233,17 @@ current_year <- as.numeric(format(Sys.Date(), "%Y"))
 
 #NOAA
 shiny.noaa.precip.anom <- precip.with.anomalies %>% 
-  select(year, month, year.month, precip.anomaly) %>% 
+  select(year, month, year.month, precip.anomaly, anomaly.percent) %>% 
   rename(noaa.precip.anom = precip.anomaly,
+         noaa.percent.precip.anom = anomaly.percent,
          noaa.year.month = year.month) %>% 
   filter(year < current_year)
 
 #McFarland
 shiny.mcfarland.precip.anom <- McFarland.precip.with.anomalies %>% 
-  select(year, month, year.month, precip.anomaly) %>% 
+  select(year, month, year.month, precip.anomaly, anomaly.percent) %>% 
   rename(mcfarland.precip.anom = precip.anomaly,
+         mcfarland.percent.precip.anom = anomaly.percent,
          mcfarland.year.month = year.month) %>% 
   filter(year < current_year)
 
@@ -248,5 +252,29 @@ shiny.merged.precip.anom <- shiny.noaa.precip.anom  %>%
   left_join(shiny.mcfarland.precip.anom, by = c("year", "month"))
 
 ##save outputs as csv
-# write.csv(shiny.merged.precip.anom, "data/processed_data/shiny_merged_precip_anom.csv", row.names = FALSE)
+write.csv(shiny.merged.precip.anom, "data/processed_data/shiny_merged_precip_anom.csv", row.names = FALSE)
+
+#basic plot to visualize
+
+ggplot(shiny.merged.precip.anom, aes(x = noaa.year.month, y = noaa.percent.precip.anom, fill = noaa.percent.precip.anom > 0)) +
+  geom_bar(stat = "identity") +
+  geom_hline(yintercept = 0, linetype = "solid", color = "black") +
+  #annotate("text", x = min(shiny.merged.precip.anom$year), y = 0.1, label = "Average baseline", hjust = 0, color = "black") +
+  scale_fill_manual(values = c("TRUE" = "red", "FALSE" = "blue"),
+                    labels = c("TRUE" = "Below baseline", "FALSE" = "Above baseline")) +
+  scale_x_date(
+    breaks = seq(from = min(shiny.merged.precip.anom$noaa.year.month), 
+                 to = max(shiny.merged.precip.anom$noaa.year.month), 
+                 by = "10 years"),
+    labels = scales::date_format("%Y"),
+    limits = c(min(shiny.merged.precip.anom$noaa.year.month), max(shiny.merged.precip.anom$noaa.year.month))
+  ) +
+  labs(title = "Monthly Precipitation Anomalies",
+       x = "Year", 
+       y = "Temperature Anomaly (°C)") +
+  theme_minimal() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "bottom",
+    axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 
