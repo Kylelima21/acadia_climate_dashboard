@@ -547,9 +547,9 @@ highest_max_monthly_temps <- monthly.noaa.data %>%
   mutate(highlight.max = ifelse(row_number() <= 10, "Top 10", "Other"))
 
 #graph of highest max temps
-ggplot(highest_max_monthly_temps, aes(x = year.month, y = tmax, color = highlight)) +
+ggplot(highest_max_monthly_temps, aes(x = year.month, y = tmax, color = highlight.max)) +
   geom_segment(aes(xend = year.month, y = min(tmax), yend = tmax), linetype = "solid", alpha = 0.6) +
-  geom_point(size = 3, aes(color = highlight)) +
+  geom_point(size = 3, aes(color = highlight.max)) +
   scale_color_manual(values = c("Top 10" = "darkred", "Other" = "orange")) +
   scale_x_date(
     breaks = seq(from = min(highest_max_monthly_temps$year.month), 

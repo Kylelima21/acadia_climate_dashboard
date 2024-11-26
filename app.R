@@ -218,10 +218,19 @@ server <- function(input, output) {
       if ("lm_noaa_temp" %in% input$linesToShow) {
         p <- p + 
           geom_smooth(
-            aes(y = `NOAA Average Temp`),
-            method = "lm", 
+            aes(y = `NOAA Average Temp`), #adds confidence interval
+            method = "lm",
             se = TRUE,
-            color = "black"
+            fill = "grey80",   
+            alpha = 0.5,       
+            color = NA         # suppresses confidence interval border
+          ) +
+          geom_line(           # adds the regression line separately
+            aes(y = `NOAA Average Temp`),
+            stat = "smooth",
+            method = "lm",
+            color = "black",   
+            linewidth = 0.8    
           )
       }
     }
@@ -237,10 +246,19 @@ server <- function(input, output) {
       if ("lm_noaa_max_temp" %in% input$linesToShow) {
         p <- p + 
           geom_smooth(
-            aes(y = `NOAA Average Max Temp`),
-            method = "lm", 
+            aes(y = `NOAA Average Max Temp`), 
+            method = "lm",
             se = TRUE,
-            color = "black"
+            fill = "grey80",   
+            alpha = 0.5,       
+            color = NA         
+          ) +
+          geom_line(           
+            aes(y = `NOAA Average Max Temp`),
+            stat = "smooth",
+            method = "lm",
+            color = "black",   
+            linewidth = 0.8    
           )
       }
     }
@@ -256,10 +274,19 @@ server <- function(input, output) {
       if ("lm_noaa_min_temp" %in% input$linesToShow) {
         p <- p + 
           geom_smooth(
-            aes(y = `NOAA Average Min Temp`),
-            method = "lm", 
+            aes(y = `NOAA Average Min Temp`), 
+            method = "lm",
             se = TRUE,
-            color = "black"
+            fill = "grey80",   
+            alpha = 0.5,       
+            color = NA         
+          ) +
+          geom_line(           
+            aes(y = `NOAA Average Min Temp`),
+            stat = "smooth",
+            method = "lm",
+            color = "black",   
+            linewidth = 0.8    
           )
       }
     }
@@ -275,10 +302,19 @@ server <- function(input, output) {
       if ("lm_mcfarland_temp" %in% input$linesToShow) {
         p <- p + 
           geom_smooth(
-            aes(y = `McFarland Average Temp`),
-            method = "lm", 
+            aes(y = `McFarland Average Temp`), 
+            method = "lm",
             se = TRUE,
-            color = "black"
+            fill = "grey80",   
+            alpha = 0.5,       
+            color = NA         
+          ) +
+          geom_line(           
+            aes(y = `McFarland Average Temp`),
+            stat = "smooth",
+            method = "lm",
+            color = "black",   
+            linewidth = 0.8    
           )
       }
     }
