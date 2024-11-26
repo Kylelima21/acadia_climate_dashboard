@@ -113,3 +113,42 @@ output$AnomPlot <- renderPlotly({
   return(plot)
 })
 
+
+#OLD TEMP ANOM CODE - NOAA and McFarland on same graph
+
+tabPanel(
+  "Temperature Anomalies", 
+  
+  #NOAA anom plot
+  fluidRow(
+    column(
+      width = 4,
+      box(
+        title = "Select Temperature Anomaly Data to Display:",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        checkboxGroupInput(
+          inputId = "linesToShowAnomalies",
+          label = NULL,
+          choices = c("NOAA Temp Anomaly" = "NOAA Temp Anom",
+                      "McFarland Temp Anomaly" = "McFarland Temp Anom"),
+          selected = c("NOAA Temp Anom", "McFarland Temp Anom")
+        )
+      )
+    ),
+    
+    column(
+      width = 8,
+      box(
+        title = "Temperature Anomalies",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        plotlyOutput("AnomPlot", height = "600px")
+      )
+    )
+  ),
+)))
+
+
