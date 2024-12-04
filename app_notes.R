@@ -152,3 +152,237 @@ tabPanel(
 )))
 
 
+##Temperature trend plot before removing the points and transparent lines:
+
+#### Server function (server)
+
+server <- function(input, output) {
+  
+  #### Temp plot
+  output$myInteractivePlot <- renderPlotly({
+    
+    #Revised data - column naming for plot
+    temp.rev <- shiny.merged.temp %>% 
+      rename(`Year` = year, `NOAA Average Temp` = temp.noaa,`NOAA Average Max Temp` = max.noaa, `NOAA Average Min Temp` = min.noaa, `McFarland Average Temp` = mcfarland) 
+    
+    #Base plot
+    p <- ggplot(temp.rev, aes(x = Year)) +
+      scale_x_continuous(breaks = pretty(temp.rev$Year)) +
+      labs(title = "Average Temperature (1895-2024)",
+           x = "Year",
+           y = "Temperature (°C)") +
+      theme_minimal()
+    
+    #Add lines based on checkbox input
+    if("NOAA Average Max Temp" %in% input$linesToShow && "NOAA Average Max Temp" %in% colnames(temp.rev)) {
+      p <- p + geom_line(aes(y = `NOAA Average Max Temp`, color = "NOAA Average Maximum Temp."))#, alpha = 0.5) 
+      # +
+      #   geom_point(aes(
+      #     y = `NOAA Average Max Temp`, 
+      #     color = "NOAA Average Maximum Temp."),
+      #     size = 0.8)
+      
+      # add linear model for noaa max
+      if ("lm_noaa_max_temp" %in% input$linesToShow) {
+        p <- p + 
+          geom_smooth(
+            aes(y = `NOAA Average Max Temp`), 
+            method = "lm",
+            se = TRUE,
+            fill = "grey80",   
+            alpha = 0.5,       
+            color = NA         
+          ) +
+          geom_line(           
+            aes(y = `NOAA Average Max Temp`),
+            stat = "smooth",
+            method = "lm",
+            color = "black",   
+            linewidth = 0.8    
+          )
+      }
+    }
+    
+    if("NOAA Average Temp" %in% input$linesToShow && "NOAA Average Temp" %in% colnames(temp.rev)) {
+      p <- p + geom_line(aes(y = `NOAA Average Temp`, color = "NOAA Average Temp."))#, alpha = 0.5) 
+      # +
+      #   geom_point(aes(
+      #     y = `NOAA Average Temp`, 
+      #     color = "NOAA Average Temp."),
+      #     size = 0.8)
+      
+      #add linear model for noaa avg
+      # LR.max <- lm(max.noaa ~ year, data = shiny.merged.temp)
+      # max.intercept <- coef(LR.max)[1]
+      # max.slope <- coef(LR.max)[2]
+      # max.r.squared <- summary(LR.max)$r.squared
+      # max.p.value <- summary(LR.max)$coefficients[2,4]
+      # #format info
+      # LR.max.info <- paste0(
+      #   "y = ", round(max.slope, 2), "x", "+", round(max.intercept, 2),
+      #   "<br>R² = ", round(max.r.squared, 3),
+      #   "<br>p-value = ", signif(max.p.value, 3)
+      # )
+      # 
+      #graph the linear model
+      if ("lm_noaa_temp" %in% input$linesToShow) {
+        p <- p + 
+          geom_smooth(
+            aes(y = `NOAA Average Temp`), #adds confidence interval
+            method = "lm",
+            se = TRUE,
+            fill = "grey80",   
+            alpha = 0.5,       
+            color = NA         # suppresses confidence interval border
+          ) +
+          geom_line(           # adds the regression line separately
+            aes(y = `NOAA Average Temp`,
+                #text = LR.max.info
+            ),
+            stat = "smooth",
+            method = "lm",
+            color = "black",   
+            linewidth = 0.8    
+          )
+      }
+    }
+    
+    if("McFarland Average Temp" %in% input$linesToShow && "McFarland Average Temp" %in% colnames(temp.rev)) {
+      p <- p + geom_line(aes(y = `McFarland Average Temp`, color = "McFarland Average Temp."))#, alpha = 0.5) 
+      # +
+      #   geom_point(aes(
+      #     y = `McFarland Average Temp`, 
+      #     color = "McFarland Average Temp."),
+      #     size = 0.8)
+      
+      # Add linear model for mcfarland 
+      if ("lm_mcfarland_temp" %in% input$linesToShow) {
+        p <- p + 
+          geom_smooth(
+            aes(y = `McFarland Average Temp`), 
+            method = "lm",
+            se = TRUE,
+            fill = "grey80",   
+            alpha = 0.5,       
+            color = NA         
+          ) +
+          geom_line(           
+            aes(y = `McFarland Average Temp`),
+            stat = "smooth",
+            method = "lm",
+            color = "black",   
+            linewidth = 0.8    
+          )
+      }
+    }
+    
+    if("NOAA Average Min Temp" %in% input$linesToShow && "NOAA Average Min Temp" %in% colnames(temp.rev)) {
+      p <- p + geom_line(aes(y = `NOAA Average Min Temp`, color = "NOAA Average Minimum Temp."))#, alpha = 0.5) 
+      # +
+      #   geom_point(aes(
+      #     y = `NOAA Average Min Temp`, 
+      #     color = "NOAA Average Minimum Temp."),
+      #     size = 0.8)
+      
+      # Add linear model for noaa min
+      if ("lm_noaa_min_temp" %in% input$linesToShow) {
+        p <- p + 
+          geom_smooth(
+            aes(y = `NOAA Average Min Temp`), 
+            method = "lm",
+            se = TRUE,
+            fill = "grey80",   
+            alpha = 0.5,       
+            color = NA         
+          ) +
+          geom_line(           
+            aes(y = `NOAA Average Min Temp`),
+            stat = "smooth",
+            method = "lm",
+            color = "black",   
+            linewidth = 0.8    
+          )
+      }
+    }
+    
+    # Customize the legend and colors
+    p <- p + scale_color_manual(
+      values = c(
+        "NOAA Average Temp." = "#000000", 
+        "NOAA Average Maximum Temp." = "#CC3300", 
+        "NOAA Average Minimum Temp." = "#003399", 
+        "McFarland Average Temp." = "#00CC00"
+      ),
+      name = "Temperature Type"
+    )
+    
+    # Convert ggplot2 plot to an interactive plotly plot
+    ggplotly(p, tooltip = c("text", "NOAA Average Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp")) %>%   layout(hovermode = "x unified")
+    
+  })
+  
+  
+## trying to figure out baseline label
+  
+  #### Temp anom plot
+  output$NOAAAnomPlot <- renderPlotly({
+    
+    #Revised data - column naming for plot
+    anom.rev <- shiny.merged.anom %>%
+      rename(Year = year, `Year-Month` = noaa.year.month, `NOAA Temp Anom` = noaa.anom) %>%
+      mutate(
+        `Year-Month` = as.Date(`Year-Month`),
+        hover_text = case_when(
+          !is.na(`NOAA Temp Anom`) ~ paste(
+            "Year-Month:", format(`Year-Month`, "%Y-%m"),
+            "<br>NOAA Temp Anomaly:", round(`NOAA Temp Anom`, 4)
+          )
+        )
+      )
+    
+    #Base plot
+    p2 <- ggplot(anom.rev, aes(x = `Year-Month`)) +
+      scale_x_date(
+        breaks = seq(from = min(anom.rev$`Year-Month`),
+                     to = max(anom.rev$`Year-Month`),
+                     by = "10 years"),
+        labels = scales::date_format("%Y"),
+        limits = c(min(anom.rev$`Year-Month`), max(anom.rev$`Year-Month`))
+      ) +
+      labs(title = "NOAA Monthly Temperature Anomalies (1895-2024)",
+           x = "Year",
+           y = "Temperature Anomaly (°C)") +
+      theme_minimal()
+    
+    #Add lines based on checkbox input
+    p2 <- p2 + geom_bar(aes(y = `NOAA Temp Anom`, fill = factor(`NOAA Temp Anom` > 0, levels = c(TRUE, FALSE), labels = c("NOAA above baseline", "NOAA below baseline")), text = hover_text), stat = "identity") +
+      geom_hline(
+        aes(yintercept = 0, color = "Baseline"), linetype = "solid")
+    
+    # Customize the legend and colors
+    p2 <- p2 +
+      scale_fill_manual(
+        values = c("NOAA above baseline" = "red",
+                   "NOAA below baseline" = "blue",
+                   "Baseline" = "black"),
+        name = "NOAA Anomaly Data") 
+    # +
+    # scale_color_manual(
+    #   values = c("Baseline" = "black"),
+    #   name = NULL  # Prevent duplicate legend titles
+    # )
+    
+    # Convert ggplot2 plot to an interactive plotly plot
+    plot <- ggplotly(p2, tooltip = "text")
+    
+    # # Adjust Plotly legend
+    # plot <- plot %>% layout(
+    #   legend = list(
+    #     traceorder = "normal"  # Maintain logical order
+    #   )
+    # )
+    # 
+    # plot
+  })
+
+
