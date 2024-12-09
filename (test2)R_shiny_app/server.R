@@ -1,7 +1,12 @@
 # server component
 
 server <- function(input, output) {
-  # Reactive data transformations
+  
+  #---------------------------------------#
+  ####  Reactive data transformations  ####
+  #---------------------------------------#   
+
+  # Reactive for temperature data
   temperature_data <- reactive({
     shiny.merged.temp %>% 
       rename(
@@ -10,6 +15,16 @@ server <- function(input, output) {
         `NOAA Average Max Temp` = max.noaa, 
         `NOAA Average Min Temp` = min.noaa, 
         `McFarland Average Temp` = mcfarland
+      )
+  })
+  
+  # Reactive for precipitation data
+  precipitation_data <- reactive({
+    shiny.merged.precip %>% 
+      rename(
+        Year = year, 
+        `NOAA Precip` = noaa.precip,
+        `McFarland Precip` = McFarland.precip
       )
   })
   
@@ -35,7 +50,7 @@ server <- function(input, output) {
       )
   })
   
-  # Reactive for temperature anomaly data
+  # Reactive for precipitation anomaly data
   precip_anomaly_data <- reactive({
     shiny.merged.precip.anom %>%
       rename(
@@ -56,17 +71,7 @@ server <- function(input, output) {
         )
       )
   })
-  
-  # Reactive for precipitation data
-  precipitation_data <- reactive({
-    shiny.merged.precip %>% 
-      rename(
-        Year = year, 
-        `NOAA Precip` = noaa.precip,
-        `McFarland Precip` = McFarland.precip
-      )
-  })
-  
+
   # Reactive for linear models
   temp_models <- reactive({
     data <- temperature_data()
@@ -86,14 +91,80 @@ server <- function(input, output) {
   precip_models <- reactive({
     data <- precipitation_data()
     list(
-      noaa = if ("lm_noaa_precip" %in% input$linesToShowPrecip) 
+      noaa_precip = if ("lm_noaa_precip" %in% input$linesToShowPrecip) 
         lm(`NOAA Precip` ~ Year, data = data),
-      mcfarland = if ("lm_mcfarland_precip" %in% input$linesToShowPrecip) 
+      mcfarland_precip = if ("lm_mcfarland_precip" %in% input$linesToShowPrecip) 
         lm(`McFarland Precip` ~ Year, data = data)
     )
   })
   
-  # Temperature plot output
+
+  #----------------------#
+  ####   Functions    ####
+  #----------------------# 
+
+  # Helper function for adding hover text 
+  customize_hover_text <- function(plt, units = "°C") {
+    for(i in seq_along(plt$x$data)) {
+      if(!is.null(plt$x$data[[i]]$name)) {
+        if(!is.null(plt$x$data[[i]]$mode) && 
+           !is.null(plt$x$data[[i]]$line$color) && 
+           plt$x$data[[i]]$mode == "lines" && 
+           identical(plt$x$data[[i]]$line$color, "black")) {
+          
+          base_name <- gsub("\\.$", "", plt$x$data[[i]]$name)
+          base_name <- gsub("fitted values", paste(base_name, "trend"), base_name)
+          
+          plt$x$data[[i]]$hovertemplate <- paste0(
+            base_name, ": %{y:.1f} ", units, "<br>",
+            "<extra></extra>"
+          )
+        } else if(!is.null(plt$x$data[[i]]$fill) && 
+                  plt$x$data[[i]]$fill == "tonexty") {
+          plt$x$data[[i]]$hovertemplate <- paste0(
+            "95% Confidence Interval: %{y:.1f} ", units, "<br>",
+            "<extra></extra>"
+          )
+        } else if(!is.null(plt$x$data[[i]]$mode) && 
+                  plt$x$data[[i]]$mode == "lines") {
+          plt$x$data[[i]]$hovertemplate <- paste0(
+            "%{data.name}: %{y:.1f} ", units, "<br>",
+            "<extra></extra>"
+          )
+          plt$x$data[[i]]$name <- gsub("\\.$", "", plt$x$data[[i]]$name)
+        }
+      }
+    }
+    plt
+  }
+  
+  
+  # Helper function for adding model lines
+  add_model_line <- function(plot, model, var_name) {
+    plot +
+      geom_smooth(
+        aes(y = .data[[var_name]]),
+        method = "lm",
+        se = TRUE,
+        fill = "grey80",
+        alpha = 0.5,
+        color = NA
+      ) +
+      geom_line(
+        aes(y = .data[[var_name]]),
+        stat = "smooth",
+        method = "lm",
+        color = "black",
+        linewidth = 0.8
+      )
+  }
+  
+  
+  #----------------------#
+  ####  Plot outputs  ####
+  #----------------------#  
+  
+  # Temperature plot output ------------------------------------------
   output$myInteractivePlot <- renderPlotly({
     data <- temperature_data()
     models <- temp_models()
@@ -166,79 +237,79 @@ server <- function(input, output) {
     )
     
     # Convert to plotly and customize hover text
-    plt <- ggplotly(p) %>%
-      layout(hovermode = "x unified")
-    
-    # Customize hover template for each trace
-    for(i in seq_along(plt$x$data)) {
-      if(!is.null(plt$x$data[[i]]$name)) {
-        # Check for linear model lines (black lines with mode "lines")
-        if(!is.null(plt$x$data[[i]]$mode) && 
-           !is.null(plt$x$data[[i]]$line$color) && 
-           plt$x$data[[i]]$mode == "lines" && 
-           identical(plt$x$data[[i]]$line$color, "black")) {
-          
-          # Get the base name without trailing period
-          base_name <- gsub("\\.$", "", plt$x$data[[i]]$name)
-          # Remove "fitted values" and add "trend"
-          base_name <- gsub("fitted values", paste(base_name, "trend"), base_name)
-          
-          plt$x$data[[i]]$hovertemplate <- paste0(
-            base_name, ": %{y:.1f}°C<br>",
-            "<extra></extra>"
-          )
-        } else if(!is.null(plt$x$data[[i]]$fill) && 
-                  plt$x$data[[i]]$fill == "tonexty") {
-          # This is a confidence interval
-          plt$x$data[[i]]$hovertemplate <- paste0(
-            "95% Confidence Interval: %{y:.1f}°C<br>",
-            "<extra></extra>"
-          )
-        } else if(!is.null(plt$x$data[[i]]$mode) && 
-                  plt$x$data[[i]]$mode == "lines") {
-          # These are the main temperature lines
-          plt$x$data[[i]]$hovertemplate <- paste0(
-            "%{data.name}: %{y:.1f}°C<br>",
-            "<extra></extra>"
-          )
-          # Remove any trailing periods from names
-          plt$x$data[[i]]$name <- gsub("\\.$", "", plt$x$data[[i]]$name)
-        }
-      }
-    }
-    
-    # Update layout to show year in the unified hover
-    plt <- plt %>%
+    temp_plt <- ggplotly(p) %>%
+      layout(hovermode = "x unified") %>%
+      customize_hover_text(units = "°C") %>%
       layout(
         hovermode = "x unified",
         hoverlabel = list(bgcolor = "white"),
-        xaxis = list(
-          hoverformat = "%Y"  # Format for the year
-        )
+        xaxis = list(hoverformat = "%Y")
       )
   })
   
-  # Helper function for adding model lines
-  add_model_line <- function(plot, model, var_name) {
-    plot +
-      geom_smooth(
-        aes(y = .data[[var_name]]),
-        method = "lm",
-        se = TRUE,
-        fill = "grey80",
-        alpha = 0.5,
-        color = NA
-      ) +
-      geom_line(
-        aes(y = .data[[var_name]]),
-        stat = "smooth",
-        method = "lm",
-        color = "black",
-        linewidth = 0.8
-      )
-  }
+  # Precipitation plot output ----------------------------------------
+  output$PrecipPlot <- renderPlotly({
+    data <- precipitation_data()
+    models <- precip_models()
+    
+    p2 <- ggplot(data, aes(x = Year)) +
+      scale_x_continuous(breaks = pretty(data$Year)) +
+      labs(title = "Total Precipitation (1895-2024)",
+           x = "Year",
+           y = "Total Precipitation (in)") +
+      theme_minimal()
+    
+    # Add precipitation lines based on selection
+    #add noaa precip data
+    if ("NOAA Precip" %in% input$linesToShowPrecip) {
+      p2 <- p2 + geom_line(aes(x = Year,
+                             y = `NOAA Precip`,
+                             color = "NOAA Total Precip."))
+      
+      if (!is.null(models$noaa_precip)) {
+        p2 <- add_model_line(p2, models$noaa_precip, "NOAA Precip")
+        
+      }
+    }
+    
+    #add McFarland precip data
+    if ("McFarland Precip" %in% input$linesToShowPrecip) {
+      p2 <- p2 + geom_line(aes(x = Year,
+                             y = `McFarland Precip`,
+                             color = "McFarland Total Precip."))
+      
+      if (!is.null(models$mcfarland_precip)) {
+        p2 <- add_model_line(p2, models$mcfarland_precip, "McFarland Precip")
+        
+      }
+    }
   
-#create anomaly plot function
+  # Customize the legend and colors
+  p2 <- p2 + scale_color_manual(
+    values = c(
+      "NOAA Total Precip." = "#000000", 
+      "McFarland Total Precip." = "#00CC00"
+    ),
+    name = "Precipitation Data"
+  )
+  
+  # Convert to plotly and customize hover text
+  precip_plt <- ggplotly(p2) %>%
+    layout(hovermode = "x unified") %>%
+    customize_hover_text(units = "in") %>%
+    layout(
+      hovermode = "x unified",
+      hoverlabel = list(bgcolor = "white"),
+      xaxis = list(hoverformat = "%Y")
+    )
+  })
+
+
+  #-----------------------#
+  ####  Anomaly Plots  ####
+  #-----------------------#  
+  
+  #create anomaly plot function
   create_anomaly_plot <- function(data, 
                                   x_col = "Year-Month", 
                                   y_col = "NOAA Temp Anom", 
@@ -287,7 +358,7 @@ server <- function(input, output) {
     )
   })
   
-  # For precipitation anomalies (assuming you have similar data structure)
+  # For NOAA precipitation anomalies
   output$NOAAPrecipAnomPlot <- renderPlotly({
     create_anomaly_plot(
       data = precip_anomaly_data(),
@@ -295,6 +366,17 @@ server <- function(input, output) {
       y_col = "NOAA Precip Anom",
       hover_text_col = "noaa_precip_hover_text",
       legend_title = "NOAA Precipitation Anomaly Data"
+    )
+  })
+  
+  # For McFarland precipitation anomalies
+  output$McFarlandPrecipAnomPlot <- renderPlotly({
+    create_anomaly_plot(
+      data = precip_anomaly_data(),
+      x_col = "Year-Month",
+      y_col = "McFarland Precip Anom",
+      hover_text_col = "mcfarland_precip_hover_text",
+      legend_title = "McFarland Precipitation Anomaly Data"
     )
   })
   

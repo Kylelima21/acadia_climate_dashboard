@@ -770,3 +770,58 @@ plt <- plt %>%
 #   
 #   ggplotly(p2, tooltip = "text")
 # })
+
+
+
+
+##################### temp plot hover text
+
+# Customize hover template for each trace
+for(i in seq_along(plt$x$data)) {
+  if(!is.null(plt$x$data[[i]]$name)) {
+    # Check for linear model lines (black lines with mode "lines")
+    if(!is.null(plt$x$data[[i]]$mode) && 
+       !is.null(plt$x$data[[i]]$line$color) && 
+       plt$x$data[[i]]$mode == "lines" && 
+       identical(plt$x$data[[i]]$line$color, "black")) {
+      
+      # Get the base name without trailing period
+      base_name <- gsub("\\.$", "", plt$x$data[[i]]$name)
+      # Remove "fitted values" and add "trend"
+      base_name <- gsub("fitted values", paste(base_name, "trend"), base_name)
+      
+      plt$x$data[[i]]$hovertemplate <- paste0(
+        base_name, ": %{y:.1f}°C<br>",
+        "<extra></extra>"
+      )
+    } else if(!is.null(plt$x$data[[i]]$fill) && 
+              plt$x$data[[i]]$fill == "tonexty") {
+      # This is a confidence interval
+      plt$x$data[[i]]$hovertemplate <- paste0(
+        "95% Confidence Interval: %{y:.1f}°C<br>",
+        "<extra></extra>"
+      )
+    } else if(!is.null(plt$x$data[[i]]$mode) && 
+              plt$x$data[[i]]$mode == "lines") {
+      # These are the main temperature lines
+      plt$x$data[[i]]$hovertemplate <- paste0(
+        "%{data.name}: %{y:.1f}°C<br>",
+        "<extra></extra>"
+      )
+      # Remove any trailing periods from names
+      plt$x$data[[i]]$name <- gsub("\\.$", "", plt$x$data[[i]]$name)
+    }
+  }
+}
+
+# Update layout to show year in the unified hover
+plt <- plt %>%
+  layout(
+    hovermode = "x unified",
+    hoverlabel = list(bgcolor = "white"),
+    xaxis = list(
+      hoverformat = "%Y"  # Format for the year
+    )
+  )
+})
+
