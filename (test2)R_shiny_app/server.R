@@ -35,6 +35,28 @@ server <- function(input, output) {
       )
   })
   
+  # Reactive for temperature anomaly data
+  precip_anomaly_data <- reactive({
+    shiny.merged.precip.anom %>%
+      rename(
+        Year = year, 
+        `Year-Month` = noaa.year.month, 
+        `NOAA Precip Anom` = noaa.percent.precip.anom,
+        `McFarland Precip Anom` = mcfarland.percent.precip.anom
+      ) %>%
+      mutate(
+        `Year-Month` = as.Date(`Year-Month`),
+        noaa_precip_hover_text = paste(
+          "Year-Month:", format(`Year-Month`, "%Y-%m"),
+          "<br>NOAA Precip Anomaly:", round(`NOAA Precip Anom`, 4)
+        ),
+        mcfarland_precip_hover_text = paste(
+          "Year-Month:", format(`Year-Month`, "%Y-%m"),
+          "<br>McFarland Precip Anomaly:", round(`McFarland Precip Anom`, 4)
+        )
+      )
+  })
+  
   # Reactive for precipitation data
   precipitation_data <- reactive({
     shiny.merged.precip %>% 
@@ -150,36 +172,50 @@ server <- function(input, output) {
     # Customize hover template for each trace
     for(i in seq_along(plt$x$data)) {
       if(!is.null(plt$x$data[[i]]$name)) {
-        plt$x$data[[i]]$hovertemplate <- paste0(
-          "Year: %{x}<br>",
-          plt$x$data[[i]]$name, ": %{y:.1f}°C<br>",
-          "<extra></extra>"
-        )
+        # Check for linear model lines (black lines with mode "lines")
+        if(!is.null(plt$x$data[[i]]$mode) && 
+           !is.null(plt$x$data[[i]]$line$color) && 
+           plt$x$data[[i]]$mode == "lines" && 
+           identical(plt$x$data[[i]]$line$color, "black")) {
+          
+          # Get the base name without trailing period
+          base_name <- gsub("\\.$", "", plt$x$data[[i]]$name)
+          # Remove "fitted values" and add "trend"
+          base_name <- gsub("fitted values", paste(base_name, "trend"), base_name)
+          
+          plt$x$data[[i]]$hovertemplate <- paste0(
+            base_name, ": %{y:.1f}°C<br>",
+            "<extra></extra>"
+          )
+        } else if(!is.null(plt$x$data[[i]]$fill) && 
+                  plt$x$data[[i]]$fill == "tonexty") {
+          # This is a confidence interval
+          plt$x$data[[i]]$hovertemplate <- paste0(
+            "95% Confidence Interval: %{y:.1f}°C<br>",
+            "<extra></extra>"
+          )
+        } else if(!is.null(plt$x$data[[i]]$mode) && 
+                  plt$x$data[[i]]$mode == "lines") {
+          # These are the main temperature lines
+          plt$x$data[[i]]$hovertemplate <- paste0(
+            "%{data.name}: %{y:.1f}°C<br>",
+            "<extra></extra>"
+          )
+          # Remove any trailing periods from names
+          plt$x$data[[i]]$name <- gsub("\\.$", "", plt$x$data[[i]]$name)
+        }
       }
     }
     
-    plt
-  })
-  
-  # Temperature anomaly plot output
-  output$NOAAAnomPlot <- renderPlotly({
-    data <- temp_anomaly_data()
-    
-    p2 <- ggplot(data, aes(x = `Year-Month`)) +
-      geom_bar(aes(
-        y = `NOAA Temp Anom`,
-        fill = factor(`NOAA Temp Anom` > 0, levels = c(TRUE, FALSE), labels = c("Above baseline", "Below baseline")),
-        text = noaa_hover_text
-      ), stat = "identity") +
-      scale_fill_manual(
-        values = c("Above baseline" = "red",
-                   "Below baseline" = "blue",
-                   "Baseline" = "black"),
-        name = "NOAA Anomaly Data") +
-      geom_hline(yintercept = 0, color = "black") +
-      theme_minimal()
-    
-    ggplotly(p2, tooltip = "text")
+    # Update layout to show year in the unified hover
+    plt <- plt %>%
+      layout(
+        hovermode = "x unified",
+        hoverlabel = list(bgcolor = "white"),
+        xaxis = list(
+          hoverformat = "%Y"  # Format for the year
+        )
+      )
   })
   
   # Helper function for adding model lines
@@ -201,6 +237,67 @@ server <- function(input, output) {
         linewidth = 0.8
       )
   }
+  
+#create anomaly plot function
+  create_anomaly_plot <- function(data, 
+                                  x_col = "Year-Month", 
+                                  y_col = "NOAA Temp Anom", 
+                                  hover_text_col = "noaa_hover_text",
+                                  legend_title = "Anomaly Data") {
+    
+    p <- ggplot(data, aes(x = .data[[x_col]])) +
+      geom_bar(aes(
+        y = .data[[y_col]],
+        fill = factor(.data[[y_col]] > 0, 
+                      levels = c(TRUE, FALSE), 
+                      labels = c("Above baseline", "Below baseline")),
+        text = .data[[hover_text_col]]
+      ), stat = "identity") +
+      scale_fill_manual(
+        values = c("Above baseline" = "red",
+                   "Below baseline" = "blue",
+                   "Baseline" = "black"),
+        name = legend_title) +
+      geom_hline(yintercept = 0, color = "black") +
+      theme_minimal()
+    
+    ggplotly(p, tooltip = "text")
+  }
+  
+#create anomaly plots
+  # For NOAA temperature anomalies
+  output$NOAAAnomPlot <- renderPlotly({
+    create_anomaly_plot(
+      data = temp_anomaly_data(),
+      x_col = "Year-Month",
+      y_col = "NOAA Temp Anom",
+      hover_text_col = "noaa_hover_text",
+      legend_title = "NOAA Anomaly Data"
+    )
+  })
+  
+  # For McFarland temperature anomalies
+  output$McFarlandAnomPlot <- renderPlotly({
+    create_anomaly_plot(
+      data = temp_anomaly_data(),
+      x_col = "Year-Month",
+      y_col = "McFarland Temp Anom",
+      hover_text_col = "mcfarland_hover_text",
+      legend_title = "McFarland Anomaly Data"
+    )
+  })
+  
+  # For precipitation anomalies (assuming you have similar data structure)
+  output$NOAAPrecipAnomPlot <- renderPlotly({
+    create_anomaly_plot(
+      data = precip_anomaly_data(),
+      x_col = "Year-Month",
+      y_col = "NOAA Precip Anom",
+      hover_text_col = "noaa_precip_hover_text",
+      legend_title = "NOAA Precipitation Anomaly Data"
+    )
+  })
+  
 }
 
 #### shinyApp function (fuse ui and server)
