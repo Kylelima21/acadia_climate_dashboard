@@ -20,9 +20,10 @@ ui <- dashboardPage(
     
     # Add sidebar menu with tabs
     sidebarMenu(
-      menuItem("Dashboard Overview", tabName = "overview", icon = icon("dashboard")),
-      menuItem("Temperature Trends", tabName = "temp", icon = icon("chart-line")),
-      menuItem("Precipitation Trends", tabName = "precip", icon = icon("chart-line"))
+      menuItem("Dashboard Overview", tabName = "overview", icon = icon("home")),
+      menuItem("Temperature Trends", tabName = "temp", icon = icon("thermometer-half")),
+      menuItem("Precipitation Trends", tabName = "precip", icon = icon("cloud-rain")),
+      menuItem("Sea Level Trends", tabName = "sea", icon = icon("water"))
     )
   ),
   
@@ -119,11 +120,39 @@ ui <- dashboardPage(
                     )
                   ),
                   
+                ),
+                
+                tabPanel(
+                  "Temperature Records and Extremes",
+                  
+                  # Add slider for year range
+                  fluidRow(
+                    column(
+                      width = 4,
+                      sliderInput(
+                        inputId = "year_range",
+                        label = "Select Year Range:",
+                        min = min(highest_mean_monthly_temps$year),
+                        max = max(highest_mean_monthly_temps$year),
+                        value = c(min(highest_mean_monthly_temps$year), max(highest_mean_monthly_temps$year)),
+                        sep = "" # Prevent commas in year values
+                      )
+                    )
+                  ),
+                  
+                  # Plot output
+                  fluidRow(
+                    column(
+                      width = 12,
+                      plotlyOutput("highestTempsPlot", height = "600px")
+                    )
+                  )
                 )
+              )
               )
       ),
       
-      #Tab for interactive precipitation plot
+      # Tab for interactive precipitation plots
       tabItem(tabName = "precip",
               
               tabsetPanel(
@@ -196,7 +225,13 @@ ui <- dashboardPage(
                   
                 )
               )
+      ),
+      
+      # Tab for interactive sea level plots
+      tabItem(tabName = "sea",
+              h2("Sea Level Trends"),
+              p("Plots for sea level trends.")
       )
     )
   )
-)
+

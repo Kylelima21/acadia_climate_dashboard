@@ -464,7 +464,7 @@ record.temp.summary <- daily.noaa.data %>%
             uci_low = quantile(tmin, prob=0.975),
             n=n())
 
-#### Record temperatures plot
+#### Record temperatures plot---------------------------------------------------
 
 #highest daily average temps
 highest_mean_daily_temps <- daily.noaa.data %>%
@@ -500,6 +500,8 @@ ggplot(highest_mean_daily_temps, aes(x = date, y = tmean, color = highlight)) +
     legend.position = "none"
   )
 
+##monthly temp
+
 #highest monthly average temps
 highest_mean_monthly_temps <- monthly.noaa.data %>%
   # Create a year_month column for graphing
@@ -507,9 +509,17 @@ highest_mean_monthly_temps <- monthly.noaa.data %>%
          year.month = as.Date(year.month)) %>% 
   group_by(year) %>%
   filter(tmean == max(tmean, na.rm = TRUE)) %>% 
-  ungroup() %>%
-  arrange(desc(tmean)) %>% 
-  mutate(highlight = ifelse(row_number() <= 10, "Top 10", "Other"))
+  ungroup() %>% 
+  select(UnitCode, long, lat, tmean, year, year.month) %>% 
+  rename(tmean.max = tmean,
+         tmean.max.ym = year.month)
+# %>%
+#   arrange(desc(tmean.max)) 
+# %>% 
+#   mutate(highlight = ifelse(row_number() <= 10, "Top 10", "Other"))
+
+##save outputs as csv
+#write.csv(, "data/processed_data/shiny_merged_temp.csv", row.names = FALSE)
 
 #graph of high mean temps
 ggplot(highest_mean_monthly_temps, aes(x = year.month, y = tmean, color = highlight)) +
@@ -542,9 +552,13 @@ highest_max_monthly_temps <- monthly.noaa.data %>%
          year.month = as.Date(year.month)) %>% 
   group_by(year) %>%
   filter(tmax == max(tmax, na.rm = TRUE)) %>% 
-  ungroup() %>%
-  arrange(desc(tmax)) %>% 
-  mutate(highlight.max = ifelse(row_number() <= 10, "Top 10", "Other"))
+  ungroup() %>% 
+  select(UnitCode, long, lat, tmax, year, year.month) %>% 
+  rename(tmax.max = tmax,
+         tmax.max.ym = year.month)
+# %>%
+#   arrange(desc(tmax)) %>% 
+#   mutate(highlight.max = ifelse(row_number() <= 10, "Top 10", "Other"))
 
 #graph of highest max temps
 ggplot(highest_max_monthly_temps, aes(x = year.month, y = tmax, color = highlight.max)) +
@@ -570,12 +584,66 @@ ggplot(highest_max_monthly_temps, aes(x = year.month, y = tmax, color = highligh
     legend.position = "none"
   )
 
+#lowest monthly average temps
+lowest_mean_monthly_temps <- monthly.noaa.data %>%
+  # Create a year_month column for graphing
+  mutate(year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+         year.month = as.Date(year.month)) %>% 
+  group_by(year) %>%
+  filter(tmean == min(tmean, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  select(UnitCode, long, lat, tmean, year, year.month) %>% 
+  rename(tmean.min = tmean,
+         tmean.min.ym = year.month)
+
+#lowest monthly min temps
+lowest_min_monthly_temps <- monthly.noaa.data %>%
+  # Create a year_month column for graphing
+  mutate(year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+         year.month = as.Date(year.month)) %>% 
+  group_by(year) %>%
+  filter(tmin == min(tmin, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  select(UnitCode, long, lat, tmin, year, year.month) %>% 
+  rename(tmin.min = tmin,
+         tmin.min.ym = year.month)
+
+##monthly precip
+
+#highest monthly average precip
+highest_monthly_precip <- monthly.noaa.data %>%
+  # Create a year_month column for graphing
+  mutate(year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+         year.month = as.Date(year.month)) %>% 
+  group_by(year) %>%
+  filter(ppt == max(ppt, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  select(UnitCode, long, lat, ppt, year, year.month) %>% 
+  rename(ppt.max = ppt,
+         ppt.max.ym = year.month)
+
+#lowest monthly precip
+lowest_monthly_precip <- monthly.noaa.data %>%
+  # Create a year_month column for graphing
+  mutate(year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+         year.month = as.Date(year.month)) %>% 
+  group_by(year) %>%
+  filter(ppt == min(ppt, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  select(UnitCode, long, lat, ppt, year, year.month) %>% 
+  rename(ppt.min = ppt,
+         ppt.min.ym = year.month)
+
 #combined data table for R shiny app
-shiny.merged.record.high.temps <- highest_mean_monthly_temps %>% 
-  left_join(highest_max_monthly_temps %>% select(year, tmax, highlight.max), by = "year")
+shiny.monthly.records <- highest_mean_monthly_temps %>%
+  left_join(highest_max_monthly_temps, by = c("year", "UnitCode", "long", "lat")) %>%
+  left_join(lowest_mean_monthly_temps, by = c("year", "UnitCode", "long", "lat")) %>%
+  left_join(lowest_min_monthly_temps, by = c("year", "UnitCode", "long", "lat")) %>%
+  left_join(highest_monthly_precip, by = c("year", "UnitCode", "long", "lat")) %>%
+  left_join(lowest_monthly_precip, by = c("year", "UnitCode", "long", "lat")) 
 
 ##save outputs as csv
-#write.csv(shiny.merged.record.high.temps, "data/processed_data/shiny_merged_record_high_temps.csv", row.names = FALSE)
+# write.csv(shiny.monthly.records, "data/processed_data/shiny_monthly_records.csv", row.names = FALSE)
 
 #### Precipitation trends over time ---------------------------------
 
