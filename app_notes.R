@@ -825,3 +825,144 @@ plt <- plt %>%
   )
 })
 
+
+#### records plots notes
+
+#-----------------------#
+####  Records Plots  ####
+#-----------------------# 
+
+filtered_data <- reactive({
+  shiny.monthly.records %>%
+    filter(year >= input$year_range[1] & year <= input$year_range[2]) %>%
+    arrange(desc(tmean.max)) %>%
+    mutate(highlight = ifelse(row_number() <= 10, "Top 10", "Other"),
+           tmean.max.ym = as.Date(tmean.max.ym))
+})
+
+# Render the interactive plot
+output$TempRecordsPlot <- renderPlotly({
+  data <- filtered_data()
+  
+  # Create the ggplot
+  p <- ggplot(data, aes(x = tmean.max.ym, y = tmean.max, color = highlight)) +
+    geom_segment(aes(xend = tmean.max.ym, y = min(tmean.max), yend = tmean.max), linetype = "solid", alpha = 0.6) +
+    geom_point(size = 3, aes(color = highlight)) +
+    scale_color_manual(values = c("Top 10" = "darkred", "Other" = "orange")) +
+    scale_x_date(
+      breaks = seq(from = min(data$tmean.max.ym), 
+                   to = max(data$tmean.max.ym), 
+                   by = "10 years"),
+      labels = scales::date_format("%Y")
+    ) +
+    labs(
+      x = "Year",
+      y = "Monthly average temperature (°C)"
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(face = "bold", size = 16),
+      plot.subtitle = element_text(size = 12),
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      legend.position = "none"
+    )
+  
+  # Convert ggplot to plotly for interactivity
+  ggplotly(p)
+})
+
+#### records plot 2
+#-----------------------#
+####  Records Plots  ####
+#-----------------------# 
+
+create_record_plot <- function(data, 
+                               date_col,      # Column containing dates
+                               value_col,     # Column containing values to plot
+                               min_year,      # Minimum year for filtering
+                               max_year,      # Maximum year for filtering
+                               top_n = 10,    # Number of top records to highlight
+                               y_label = "",  # Y-axis label
+                               color_top = "darkred",    # Color for top records
+                               color_other = "orange") { # Color for other records
+  
+  # Filter and prepare data
+  filtered_data <- data %>%
+    filter(year >= min_year & year <= max_year) %>%
+    arrange(desc(.data[[value_col]])) %>%
+    mutate(
+      highlight = ifelse(row_number() <= top_n, paste("Top", top_n), "Other"),
+      date = as.Date(.data[[date_col]])
+    )
+  
+  # Create the ggplot
+  p <- ggplot(filtered_data, 
+              aes(x = date, 
+                  y = .data[[value_col]], 
+                  color = highlight)) +
+    geom_segment(
+      aes(xend = date, 
+          y = min(.data[[value_col]]), 
+          yend = .data[[value_col]]), 
+      linetype = "solid", 
+      alpha = 0.6
+    ) +
+    geom_point(size = 3) +
+    scale_color_manual(
+      values = c(setNames(color_top, paste("Top", top_n)), 
+                 setNames(color_other, "Other"))
+    ) +
+    scale_x_date(
+      breaks = seq(
+        from = min(filtered_data$date), 
+        to = max(filtered_data$date), 
+        by = "10 years"
+      ),
+      labels = scales::date_format("%Y")
+    ) +
+    labs(
+      x = "Year",
+      y = y_label
+    ) +
+    theme_minimal() +
+    theme(
+      plot.title = element_text(face = "bold", size = 16),
+      plot.subtitle = element_text(size = 12),
+      axis.text.x = element_text(angle = 45, hjust = 1),
+      legend.position = "none"
+    )
+  
+  # Convert to plotly
+  ggplotly(p)
+}
+
+# Render the temperature records plot
+output$TempRecordsPlot <- renderPlotly({
+  create_record_plot(
+    data = shiny.monthly.records,
+    date_col = "tmean.max.ym",
+    value_col = "tmean.max",
+    min_year = input$year_range[1],
+    max_year = input$year_range[2],
+    top_n = 10,
+    y_label = "Monthly average temperature (°C)",
+    color_top = "darkred",
+    color_other = "orange"
+  )
+})
+
+# And if you want to create similar plots for other variables, you can reuse the function:
+output$PrecipRecordsPlot <- renderPlotly({
+  create_record_plot(
+    data = shiny.monthly.records,
+    date_col = "precip.max.ym",  # assuming these columns exist
+    value_col = "precip.max",    # assuming these columns exist
+    min_year = input$year_range[1],
+    max_year = input$year_range[2],
+    top_n = 10,
+    y_label = "Monthly total precipitation (in)",
+    color_top = "darkblue",
+    color_other = "lightblue"
+  )
+})
+

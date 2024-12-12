@@ -132,25 +132,33 @@ ui <- dashboardPage(
                       sliderInput(
                         inputId = "year_range",
                         label = "Select Year Range:",
-                        min = min(highest_mean_monthly_temps$year),
-                        max = max(highest_mean_monthly_temps$year),
-                        value = c(min(highest_mean_monthly_temps$year), max(highest_mean_monthly_temps$year)),
+                        min = min(shiny.monthly.records$year),
+                        max = max(shiny.monthly.records$year),
+                        value = c(min(shiny.monthly.records$year), max(shiny.monthly.records$year)),
                         sep = "" # Prevent commas in year values
                       )
                     )
                   ),
                   
-                  # Plot output
+                  # max temp record plot output
                   fluidRow(
                     column(
                       width = 12,
-                      plotlyOutput("highestTempsPlot", height = "600px")
+                      plotlyOutput("MaxTempRecordsPlot", height = "600px")
                     )
-                  )
+                  ),
+                  
+                  # min temp records plot output
+                  fluidRow(
+                    column(
+                      width = 12,
+                      plotlyOutput("MinTempRecordsPlot", height = "600px")
+
                 )
               )
-              )
-      ),
+            )
+          )
+        ),
       
       # Tab for interactive precipitation plots
       tabItem(tabName = "precip",
@@ -223,8 +231,34 @@ ui <- dashboardPage(
                     )
                   ),
                   
-                )
-              )
+                ),
+                
+              #   tabPanel(
+              #     "Precipitation Records and Extremes",
+              #     
+              #     # Add slider for year range
+              #     fluidRow(
+              #       column(
+              #         width = 4,
+              #         sliderInput(
+              #           inputId = "year_range",
+              #           label = "Select Year Range:",
+              #           min = min(shiny.monthly.precip.records$year),
+              #           max = max(shiny.monthly.precip.records$year),
+              #           value = c(min(shiny.monthly.precip.records$year), max(shiny.monthly.precip.records$year)),
+              #           sep = "" # Prevent commas in year values
+              #         )
+              #       )
+              #     ),
+              #     
+              #     # max temp record plot output
+              #     fluidRow(
+              #       column(
+              #         width = 12,
+              #         plotlyOutput("MaxPrecipRecordsPlot", height = "600px")
+              #       )
+              #     ),
+              # ),
       ),
       
       # Tab for interactive sea level plots
@@ -234,4 +268,6 @@ ui <- dashboardPage(
       )
     )
   )
+ )
+)
 

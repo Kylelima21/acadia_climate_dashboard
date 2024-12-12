@@ -380,6 +380,277 @@ server <- function(input, output) {
     )
   })
   
+  #-----------------------#
+  ####  Records Plots  ####
+  #-----------------------# 
+  
+  # function for record highs
+  
+  create_record_plot <- function(data, 
+                                 date_col1,     # Date column for first variable
+                                 date_col2,     # Date column for second variable
+                                 value_col1,    # First value column to plot
+                                 value_col2,    # Second value column to plot
+                                 min_year,      # Minimum year for filtering
+                                 max_year,      # Maximum year for filtering
+                                 top_n = 10,    # Number of top records to highlight
+                                 y_label = "",  # Y-axis label
+                                 color_top1 = "black",     # Color for top records (var1)
+                                 color_other1 = "grey",    # Color for other records (var1)
+                                 color_top2 = "darkred",    # Color for top records (var2)
+                                 color_other2 = "orange") { # Color for other records (var2)
+    
+    # Filter and prepare data for both variables
+    filtered_data <- data %>%
+      filter(year >= min_year & year <= max_year)
+    
+    # Process first variable
+    data1 <- filtered_data %>%
+      arrange(desc(.data[[value_col1]])) %>%
+      mutate(
+        highlight1 = ifelse(row_number() <= top_n, paste("Top", top_n, "Highest Monthly Mean Temp"), "Highest Monthly Mean Temp"),
+        date1 = as.Date(.data[[date_col1]])
+      )
+    
+    # Process second variable
+    data2 <- filtered_data %>%
+      arrange(desc(.data[[value_col2]])) %>%
+      mutate(
+        highlight2 = ifelse(row_number() <= top_n, paste("Top", top_n, "Highest Monthly Max Temp"), "Highest Monthly Max Temp"),
+        date2 = as.Date(.data[[date_col2]])
+      )
+    
+    # Get date range for x-axis
+    min_date <- min(c(data1$date1, data2$date2))
+    max_date <- max(c(data1$date1, data2$date2))
+    
+    # Create the ggplot
+    p <- ggplot() +
+      # First variable
+      geom_segment(
+        data = data1,
+        aes(x = date1, xend = date1,
+            y = min(.data[[value_col1]]), 
+            yend = .data[[value_col1]],
+            color = highlight1),
+        linetype = "solid", 
+        alpha = 0.6
+      ) +
+      geom_point(
+        data = data1,
+        aes(x = date1, 
+            y = .data[[value_col1]],
+            color = highlight1),
+        size = 3
+      ) +
+      # Second variable
+      geom_segment(
+        data = data2,
+        aes(x = date2, xend = date2,
+            y = min(.data[[value_col2]]), 
+            yend = .data[[value_col2]],
+            color = highlight2),
+        linetype = "solid", 
+        alpha = 0.6
+      ) +
+      geom_point(
+        data = data2,
+        aes(x = date2, 
+            y = .data[[value_col2]],
+            color = highlight2),
+        size = 3
+      ) +
+      scale_color_manual(
+        values = c(
+          setNames(color_top1, paste("Top", top_n, "Highest Monthly Mean Temp")),
+          setNames(color_other1, "Highest Monthly Mean Temp"),
+          setNames(color_top2, paste("Top", top_n, "Highest Monthly Max Temp")),
+          setNames(color_other2, "Highest Monthly Max Temp")
+        ),
+        name = "Records"
+      ) +
+      scale_x_date(
+        breaks = seq(
+          from = min_date, 
+          to = max_date, 
+          by = "10 years"
+        ),
+        labels = scales::date_format("%Y")
+      ) +
+      labs(
+        x = "Year",
+        y = y_label
+      ) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(face = "bold", size = 16),
+        plot.subtitle = element_text(size = 12),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "bottom"
+      )
+    
+    # Convert to plotly
+    ggplotly(p)
+  }
+  
+  # max temp record plot output
+  output$MaxTempRecordsPlot <- renderPlotly({
+    create_record_plot(
+      data = shiny.monthly.records,
+      date_col1 = "tmean.max.ym",    
+      date_col2 = "tmax.max.ym",    
+      value_col1 = "tmean.max",
+      value_col2 = "tmax.max",
+      min_year = input$year_range[1],
+      max_year = input$year_range[2],
+      top_n = 10,
+      y_label = "Monthly average temperature (°C)",
+      color_top1 = "black",
+      color_other1 = "grey",
+      color_top2 = "darkred",
+      color_other2 = "orange"
+    )
+  })
+  
+  # plot for precip records??
+  
+  
+  # function for record lows
+  
+  record_lows <- function(data, 
+                                 date_col1,     
+                                 date_col2,     
+                                 value_col1,    
+                                 value_col2,    
+                                 min_year,      
+                                 max_year,      
+                                 top_n = 10,    
+                                 y_label = "",  
+                                 color_top1 = "black",     
+                                 color_other1 = "grey",    
+                                 color_top2 = "darkblue",    
+                                 color_other2 = "lightblue") { 
+    
+    # Filter and prepare data for both variables
+    filtered_data <- data %>%
+      filter(year >= min_year & year <= max_year)
+    
+    # Get the maximum value to start the lines from
+    max_value <- max(c(filtered_data[[value_col1]], filtered_data[[value_col2]]))
+    
+    # Process first variable
+    tmean.min <- filtered_data %>%
+      arrange(.data[[value_col1]]) %>%   
+      mutate(
+        highlight1 = ifelse(row_number() <= top_n, 
+                            paste("Top", top_n, "Lowest Monthly Mean Temp"), 
+                            "Lowest Monthly Mean Temp"),
+        tmean.min = as.Date(.data[[date_col1]])
+      )
+    
+    # Process second variable
+    tmin.min <- filtered_data %>%
+      arrange(.data[[value_col2]]) %>%   
+      mutate(
+        highlight2 = ifelse(row_number() <= top_n, 
+                            paste("Top", top_n, "Lowest Monthly Min Temp"), 
+                            "Lowest Monthly Min Temp"),
+        tmin.min = as.Date(.data[[date_col2]])
+      )
+    
+    # Get date range for x-axis
+    min_date <- min(c(tmean.min$tmean.min, tmin.min$tmin.min))
+    max_date <- max(c(tmean.min$tmean.min, tmin.min$tmin.min))
+    
+    # Create the ggplot
+    p <- ggplot() +
+      # First variable - lines now drop from the top
+      geom_segment(
+        data = tmean.min,
+        aes(x = tmean.min, xend = tmean.min,
+            y = max_value,  # Changed to start from max_value
+            yend = .data[[value_col1]],
+            color = highlight1),
+        linetype = "solid", 
+        alpha = 0.6
+      ) +
+      geom_point(
+        data = tmean.min,
+        aes(x = tmean.min, 
+            y = .data[[value_col1]],
+            color = highlight1),
+        size = 3
+      ) +
+      # Second variable - lines now drop from the top
+      geom_segment(
+        data = tmin.min,
+        aes(x = tmin.min, xend = tmin.min,
+            y = max_value,  # Changed to start from max_value
+            yend = .data[[value_col2]],
+            color = highlight2),
+        linetype = "solid", 
+        alpha = 0.6
+      ) +
+      geom_point(
+        data = tmin.min,
+        aes(x = tmin.min, 
+            y = .data[[value_col2]],
+            color = highlight2),
+        size = 3
+      ) +
+      scale_color_manual(
+        values = c(
+          setNames(color_top1, paste("Top", top_n, "Lowest Monthly Mean Temp")),
+          setNames(color_other1, "Lowest Monthly Mean Temp"),
+          setNames(color_top2, paste("Top", top_n, "Lowest Monthly Min Temp")),
+          setNames(color_other2, "Lowest Monthly Min Temp")
+        ),
+        name = "Records"
+      ) +
+      scale_x_date(
+        breaks = seq(
+          from = min_date, 
+          to = max_date, 
+          by = "10 years"
+        ),
+        labels = scales::date_format("%Y")
+      ) +
+      labs(
+        x = "Year",
+        y = y_label
+      ) +
+      theme_minimal() +
+      theme(
+        plot.title = element_text(face = "bold", size = 16),
+        plot.subtitle = element_text(size = 12),
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        legend.position = "bottom"
+      )
+    
+    # Convert to plotly
+    ggplotly(p)
+  }
+  
+  # min temp record plot output
+  output$MinTempRecordsPlot <- renderPlotly({
+    record_lows(
+      data = shiny.monthly.records,
+      date_col1 = "tmean.min.ym",    
+      date_col2 = "tmin.min.ym",     
+      value_col1 = "tmean.min",      
+      value_col2 = "tmin.min",       
+      min_year = input$year_range[1],
+      max_year = input$year_range[2],
+      top_n = 10,
+      y_label = "Monthly average temperature (°C)",
+      color_top1 = "black",
+      color_other1 = "grey",
+      color_top2 = "darkblue",       
+      color_other2 = "lightblue"     
+    )
+  })
+
+  
 }
 
 #### shinyApp function (fuse ui and server)
