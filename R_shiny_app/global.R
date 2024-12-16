@@ -29,3 +29,5 @@ shiny.merged.precip.anom <- read.csv("data/processed_data/shiny_merged_precip_an
 
 shiny.monthly.records <- read.csv("data/processed_data/shiny_monthly_records.csv")
 
+shiny.monthly.precip.records <- read.csv("data/processed_data/shiny_monthly_precip_records.csv")
+

@@ -441,7 +441,7 @@ server <- function(input, output) {
         aes(x = date1, 
             y = .data[[value_col1]],
             color = highlight1),
-        size = 3
+        size = 2
       ) +
       # Second variable
       geom_segment(
@@ -458,7 +458,7 @@ server <- function(input, output) {
         aes(x = date2, 
             y = .data[[value_col2]],
             color = highlight2),
-        size = 3
+        size = 2
       ) +
       scale_color_manual(
         values = c(
@@ -512,8 +512,24 @@ server <- function(input, output) {
     )
   })
   
-  # plot for precip records??
-  
+  # max precip record plot output
+  output$MaxPrecipRecordsPlot <- renderPlotly({
+    create_record_plot(
+      data = shiny.monthly.precip.records,
+      date_col1 = "ppt.max.ym",    
+      date_col2 = NULL,    
+      value_col1 = "ppt.max",
+      value_col2 = NULL,
+      min_year = input$year_range[1],
+      max_year = input$year_range[2],
+      top_n = 10,
+      y_label = "Monthly average temperature (°C)",
+      color_top1 = "black",
+      color_other1 = "grey",
+      color_top2 = NULL,
+      color_other2 = NULL
+    )
+  })
   
   # function for record lows
   
@@ -535,8 +551,8 @@ server <- function(input, output) {
     filtered_data <- data %>%
       filter(year >= min_year & year <= max_year)
     
-    # Get the maximum value to start the lines from
-    max_value <- max(c(filtered_data[[value_col1]], filtered_data[[value_col2]]))
+    # # Get the maximum value to start the lines from
+    # max_value <- max(c(filtered_data[[value_col1]], filtered_data[[value_col2]]))
     
     # Process first variable
     tmean.min <- filtered_data %>%
@@ -545,7 +561,7 @@ server <- function(input, output) {
         highlight1 = ifelse(row_number() <= top_n, 
                             paste("Top", top_n, "Lowest Monthly Mean Temp"), 
                             "Lowest Monthly Mean Temp"),
-        tmean.min = as.Date(.data[[date_col1]])
+        date.tmean.min = as.Date(.data[[date_col1]])
       )
     
     # Process second variable
@@ -555,20 +571,20 @@ server <- function(input, output) {
         highlight2 = ifelse(row_number() <= top_n, 
                             paste("Top", top_n, "Lowest Monthly Min Temp"), 
                             "Lowest Monthly Min Temp"),
-        tmin.min = as.Date(.data[[date_col2]])
+        date.tmin.min = as.Date(.data[[date_col2]])
       )
     
     # Get date range for x-axis
-    min_date <- min(c(tmean.min$tmean.min, tmin.min$tmin.min))
-    max_date <- max(c(tmean.min$tmean.min, tmin.min$tmin.min))
+    min_date <- min(c(tmean.min$date.tmean.min, tmin.min$date.tmin.min))
+    max_date <- max(c(tmean.min$date.tmean.min, tmin.min$date.tmin.min))
     
     # Create the ggplot
     p <- ggplot() +
       # First variable - lines now drop from the top
       geom_segment(
         data = tmean.min,
-        aes(x = tmean.min, xend = tmean.min,
-            y = max_value,  # Changed to start from max_value
+        aes(x = date.tmean.min, xend = date.tmean.min,
+            y = max(.data[[value_col1]]),  
             yend = .data[[value_col1]],
             color = highlight1),
         linetype = "solid", 
@@ -576,16 +592,16 @@ server <- function(input, output) {
       ) +
       geom_point(
         data = tmean.min,
-        aes(x = tmean.min, 
+        aes(x = date.tmean.min, 
             y = .data[[value_col1]],
             color = highlight1),
-        size = 3
+        size = 2
       ) +
       # Second variable - lines now drop from the top
       geom_segment(
         data = tmin.min,
-        aes(x = tmin.min, xend = tmin.min,
-            y = max_value,  # Changed to start from max_value
+        aes(x = date.tmin.min, xend = date.tmin.min,
+            y = max(.data[[value_col2]]),  
             yend = .data[[value_col2]],
             color = highlight2),
         linetype = "solid", 
@@ -593,10 +609,10 @@ server <- function(input, output) {
       ) +
       geom_point(
         data = tmin.min,
-        aes(x = tmin.min, 
+        aes(x = date.tmin.min, 
             y = .data[[value_col2]],
             color = highlight2),
-        size = 3
+        size = 2
       ) +
       scale_color_manual(
         values = c(

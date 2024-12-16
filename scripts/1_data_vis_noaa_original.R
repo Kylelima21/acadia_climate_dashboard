@@ -635,15 +635,11 @@ lowest_monthly_precip <- monthly.noaa.data %>%
          ppt.min.ym = year.month)
 
 #combined data table for R shiny app
-shiny.monthly.records <- highest_mean_monthly_temps %>%
-  left_join(highest_max_monthly_temps, by = c("year", "UnitCode", "long", "lat")) %>%
-  left_join(lowest_mean_monthly_temps, by = c("year", "UnitCode", "long", "lat")) %>%
-  left_join(lowest_min_monthly_temps, by = c("year", "UnitCode", "long", "lat")) %>%
-  left_join(highest_monthly_precip, by = c("year", "UnitCode", "long", "lat")) %>%
+shiny.monthly.precip.records <- highest_monthly_precip %>%
   left_join(lowest_monthly_precip, by = c("year", "UnitCode", "long", "lat")) 
 
 ##save outputs as csv
-# write.csv(shiny.monthly.records, "data/processed_data/shiny_monthly_records.csv", row.names = FALSE)
+#write.csv(shiny.monthly.precip.records, "data/processed_data/shiny_monthly_precip_records.csv", row.names = FALSE)
 
 #### Precipitation trends over time ---------------------------------
 
