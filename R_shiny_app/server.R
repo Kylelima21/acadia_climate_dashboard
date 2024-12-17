@@ -74,7 +74,9 @@ server <- function(input, output) {
 
   # Reactive for linear models
   temp_models <- reactive({
-    data <- temperature_data()
+    data <- temperature_data() %>%
+      filter(Year >= input$year_range_temp[1], Year <= input$year_range_temp[2])
+    
     list(
       noaa_avg = if ("lm_noaa_temp" %in% input$linesToShow) 
         lm(`NOAA Average Temp` ~ Year, data = data),
@@ -89,7 +91,9 @@ server <- function(input, output) {
   
   # Reactive for precipitation models
   precip_models <- reactive({
-    data <- precipitation_data()
+    data <- precipitation_data() %>%
+      filter(Year >= input$year_range_precip[1], Year <= input$year_range_precip[2])
+    
     list(
       noaa_precip = if ("lm_noaa_precip" %in% input$linesToShowPrecip) 
         lm(`NOAA Precip` ~ Year, data = data),
@@ -252,13 +256,40 @@ server <- function(input, output) {
       )
   })
   
+  
+    # Temp model summaries -----------------------------------------
+
+    output$noaa_temp_model_summary <- renderPrint({
+      req("lm_noaa_temp" %in% input$linesToShow)
+      summary(temp_models()$noaa_avg)
+    })
+    
+    output$noaa_max_temp_model_summary <- renderPrint({
+      req("lm_noaa_max_temp" %in% input$linesToShow)
+      summary(temp_models()$noaa_max)
+    })
+    
+    output$noaa_min_temp_model_summary <- renderPrint({
+      req("lm_noaa_min_temp" %in% input$linesToShow)
+      summary(temp_models()$noaa_min)
+    })
+    
+    output$mcfarland_temp_model_summary <- renderPrint({
+      req("lm_mcfarland_temp" %in% input$linesToShow)
+      summary(temp_models()$mcfarland)
+    })
+  
   # Precipitation plot output ----------------------------------------
   output$PrecipPlot <- renderPlotly({
     data <- precipitation_data()
     models <- precip_models()
     
-    p2 <- ggplot(data, aes(x = Year)) +
-      scale_x_continuous(breaks = pretty(data$Year)) +
+    # Filter data based on year range from slider
+    filtered_data <- data %>%
+      filter(Year >= input$year_range_precip[1], Year <= input$year_range_precip[2])
+    
+    p2 <- ggplot(filtered_data, aes(x = Year)) +
+      scale_x_continuous(breaks = pretty(filtered_data$Year)) +
       labs(title = "Total Precipitation (1895-2024)",
            x = "Year",
            y = "Total Precipitation (in)") +
@@ -308,6 +339,18 @@ server <- function(input, output) {
       xaxis = list(hoverformat = "%Y")
     )
   })
+    
+    # Precip model summaries -----------------------------------------
+    
+    output$noaa_precip_model_summary <- renderPrint({
+      req("lm_noaa_precip" %in% input$linesToShowPrecip)
+      summary(precip_models()$noaa_precip)
+    })
+    
+    output$mcfarland_precip_model_summary <- renderPrint({
+      req("lm_mcfarland_precip" %in% input$linesToShowPrecip)
+      summary(precip_models()$mcfarland_precip)
+    })
 
 
   #-----------------------#
@@ -561,7 +604,7 @@ server <- function(input, output) {
   # function for record lows
   
   record_lows <- function(data, 
-                                 date_col1,     # Date column for first variable
+                                 date_col1,     
                                  date_col2 = NULL, # Date column for second variable (optional)
                                  value_col1,    # First value column to plot
                                  value_col2 = NULL, # Second value column to plot (optional)
@@ -685,7 +728,7 @@ server <- function(input, output) {
     ggplotly(p)
   }
   
-  # max temp record plot output
+  # min temp record plot output
   output$MinTempRecordsPlot <- renderPlotly({
     record_lows(
       data = shiny.monthly.records,
@@ -708,7 +751,7 @@ server <- function(input, output) {
     )
   })
   
-  # max precip record plot output
+  # min precip record plot output
   output$MinPrecipRecordsPlot <- renderPlotly({
     record_lows(
       data = shiny.monthly.precip.records,

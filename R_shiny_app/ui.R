@@ -77,9 +77,9 @@ ui <- dashboardPage(
                           sliderInput(
                             inputId = "year_range_temp",
                             label = "Select Year Range:",
-                            min = min(shiny.monthly.records$year),
-                            max = max(shiny.monthly.records$year),
-                            value = c(min(shiny.monthly.records$year), max(shiny.monthly.records$year)),
+                            min = min(shiny.merged.temp$year),
+                            max = max(shiny.merged.temp$year),
+                            value = c(min(shiny.merged.temp$year), max(shiny.merged.temp$year)),
                             sep = ""
                         )
                       )
@@ -96,8 +96,50 @@ ui <- dashboardPage(
                         plotlyOutput("myInteractivePlot", height = "600px")
                       )
                     )
+                  ),
+                  
+                  # fluidRow for model statistics
+                  fluidRow(
+                    column(
+                      width = 12,
+                      box(
+                        title = "Model Statistics",
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        
+                        # NOAA Average Temperature model stats
+                        conditionalPanel(
+                          condition = "input.linesToShow.includes('lm_noaa_temp')",
+                          h4("NOAA Average Temperature Model"),
+                          verbatimTextOutput("noaa_temp_model_summary")
+                        ),
+                        
+                        # NOAA Maximum Temperature model stats
+                        conditionalPanel(
+                          condition = "input.linesToShow.includes('lm_noaa_max_temp')",
+                          h4("NOAA Maximum Temperature Model"),
+                          verbatimTextOutput("noaa_max_temp_model_summary")
+                        ),
+                        
+                        # NOAA Minimum Temperature model stats
+                        conditionalPanel(
+                          condition = "input.linesToShow.includes('lm_noaa_min_temp')",
+                          h4("NOAA Minimum Temperature Model"),
+                          verbatimTextOutput("noaa_min_temp_model_summary")
+                        ),
+                        
+                        # McFarland Temperature model stats
+                        conditionalPanel(
+                          condition = "input.linesToShow.includes('lm_mcfarland_temp')",
+                          h4("McFarland Temperature Model"),
+                          verbatimTextOutput("mcfarland_temp_model_summary")
+                        )
+                      )
+                    )
                   )
                 ),
+                  
                 
                 tabPanel(
                   "Temperature Anomalies", 
@@ -181,18 +223,28 @@ ui <- dashboardPage(
                     column(
                       width = 4,
                       box(
-                        title = "Select Precipitation Data to Display:",
+                        title = "Precipitation Data Adjustments",
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
                         checkboxGroupInput(
                           inputId = "linesToShowPrecip",
-                          label = NULL,
+                          label = "Select Precipitation Data to Display:",
                           choices = c("NOAA Total Precip." = "NOAA Precip",
                                       "McFarland Total Precip." = "McFarland Precip",
                                       "Linear Model for NOAA Precip" = "lm_noaa_precip",
                                       "Linear Model for McFarland Precip" = "lm_mcfarland_precip"),
                           selected = c("NOAA Precip", "McFarland Precip")
+                        ),
+                      
+                      # Add slider for year range
+                      sliderInput(
+                        inputId = "year_range_precip",
+                        label = "Select Year Range:",
+                        min = min(shiny.merged.precip$year),
+                        max = max(shiny.merged.precip$year),
+                        value = c(min(shiny.merged.precip$year), max(shiny.merged.precip$year)),
+                        sep = ""
                         )
                       )
                     ),
@@ -207,8 +259,36 @@ ui <- dashboardPage(
                         plotlyOutput("PrecipPlot", height = "600px")
                       )
                     )
+                  ),
+                  
+                  # fluidRow for model statistics
+                  fluidRow(
+                    column(
+                      width = 12,
+                      box(
+                        title = "Model Statistics",
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        
+                        # NOAA precipitation model stats
+                        conditionalPanel(
+                          condition = "input.linesToShowPrecip.includes('lm_noaa_precip')",
+                          h4("NOAA Precipitation Model"),
+                          verbatimTextOutput("noaa_precip_model_summary")
+                        ),
+                        
+                        # McFarland precipitation model stats
+                        conditionalPanel(
+                          condition = "input.linesToShowPrecip.includes('lm_mcfarland_precip')",
+                          h4("McFarland Precipitation Model"),
+                          verbatimTextOutput("mcfarland_precip_model_summary")
+                        )
+                      )
+                    )
                   )
                 ),
+
                 
                 tabPanel(
                   "Precipitation Anomalies", 

@@ -1255,3 +1255,23 @@ output$MinTempRecordsPlot <- renderPlotly({
   )
 })
 
+
+
+
+###linear models
+
+# Reactive for linear models
+temp_models <- reactive({
+  data <- temperature_data()
+  list(
+    noaa_avg = if ("lm_noaa_temp" %in% input$linesToShow) 
+      lm(`NOAA Average Temp` ~ Year, data = data),
+    noaa_max = if ("lm_noaa_max_temp" %in% input$linesToShow) 
+      lm(`NOAA Average Max Temp` ~ Year, data = data),
+    noaa_min = if ("lm_noaa_min_temp" %in% input$linesToShow) 
+      lm(`NOAA Average Min Temp` ~ Year, data = data),
+    mcfarland = if ("lm_mcfarland_temp" %in% input$linesToShow) 
+      lm(`McFarland Average Temp` ~ Year, data = data)
+  )
+})
+
