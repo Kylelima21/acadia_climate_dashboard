@@ -53,14 +53,14 @@ ui <- dashboardPage(
                     column(
                       width = 4, 
                       box(
-                        title = "Select Temperature Data to Display:",
+                        title = "Temperature Data Adjustments",
                         status = "primary", 
                         solidHeader = TRUE, 
                         width = 12,
                         # Add checkbox group for line selection
                         checkboxGroupInput(
                           inputId = "linesToShow",
-                          label = NULL,
+                          label = "Select Temperature Data to Display:",
                           choices = c("NOAA Average Temp." = "NOAA Average Temp",
                                       "NOAA Average Maximum Temp." = "NOAA Average Max Temp",
                                       "NOAA Average Minimum Temp." = "NOAA Average Min Temp",
@@ -71,6 +71,16 @@ ui <- dashboardPage(
                                       "Linear Model for McFarland Average Temp" = "lm_mcfarland_temp"
                           ),
                           selected = c("NOAA Average Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp")
+                        ),
+                      
+                      # Add slider for year range
+                          sliderInput(
+                            inputId = "year_range_temp",
+                            label = "Select Year Range:",
+                            min = min(shiny.monthly.records$year),
+                            max = max(shiny.monthly.records$year),
+                            value = c(min(shiny.monthly.records$year), max(shiny.monthly.records$year)),
+                            sep = ""
                         )
                       )
                     ),
@@ -118,7 +128,7 @@ ui <- dashboardPage(
                         plotlyOutput("McFarlandAnomPlot", height = "600px")
                       )
                     )
-                  ),
+                  )
                   
                 ),
                 
@@ -154,11 +164,11 @@ ui <- dashboardPage(
                       width = 12,
                       plotlyOutput("MinTempRecordsPlot", height = "600px")
 
+                    )
+                  )
                 )
               )
-            )
-          )
-        ),
+      ),
       
       # Tab for interactive precipitation plots
       tabItem(tabName = "precip",
@@ -229,7 +239,7 @@ ui <- dashboardPage(
                         plotlyOutput("McFarlandPrecipAnomPlot", height = "600px")
                       )
                     )
-                  ),
+                  )
                   
                 ),
                 
@@ -264,8 +274,9 @@ ui <- dashboardPage(
                       width = 12,
                       plotlyOutput("MinPrecipRecordsPlot", height = "600px")
                     )
-                  ),
-              ),
+                  )
+              )
+            )
       ),
       
       # Tab for interactive sea level plots
@@ -276,5 +287,7 @@ ui <- dashboardPage(
     )
   )
  )
-)
+
+
+
 
