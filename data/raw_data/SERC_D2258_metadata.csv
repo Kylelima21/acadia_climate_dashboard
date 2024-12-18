@@ -1,5 +1,5 @@
 ﻿filename,path,file.type,description
-SERC_D2258_export_20241119,acadia_climate_dashboard/data/raw_data,.csv,Winter Harbor - SERC (Schoodic Institute) weather station data (ID:D2258)
+SERC_D2258_export_20241119,acadia_climate_dashboard/data/raw_data,.csv,Winter Harbor - SERC (Schoodic Institute) weather station data (ID:D2258). Downloaded from: https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=D2258
 ,,,
 column name,description,,
 Station_ID,unique identification code of weather station,,
