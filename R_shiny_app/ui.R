@@ -12,11 +12,11 @@ ui <- dashboardPage(
   
   dashboardHeader(
     title = "Acadia Climate Dashboard",
-    titleWidth = 325
+    titleWidth = 300
   ),
   
   dashboardSidebar(
-    width = 325,
+    width = 300,
     
     # Add sidebar menu with tabs
     sidebarMenu(
@@ -225,11 +225,9 @@ ui <- dashboardPage(
                           "temp_records_display",
                           "Select Temperature Records Data to Display:",
                           choices = c("Maximum Mean Temperature Records" = "mean_max_temp",
-                                      "Maximum Temperature Records" = "max_temp",
-                                      "Minimum Mean Temperature Records" = "mean_min_temp",
-                                      "Minimum Temperature Records" = "min_temp"
+                                      "Maximum Temperature Records" = "max_temp"
                           ),
-                          selected = c("mean_max_temp", "max_temp", "mean_min_temp", "min_temp")
+                          selected = c("mean_max_temp")
                         ),
 
                       sliderInput(
@@ -252,6 +250,35 @@ ui <- dashboardPage(
                         solidHeader = TRUE, 
                         width = 12,
                       plotlyOutput("MaxTempRecordsPlot", height = "600px")
+                  )
+                ),
+                
+                # Column for the checkbox group input
+                column(
+                  width = 4,
+                  box(
+                    title = "Temperature Records Data Adjustments",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    # Add checkbox group for line selection
+                    checkboxGroupInput(
+                      "min_temp_records_display",
+                      "Select Temperature Records Data to Display:",
+                      choices = c("Minimum Mean Temperature Records" = "mean_min_temp",
+                                  "Minimum Temperature Records" = "min_temp"
+                      ),
+                      selected = c("mean_min_temp")
+                    ),
+                    
+                    sliderInput(
+                      inputId = "year_range_records2",
+                      label = "Select Year Range:",
+                      min = min(shiny.monthly.records$year),
+                      max = max(shiny.monthly.records$year),
+                      value = c(min(shiny.monthly.records$year), max(shiny.monthly.records$year)),
+                      sep = "" 
+                    )
                   )
                 ),
                   
@@ -352,6 +379,39 @@ ui <- dashboardPage(
                 tabPanel(
                   "Precipitation Anomalies", 
                   
+                  # Add fluidRow for the checkbox group and plot
+                  fluidRow(
+                    # Column for the checkbox group input
+                    column(
+                      width = 4,
+                      box(
+                        title = "Temperature Anomaly Data Adjustments",
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        # # Add checkbox group for line selection
+                        # checkboxGroupInput(
+                        #   inputId = "linesToShowAnom",
+                        #   label = "Select Temperature Anomaly Data to Display:",
+                        #   choices = c("NOAA Temp Anomaly" = "NOAA Temp Anom",
+                        #               "McFarland Temp Anomaly" = "McFarland Temp Anom"
+                        #   ),
+                        #   selected = c("NOAA Temp Anom", "McFarland Temp Anom")
+                        # ),
+                        
+                        # Add slider for year range
+                        sliderInput(
+                          inputId = "year_range_precip_anom",
+                          label = "Select Year Range:",
+                          min = min(shiny.merged.precip.anom$year),
+                          max = max(shiny.merged.precip.anom$year),
+                          value = c(min(shiny.merged.precip.anom$year), max(shiny.merged.precip.anom$year)),
+                          sep = ""
+                        )
+                      )
+                    )
+                  ),
+                  
                   #NOAA anom plot
                   fluidRow(
                     column(
@@ -408,7 +468,7 @@ ui <- dashboardPage(
                         # ),
 
                       sliderInput(
-                        inputId = "year_range",
+                        inputId = "year_range_precip",
                         label = "Select Year Range:",
                         min = min(shiny.monthly.precip.records$year),
                         max = max(shiny.monthly.precip.records$year),
@@ -422,20 +482,32 @@ ui <- dashboardPage(
                   # max precip record plot output
                   fluidRow(
                     column(
+                    width = 12,
+                    box(
+                      title = "Maximim NOAA Precipitation Records", 
+                      status = "primary", 
+                      solidHeader = TRUE, 
                       width = 12,
                       plotlyOutput("MaxPrecipRecordsPlot", height = "600px")
                     )
-                  ),
+                  )
+                ),
                   # min precip record plot output
                   fluidRow(
                     column(
                       width = 12,
+                      box(
+                        title = "Minimum NOAA Precipitation Records", 
+                        status = "primary", 
+                        solidHeader = TRUE, 
+                        width = 12,
                       plotlyOutput("MinPrecipRecordsPlot", height = "600px")
                     )
                   )
               )
             )
-      ),
+      )
+    ),
       
       # Tab for interactive sea level plots
       tabItem(tabName = "sea",

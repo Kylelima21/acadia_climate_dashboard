@@ -74,6 +74,11 @@ server <- function(input, output) {
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
           "<br>McFarland Precip Anomaly:", round(`McFarland Precip Anom`, 4)
         )
+      ) %>%
+      # Add filter based on slider input
+      filter(
+        Year >= input$year_range_precip_anom[1],
+        Year <= input$year_range_precip_anom[2]
       )
   })
 
@@ -638,15 +643,15 @@ server <- function(input, output) {
       date_col2 = NULL,    
       value_col1 = "ppt.max",
       value_col2 = NULL,
-      min_year = input$year_range_records[1],
-      max_year = input$year_range_records[2],
+      min_year = input$year_range_precip[1],
+      max_year = input$year_range_precip[2],
       top_n = 10,
       y_label = "Monthly precipitation (in)",
       label_highlight1 = "Top 10 Highest Precipitation Records",
       label_other1 = "Highest Precipitation Records",
       color_top1 = "darkblue",
       color_other1 = "lightblue",
-      show_var1 = "max_precip" %in% input$precip_records_display
+      # show_var1 = "max_precip" %in% input$precip_records_display
     )
   })
   
@@ -783,7 +788,13 @@ server <- function(input, output) {
     ggplotly(p) %>%
       layout(
         showlegend = TRUE,
-        legend = list(itemclick = FALSE, itemdoubleclick = FALSE)
+        legend = list(
+          itemclick = FALSE, 
+          itemdoubleclick = FALSE,
+          orientation = "h", 
+          x = 0.5, 
+          y = -0.2,
+          xanchor = "center")
       )
   }
   
@@ -795,8 +806,8 @@ server <- function(input, output) {
       date_col2 = "tmin.min.ym",    
       value_col1 = "tmean.min",
       value_col2 = "tmin.min",
-      min_year = input$year_range_records[1],
-      max_year = input$year_range_records[2],
+      min_year = input$year_range_records2[1],
+      max_year = input$year_range_records2[2],
       top_n = 10,
       y_label = "Monthly average temperature (°C)",
       label_highlight1 = "Top 10 Lowest Mean Temperatures",
@@ -807,8 +818,8 @@ server <- function(input, output) {
       color_other1 = "grey",
       color_top2 = "darkblue",
       color_other2 = "lightblue",
-      show_var1 = "mean_min_temp" %in% input$temp_records_display,
-      show_var2 = "min_temp" %in% input$temp_records_display
+      show_var1 = "mean_min_temp" %in% input$min_temp_records_display,
+      show_var2 = "min_temp" %in% input$min_temp_records_display
     )
   })
   
@@ -820,15 +831,15 @@ server <- function(input, output) {
       date_col2 = NULL,    
       value_col1 = "ppt.min",
       value_col2 = NULL,
-      min_year = input$year_range[1],
-      max_year = input$year_range[2],
+      min_year = input$year_range_precip[1],
+      max_year = input$year_range_precip[2],
       top_n = 10,
       y_label = "Monthly precipitation (in)",
       label_highlight1 = "Top 10 Lowest Precipitation Records",
       label_other1 = "Lowest Precipitation Records",
       color_top1 = "black",
       color_other1 = "grey",
-      show_var1 = "min_precip" %in% input$precip_records_display
+      # show_var1 = "min_precip" %in% input$precip_records_display
     )
   })
   
