@@ -47,6 +47,11 @@ server <- function(input, output) {
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
           "<br>McFarland Temp Anomaly:", round(`McFarland Temp Anom`, 4)
         )
+      )  %>%
+      # Add filter based on slider input
+      filter(
+        Year >= input$year_range_temp_anom[1],
+        Year <= input$year_range_temp_anom[2]
       )
   })
   
@@ -209,18 +214,6 @@ server <- function(input, output) {
         
       }
     }
-    
-    #add mcfarland temp
-    if ("McFarland Average Temp" %in% input$linesToShow) {
-      p <- p + geom_line(aes(x = Year,
-                             y = `McFarland Average Temp`,
-                             color = "McFarland Average Temp."))
-      
-      if (!is.null(models$mcfarland)) {
-        p <- add_model_line(p, models$mcfarland, "McFarland Average Temp")
-        
-      }
-    }
         
     #add noaa min temp
     if ("NOAA Average Min Temp" %in% input$linesToShow) {
@@ -230,6 +223,18 @@ server <- function(input, output) {
           
        if (!is.null(models$noaa_min)) {
          p <- add_model_line(p, models$noaa_min, "NOAA Average Min Temp")
+        
+      }
+    }
+    
+    #add mcfarland temp
+    if ("McFarland Average Temp" %in% input$linesToShow) {
+      p <- p + geom_line(aes(x = Year,
+                             y = `McFarland Average Temp`,
+                             color = "McFarland Average Temp."))
+      
+      if (!is.null(models$mcfarland)) {
+        p <- add_model_line(p, models$mcfarland, "McFarland Average Temp")
         
       }
     }
@@ -247,13 +252,14 @@ server <- function(input, output) {
     
     # Convert to plotly and customize hover text
     temp_plt <- ggplotly(p) %>%
-      layout(hovermode = "x unified") %>%
-      customize_hover_text(units = "°C") %>%
       layout(
+        showlegend = TRUE, 
+        legend = list(itemclick = FALSE, itemdoubleclick = FALSE),
         hovermode = "x unified",
         hoverlabel = list(bgcolor = "white"),
         xaxis = list(hoverformat = "%Y")
-      )
+      ) %>%
+      customize_hover_text(units = "°C") 
   })
   
   
@@ -331,13 +337,14 @@ server <- function(input, output) {
   
   # Convert to plotly and customize hover text
   precip_plt <- ggplotly(p2) %>%
-    layout(hovermode = "x unified") %>%
-    customize_hover_text(units = "in") %>%
     layout(
+      showlegend = TRUE,
+      legend = list(itemclick = FALSE, itemdoubleclick = FALSE),
       hovermode = "x unified",
       hoverlabel = list(bgcolor = "white"),
       xaxis = list(hoverformat = "%Y")
-    )
+    ) %>%
+    customize_hover_text(units = "in")
   })
     
     # Precip model summaries -----------------------------------------
@@ -356,13 +363,18 @@ server <- function(input, output) {
   #-----------------------#
   ####  Anomaly Plots  ####
   #-----------------------#  
-  
+    
   #create anomaly plot function
   create_anomaly_plot <- function(data, 
                                   x_col = "Year-Month", 
                                   y_col = "NOAA Temp Anom", 
                                   hover_text_col = "noaa_hover_text",
-                                  legend_title = "Anomaly Data") {
+                                  legend_title = "Anomaly Data",
+                                  break_interval = "10 years") {
+    
+    # Get date range for x-axis
+    min_date <- min(data[[x_col]], na.rm = TRUE)
+    max_date <- max(data[[x_col]], na.rm = TRUE)
     
     p <- ggplot(data, aes(x = .data[[x_col]])) +
       geom_bar(aes(
@@ -378,9 +390,24 @@ server <- function(input, output) {
                    "Baseline" = "black"),
         name = legend_title) +
       geom_hline(yintercept = 0, color = "black") +
+      scale_x_date(
+        breaks = scales::breaks_width(break_interval),  
+        labels = scales::date_format("%Y")
+      )  +
+      xlab("Year") +
       theme_minimal()
     
-    ggplotly(p, tooltip = "text")
+    # Convert to plotly and disable legend clicking
+    ggplotly(p, tooltip = "text") %>%
+      layout(
+        showlegend = TRUE,
+        legend = list(
+          itemclick = FALSE, 
+          itemdoubleclick = FALSE),
+        hovermode = "x unified",
+        hoverlabel = list(bgcolor = "white"),
+        xaxis = list(title = "Year")
+      )
   }
   
 #create anomaly plots
@@ -391,7 +418,8 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "NOAA Temp Anom",
       hover_text_col = "noaa_hover_text",
-      legend_title = "NOAA Anomaly Data"
+      legend_title = "NOAA Temp Anomaly Data",
+      break_interval = "10 years"
     )
   })
   
@@ -402,7 +430,8 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "McFarland Temp Anom",
       hover_text_col = "mcfarland_hover_text",
-      legend_title = "McFarland Anomaly Data"
+      legend_title = "McFarland Temp Anomaly Data",
+      break_interval = "5 years"
     )
   })
   
@@ -413,7 +442,8 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "NOAA Precip Anom",
       hover_text_col = "noaa_precip_hover_text",
-      legend_title = "NOAA Precipitation Anomaly Data"
+      legend_title = "NOAA Precip Anomaly Data",
+      break_interval = "10 years"
     )
   })
   
@@ -424,7 +454,8 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "McFarland Precip Anom",
       hover_text_col = "mcfarland_precip_hover_text",
-      legend_title = "McFarland Precipitation Anomaly Data"
+      legend_title = "McFarland Precip Anomaly Data",
+      break_interval = "5 years"
     )
   })
   
@@ -450,7 +481,9 @@ server <- function(input, output) {
                                  color_top1 = "black",     # Color for top records (var1)
                                  color_other1 = "grey",    # Color for other records (var1)
                                  color_top2 = "darkred",    # Color for top records (var2, optional)
-                                 color_other2 = "orange") { # Color for other records (var2, optional)
+                                 color_other2 = "orange",
+                                 show_var1 = TRUE,
+                                 show_var2 = TRUE) { # Color for other records (var2, optional)
     
     # Filter data based on year range
     filtered_data <- data %>%
@@ -484,9 +517,12 @@ server <- function(input, output) {
     }
     
     # Create ggplot object
-    p <- ggplot() +
+    p <- ggplot() 
+    
       # First variable
-      geom_segment(
+    if (show_var1){
+      p <- p +
+    geom_segment(
         data = data1,
         aes(x = date1, xend = date1,
             y = min(.data[[value_col1]], na.rm = TRUE), 
@@ -502,9 +538,9 @@ server <- function(input, output) {
             color = highlight1),
         size = 2
       )
-    
+    } 
     # Add second variable if provided
-    if (!is.null(date_col2) && !is.null(value_col2)) {
+    if (!is.null(date_col2) && !is.null(value_col2) && show_var2) {
       p <- p +
         geom_segment(
           data = data2,
@@ -555,8 +591,18 @@ server <- function(input, output) {
         legend.position = "bottom"
       )
     
-    # Convert to plotly
-    ggplotly(p)
+    # Convert to plotly and disable legend clicking
+    ggplotly(p) %>%
+      layout(
+        showlegend = TRUE,
+        legend = list(
+          itemclick = FALSE, 
+          itemdoubleclick = FALSE,
+          orientation = "h", 
+          x = 0.5, 
+          y = -0.2,
+          xanchor = "center")
+      )
   }
   
   # max temp record plot output
@@ -567,8 +613,8 @@ server <- function(input, output) {
       date_col2 = "tmax.max.ym",    
       value_col1 = "tmean.max",
       value_col2 = "tmax.max",
-      min_year = input$year_range[1],
-      max_year = input$year_range[2],
+      min_year = input$year_range_records[1],
+      max_year = input$year_range_records[2],
       top_n = 10,
       y_label = "Monthly average temperature (°C)",
       label_highlight1 = "Top 10 Highest Mean Temperatures",
@@ -578,7 +624,9 @@ server <- function(input, output) {
       color_top1 = "black",
       color_other1 = "grey",
       color_top2 = "darkred",
-      color_other2 = "orange"
+      color_other2 = "orange",
+      show_var1 = "mean_max_temp" %in% input$temp_records_display,
+      show_var2 = "max_temp" %in% input$temp_records_display
     )
   })
   
@@ -590,14 +638,15 @@ server <- function(input, output) {
       date_col2 = NULL,    
       value_col1 = "ppt.max",
       value_col2 = NULL,
-      min_year = input$year_range[1],
-      max_year = input$year_range[2],
+      min_year = input$year_range_records[1],
+      max_year = input$year_range_records[2],
       top_n = 10,
       y_label = "Monthly precipitation (in)",
       label_highlight1 = "Top 10 Highest Precipitation Records",
       label_other1 = "Highest Precipitation Records",
       color_top1 = "darkblue",
-      color_other1 = "lightblue"
+      color_other1 = "lightblue",
+      show_var1 = "max_precip" %in% input$precip_records_display
     )
   })
   
@@ -619,7 +668,9 @@ server <- function(input, output) {
                                  color_top1 = "black",     # Color for top records (var1)
                                  color_other1 = "grey",    # Color for other records (var1)
                                  color_top2 = "darkblue",    # Color for top records (var2, optional)
-                                 color_other2 = "light blue") { # Color for other records (var2, optional)
+                                 color_other2 = "light blue",
+                                 show_var1 = TRUE,
+                                 show_var2 = TRUE) { 
     
     # Filter data based on year range
     filtered_data <- data %>%
@@ -653,8 +704,11 @@ server <- function(input, output) {
     }
     
     # Create ggplot object
-    p <- ggplot() +
-      # First variable
+    p <- ggplot() 
+    
+    # First variable
+    if (show_var1){
+      p <- p +
       geom_segment(
         data = tmean.min,
         aes(x = date.tmean.min, xend = date.tmean.min,
@@ -671,9 +725,10 @@ server <- function(input, output) {
             color = highlight1),
         size = 2
       )
+    }
     
     # Add second variable if provided
-    if (!is.null(date_col2) && !is.null(value_col2)) {
+    if (!is.null(date_col2) && !is.null(value_col2) && show_var2) {
       p <- p +
         geom_segment(
           data = tmin.min,
@@ -724,8 +779,12 @@ server <- function(input, output) {
         legend.position = "bottom"
       )
     
-    # Convert to plotly
-    ggplotly(p)
+    # Convert to plotly and disable legend clicking
+    ggplotly(p) %>%
+      layout(
+        showlegend = TRUE,
+        legend = list(itemclick = FALSE, itemdoubleclick = FALSE)
+      )
   }
   
   # min temp record plot output
@@ -736,8 +795,8 @@ server <- function(input, output) {
       date_col2 = "tmin.min.ym",    
       value_col1 = "tmean.min",
       value_col2 = "tmin.min",
-      min_year = input$year_range[1],
-      max_year = input$year_range[2],
+      min_year = input$year_range_records[1],
+      max_year = input$year_range_records[2],
       top_n = 10,
       y_label = "Monthly average temperature (°C)",
       label_highlight1 = "Top 10 Lowest Mean Temperatures",
@@ -747,7 +806,9 @@ server <- function(input, output) {
       color_top1 = "black",
       color_other1 = "grey",
       color_top2 = "darkblue",
-      color_other2 = "lightblue"
+      color_other2 = "lightblue",
+      show_var1 = "mean_min_temp" %in% input$temp_records_display,
+      show_var2 = "min_temp" %in% input$temp_records_display
     )
   })
   
@@ -766,7 +827,8 @@ server <- function(input, output) {
       label_highlight1 = "Top 10 Lowest Precipitation Records",
       label_other1 = "Lowest Precipitation Records",
       color_top1 = "black",
-      color_other1 = "grey"
+      color_other1 = "grey",
+      show_var1 = "min_precip" %in% input$precip_records_display
     )
   })
   
