@@ -1275,3 +1275,97 @@ temp_models <- reactive({
   )
 })
 
+
+
+####ui component temp records plots ####
+
+tabPanel(
+  "Temperature Records and Extremes",
+  
+  # Add fluidRow for the checkbox group and plot
+  fluidRow(
+    # Column for the checkbox group input
+    column(
+      width = 4,
+      box(
+        title = "Data Tools",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        # Add checkbox group for line selection
+        checkboxGroupInput(
+          "temp_records_display",
+          "Select Temperature Records Data to Display:",
+          choices = c("Maximum Mean Temperature Records" = "mean_max_temp",
+                      "Maximum Temperature Records" = "max_temp"
+          ),
+          selected = c("mean_max_temp")
+        ),
+        
+        sliderInput(
+          inputId = "year_range_records",
+          label = "Select Year Range:",
+          min = min(shiny.monthly.records$year),
+          max = max(shiny.monthly.records$year),
+          value = c(min(shiny.monthly.records$year), max(shiny.monthly.records$year)),
+          sep = "" # Prevent commas in year values
+        )
+      )
+    ),
+    
+    # max temp record plot output
+    column(
+      width = 8,
+      box(
+        title = "Maximum NOAA Temperature Records", 
+        status = "primary", 
+        solidHeader = TRUE, 
+        width = 12,
+        plotlyOutput("MaxTempRecordsPlot", height = "600px")
+      )
+    ),
+    
+    # Column for the checkbox group input
+    column(
+      width = 4,
+      box(
+        title = "Data Tools",
+        status = "primary",
+        solidHeader = TRUE,
+        width = 12,
+        # Add checkbox group for line selection
+        checkboxGroupInput(
+          "min_temp_records_display",
+          "Select Temperature Records Data to Display:",
+          choices = c("Minimum Mean Temperature Records" = "mean_min_temp",
+                      "Minimum Temperature Records" = "min_temp"
+          ),
+          selected = c("mean_min_temp")
+        ),
+        
+        sliderInput(
+          inputId = "year_range_records2",
+          label = "Select Year Range:",
+          min = min(shiny.monthly.records$year),
+          max = max(shiny.monthly.records$year),
+          value = c(min(shiny.monthly.records$year), max(shiny.monthly.records$year)),
+          sep = "" 
+        )
+      )
+    ),
+    
+    # min temp records plot output
+    column(
+      width = 8,
+      box(
+        title = "Minimum NOAA Temperature Records", 
+        status = "primary", 
+        solidHeader = TRUE, 
+        width = 12,
+        plotlyOutput("MinTempRecordsPlot", height = "600px")
+      )
+    )
+  )
+)
+)
+),

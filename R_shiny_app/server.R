@@ -489,7 +489,8 @@ server <- function(input, output) {
                                  color_other2 = "orange",
                                  show_var1 = TRUE,
                                  show_var2 = TRUE,
-                                 units = "°C") { # Color for other records (var2, optional)
+                                 units = "°C",
+                                 date_format = "%Y-%m") { # Color for other records (var2, optional)
     
     # Filter data based on year range
     filtered_data <- data %>%
@@ -503,7 +504,7 @@ server <- function(input, output) {
         date1 = as.Date(.data[[date_col1]]),
         hover_text1 = sprintf(
           "Date: %s<br>Value: %.2f %s<br>Rank: %d",
-          format(date1, "%Y-%m"),
+          format(date1, date_format),
           .data[[value_col1]],
           units,
           row_number()
@@ -519,7 +520,7 @@ server <- function(input, output) {
           date2 = as.Date(.data[[date_col2]]),
           hover_text2 = sprintf(
             "Date: %s<br>Value: %.2f %s<br>Rank: %d",
-            format(date2, "%Y-%m"),
+            format(date2, date_format),
             .data[[value_col2]],
             units,
             row_number()
@@ -649,7 +650,35 @@ server <- function(input, output) {
       color_other2 = "orange",
       show_var1 = "mean_max_temp" %in% input$temp_records_display,
       show_var2 = "max_temp" %in% input$temp_records_display,
-      units = "°C"
+      units = "°C",
+      date_format = "%Y-%m"
+    )
+  })
+  
+  # daily max temp record plot output
+  output$DailyMaxRecordsPlot <- renderPlotly({
+    create_record_plot(
+      data = shiny.daily.temp.records,
+      date_col1 = "tmean.max.date",    
+      date_col2 = "tmax.max.date",    
+      value_col1 = "tmean.max",
+      value_col2 = "tmax.max",
+      min_year = input$year_range_records3[1],
+      max_year = input$year_range_records3[2],
+      top_n = 10,
+      y_label = "Monthly average temperature (°C)",
+      label_highlight1 = "Top 10 Highest Mean Temperatures",
+      label_other1 = "Highest Mean Temperatures",
+      label_highlight2 = "Top 10 Highest Max Temperatures",
+      label_other2 = "Highest Max Temperatures",
+      color_top1 = "black",
+      color_other1 = "grey",
+      color_top2 = "darkred",
+      color_other2 = "orange",
+      show_var1 = "daily_mean_max_temp" %in% input$daily_max_temp_display,
+      show_var2 = "daily_max_temp" %in% input$daily_max_temp_display,
+      units = "°C",
+      date_format = "%Y-%m-%d"
     )
   })
   
@@ -670,7 +699,8 @@ server <- function(input, output) {
       color_top1 = "darkblue",
       color_other1 = "lightblue",
       # show_var1 = "max_precip" %in% input$precip_records_display,
-      units = "in"
+      units = "in",
+      date_format = "%Y-%m"
     )
   })
   
@@ -695,7 +725,8 @@ server <- function(input, output) {
                                  color_other2 = "light blue",
                                  show_var1 = TRUE,
                                  show_var2 = TRUE,
-                                 units = "°C") { 
+                                 units = "°C",
+                                 date_format = "%Y-%m") { 
     
     # Filter data based on year range
     filtered_data <- data %>%
@@ -709,7 +740,7 @@ server <- function(input, output) {
         date.tmean.min = as.Date(.data[[date_col1]]),
         hover_text_mean_min = sprintf(
           "Date: %s<br>Value: %.2f %s<br>Rank: %d",
-          format(date.tmean.min, "%Y-%m"),
+          format(date.tmean.min, date_format),
           .data[[value_col1]],
           units,
           row_number()
@@ -725,7 +756,7 @@ server <- function(input, output) {
         date.tmin.min = as.Date(.data[[date_col2]]),
         hover_text_min = sprintf(
           "Date: %s<br>Value: %.2f %s<br>Rank: %d",
-          format(date.tmin.min, "%Y-%m"),
+          format(date.tmin.min, date_format),
           .data[[value_col2]],
           units,
           row_number()
@@ -856,7 +887,35 @@ server <- function(input, output) {
       color_other2 = "lightblue",
       show_var1 = "mean_min_temp" %in% input$min_temp_records_display,
       show_var2 = "min_temp" %in% input$min_temp_records_display,
-      units = "°C"
+      units = "°C",
+      date_format = "%Y-%m"
+    )
+  })
+  
+  # daily min temp record plot output
+  output$DailyMinRecordsPlot <- renderPlotly({
+    record_lows(
+      data = shiny.daily.temp.records,
+      date_col1 = "tmean.min.date",    
+      date_col2 = "tmin.min.date",    
+      value_col1 = "tmean.min",
+      value_col2 = "tmin.min",
+      min_year = input$year_range_records4[1],
+      max_year = input$year_range_records4[2],
+      top_n = 10,
+      y_label = "Daily average temperature (°C)",
+      label_highlight1 = "Top 10 Lowest Mean Temperatures",
+      label_other1 = "Lowest Mean Temperatures",
+      label_highlight2 = "Top 10 Lowest Max Temperatures",
+      label_other2 = "Lowest Max Temperatures",
+      color_top1 = "black",
+      color_other1 = "grey",
+      color_top2 = "darkblue",
+      color_other2 = "lightblue",
+      show_var1 = "daily_mean_min_temp" %in% input$daily_min_temp_display,
+      show_var2 = "daily_min_temp" %in% input$daily_min_temp_display,
+      units = "°C",
+      date_format = "%Y-%m-%d"
     )
   })
   
@@ -877,7 +936,8 @@ server <- function(input, output) {
       color_top1 = "black",
       color_other1 = "grey",
       # show_var1 = "min_precip" %in% input$precip_records_display,
-      units = "in"
+      units = "in",
+      date_format = "%Y-%m"
     )
   })
   

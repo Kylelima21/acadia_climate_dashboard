@@ -4,6 +4,56 @@
 ####    Build R Shiny Dashboard     ####
 #--------------------------------------# 
 
+
+#### functions ####
+
+create_temp_records_panel <- function(plots_config) {
+  # plots_config should be a list of lists, each containing configuration for one plot
+  lapply(plots_config, function(config) {
+    # Get the data source for the year range
+    data_source <- config$data_source
+    
+    fluidRow(
+      # Column for the checkbox group input
+      column(
+        width = 4,
+        box(
+          title = "Data Tools",
+          status = "primary",
+          solidHeader = TRUE,
+          width = 12,
+          # Add checkbox group for line selection
+          checkboxGroupInput(
+            config$checkbox_id,
+            "Select Data to Display:",
+            choices = config$checkbox_choices,
+            selected = config$default_selected
+          ),
+          sliderInput(
+            inputId = config$year_range_id,
+            label = "Select Year Range:",
+            min = min(data_source$year),
+            max = max(data_source$year),
+            value = c(min(data_source$year), max(data_source$year)),
+            sep = ""
+          )
+        )
+      ),
+      # Plot output
+      column(
+        width = 8,
+        box(
+          title = config$plot_title,
+          status = "primary",
+          solidHeader = TRUE,
+          width = 12,
+          plotlyOutput(config$plot_id, height = "600px")
+        )
+      )
+    )
+  })
+}
+
 #### User interface (ui)
 
 ui <- dashboardPage(
@@ -207,96 +257,73 @@ ui <- dashboardPage(
                   
                 ),
                 
+                # tab for temp records plots
                 tabPanel(
                   "Temperature Records and Extremes",
                   
-                  # Add fluidRow for the checkbox group and plot
-                  fluidRow(
-                    # Column for the checkbox group input
-                    column(
-                      width = 4,
-                      box(
-                        title = "Data Tools",
-                        status = "primary",
-                        solidHeader = TRUE,
-                        width = 12,
-                        # Add checkbox group for line selection
-                        checkboxGroupInput(
-                          "temp_records_display",
-                          "Select Temperature Records Data to Display:",
-                          choices = c("Maximum Mean Temperature Records" = "mean_max_temp",
-                                      "Maximum Temperature Records" = "max_temp"
-                          ),
-                          selected = c("mean_max_temp")
+                  create_temp_records_panel(
+                    list(
+                      # First plot (monthly maximum temperatures)
+                      list(
+                        plot_title = "Monthly Maximum NOAA Temperature Records",
+                        year_range_id = "year_range_records",
+                        checkbox_id = "temp_records_display",
+                        plot_id = "MaxTempRecordsPlot",
+                        data_source = shiny.monthly.records,  # Original data source
+                        checkbox_choices = c(
+                          "Monthly Maximum Mean Temperature Records" = "mean_max_temp",
+                          "Monthly Maximum Temperature Records" = "max_temp"
                         ),
-
-                      sliderInput(
-                        inputId = "year_range_records",
-                        label = "Select Year Range:",
-                        min = min(shiny.monthly.records$year),
-                        max = max(shiny.monthly.records$year),
-                        value = c(min(shiny.monthly.records$year), max(shiny.monthly.records$year)),
-                        sep = "" # Prevent commas in year values
+                        default_selected = c("mean_max_temp")
+                      ),
+                      
+                      # Second plot (monthly minimum temperatures)
+                      list(
+                        plot_title = "Monthly Minimum NOAA Temperature Records",
+                        year_range_id = "year_range_records2",
+                        checkbox_id = "min_temp_records_display",
+                        plot_id = "MinTempRecordsPlot",
+                        data_source = shiny.monthly.records,  # Original data source
+                        checkbox_choices = c(
+                          "Monthly Minimum Mean Temperature Records" = "mean_min_temp",
+                          "Monthly Minimum Temperature Records" = "min_temp"
+                        ),
+                        default_selected = c("mean_min_temp")
+                      ),
+                      
+                      # Third plot (daily maximum temperatures)
+                      list(
+                        plot_title = "Daily Maximum NOAA Temperature Records",
+                        year_range_id = "year_range_records3",
+                        checkbox_id = "daily_max_temp_display",
+                        plot_id = "DailyMaxRecordsPlot",
+                        data_source = shiny.daily.temp.records,  
+                        checkbox_choices = c(
+                          "Daily Maximum Mean Temperature Records" = "daily_mean_max_temp",
+                          "Daily Maximum Temperature Records" = "daily_max_temp"
+                        ),
+                        default_selected = c("daily_mean_max_temp")
+                      ),
+                      
+                      # Fourth plot (daily maximum temperatures)
+                      list(
+                        plot_title = "Daily Minimum NOAA Temperature Records",
+                        year_range_id = "year_range_records4",
+                        checkbox_id = "daily_min_temp_display",
+                        plot_id = "DailyMinRecordsPlot",
+                        data_source = shiny.daily.temp.records,  
+                        checkbox_choices = c(
+                          "Daily Minimum Mean Temperature Records" = "daily_mean_min_temp",
+                          "Daily Minimum Temperature Records" = "daily_min_temp"
+                        ),
+                        default_selected = c("daily_mean_min_temp")
                       )
                     )
-                  ),
-                  
-                  # max temp record plot output
-                    column(
-                      width = 8,
-                      box(
-                        title = "Maximum NOAA Temperature Records", 
-                        status = "primary", 
-                        solidHeader = TRUE, 
-                        width = 12,
-                      plotlyOutput("MaxTempRecordsPlot", height = "600px")
-                  )
-                ),
-                
-                # Column for the checkbox group input
-                column(
-                  width = 4,
-                  box(
-                    title = "Data Tools",
-                    status = "primary",
-                    solidHeader = TRUE,
-                    width = 12,
-                    # Add checkbox group for line selection
-                    checkboxGroupInput(
-                      "min_temp_records_display",
-                      "Select Temperature Records Data to Display:",
-                      choices = c("Minimum Mean Temperature Records" = "mean_min_temp",
-                                  "Minimum Temperature Records" = "min_temp"
-                      ),
-                      selected = c("mean_min_temp")
-                    ),
-                    
-                    sliderInput(
-                      inputId = "year_range_records2",
-                      label = "Select Year Range:",
-                      min = min(shiny.monthly.records$year),
-                      max = max(shiny.monthly.records$year),
-                      value = c(min(shiny.monthly.records$year), max(shiny.monthly.records$year)),
-                      sep = "" 
-                    )
-                  )
-                ),
-                  
-                  # min temp records plot output
-                    column(
-                      width = 8,
-                      box(
-                        title = "Minimum NOAA Temperature Records", 
-                        status = "primary", 
-                        solidHeader = TRUE, 
-                        width = 12,
-                      plotlyOutput("MinTempRecordsPlot", height = "600px")
                   )
                 )
               )
-            )
-      )
-    ),
+            ),
+                 
       
       # Tab for interactive precipitation plots
       tabItem(tabName = "precip",

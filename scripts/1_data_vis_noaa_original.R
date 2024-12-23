@@ -471,10 +471,16 @@ highest_mean_daily_temps <- daily.noaa.data %>%
   mutate(year = lubridate::year(date)) %>% 
   group_by(year) %>%
   filter(tmean == max(tmean, na.rm = TRUE)) %>% 
-  ungroup() %>%
-  arrange(desc(tmean)) %>% 
-  mutate(highlight = ifelse(row_number() <= 10, "Top 10", "Other"),
-         date = as.Date(date))
+  ungroup() %>% 
+  select(UnitCode, long, lat, tmean, year, date) %>% 
+  rename(tmean.max = tmean,
+         tmean.max.date = date,
+         unit.code = UnitCode)
+# %>%
+#   arrange(desc(tmean)) %>% 
+#   mutate(highlight = ifelse(row_number() <= 10, "Top 10", "Other"),
+#          date = as.Date(date))
+
 
 #graph of high mean temps
 ggplot(highest_mean_daily_temps, aes(x = date, y = tmean, color = highlight)) +
@@ -499,6 +505,52 @@ ggplot(highest_mean_daily_temps, aes(x = date, y = tmean, color = highlight)) +
     axis.text.x = element_text(angle = 45, hjust = 1),
     legend.position = "none"
   )
+
+##highest daily max temps
+
+highest_max_daily_temps <- daily.noaa.data %>%
+  mutate(year = lubridate::year(date)) %>% 
+  group_by(year) %>%
+  filter(tmax == max(tmax, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  select(UnitCode, long, lat, tmax, year, date) %>% 
+  rename(tmax.max = tmax,
+         tmax.max.date = date,
+         unit.code = UnitCode)
+
+##lowest daily mean temps
+
+lowest_mean_daily_temps <- daily.noaa.data %>%
+  mutate(year = lubridate::year(date)) %>% 
+  group_by(year) %>%
+  filter(tmean == min(tmean, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  select(UnitCode, long, lat, tmean, year, date) %>% 
+  rename(tmean.min = tmean,
+         tmean.min.date = date,
+         unit.code = UnitCode)
+
+##lowest daily min temps
+
+lowest_min_daily_temps <- daily.noaa.data %>%
+  mutate(year = lubridate::year(date)) %>% 
+  group_by(year) %>%
+  filter(tmin == min(tmin, na.rm = TRUE)) %>% 
+  ungroup() %>% 
+  select(UnitCode, long, lat, tmin, year, date) %>% 
+  rename(tmin.min = tmin,
+         tmin.min.date = date,
+         unit.code = UnitCode)
+
+#combined data table for R shiny app
+shiny.daily.temp.records <- highest_mean_daily_temps %>%
+  left_join(highest_max_daily_temps, by = c("year", "unit.code", "long", "lat")) %>%
+  left_join(lowest_mean_daily_temps, by = c("year", "unit.code", "long", "lat")) %>%
+  left_join(lowest_min_daily_temps, by = c("year", "unit.code", "long", "lat")) 
+
+##save outputs as csv
+write.csv(shiny.daily.temp.records, "data/processed_data/shiny_daily_temp_records.csv", row.names = FALSE)
+
 
 ##monthly temp
 
@@ -555,22 +607,21 @@ highest_max_monthly_temps <- monthly.noaa.data %>%
   ungroup() %>% 
   select(UnitCode, long, lat, tmax, year, year.month) %>% 
   rename(tmax.max = tmax,
-         tmax.max.ym = year.month)
-# %>%
-#   arrange(desc(tmax)) %>% 
-#   mutate(highlight.max = ifelse(row_number() <= 10, "Top 10", "Other"))
+         tmax.max.ym = year.month) %>%
+  arrange(desc(tmax.max)) %>%
+  mutate(highlight.max = ifelse(row_number() <= 10, "Top 10", "Other"))
 
 #graph of highest max temps
-ggplot(highest_max_monthly_temps, aes(x = year.month, y = tmax, color = highlight.max)) +
-  geom_segment(aes(xend = year.month, y = min(tmax), yend = tmax), linetype = "solid", alpha = 0.6) +
+ggplot(highest_max_monthly_temps, aes(x = tmax.max.ym, y = tmax.max, color = highlight.max)) +
+  geom_segment(aes(xend = tmax.max.ym, y = min(tmax.max), yend = tmax.max), linetype = "solid", alpha = 0.6) +
   geom_point(size = 3, aes(color = highlight.max)) +
   scale_color_manual(values = c("Top 10" = "darkred", "Other" = "orange")) +
   scale_x_date(
-    breaks = seq(from = min(highest_max_monthly_temps$year.month), 
-                 to = max(highest_max_monthly_temps$year.month), 
+    breaks = seq(from = min(highest_max_monthly_temps$tmax.max.ym), 
+                 to = max(highest_max_monthly_temps$tmax.max.ym), 
                  by = "10 years"),
     labels = scales::date_format("%Y"),
-    limits = c(min(highest_max_monthly_temps$year.month), max(highest_max_monthly_temps$year.month))
+    limits = c(min(highest_max_monthly_temps$tmax.max.ym), max(highest_max_monthly_temps$tmax.max.ym))
   ) +
   labs(
     x = "Year",
@@ -607,6 +658,7 @@ lowest_min_monthly_temps <- monthly.noaa.data %>%
   select(UnitCode, long, lat, tmin, year, year.month) %>% 
   rename(tmin.min = tmin,
          tmin.min.ym = year.month)
+
 
 ##monthly precip
 
