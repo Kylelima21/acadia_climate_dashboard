@@ -53,7 +53,7 @@ ui <- dashboardPage(
                     column(
                       width = 4, 
                       box(
-                        title = "Temperature Data Adjustments",
+                        title = "Data Tools",
                         status = "primary", 
                         solidHeader = TRUE, 
                         width = 12,
@@ -150,7 +150,7 @@ ui <- dashboardPage(
                     column(
                       width = 4,
                       box(
-                        title = "Temperature Anomaly Data Adjustments",
+                        title = "Data Tools",
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
@@ -185,7 +185,7 @@ ui <- dashboardPage(
                         title = "NOAA Temperature Anomalies",
                         status = "primary",
                         solidHeader = TRUE,
-                        width = 15,
+                        width = 12,
                         plotlyOutput("NOAAAnomPlot", height = "600px")
                       )
                     )
@@ -199,7 +199,7 @@ ui <- dashboardPage(
                         title = "McFarland Temperature Anomalies",
                         status = "primary",
                         solidHeader = TRUE,
-                        width = 15,
+                        width = 12,
                         plotlyOutput("McFarlandAnomPlot", height = "600px")
                       )
                     )
@@ -216,7 +216,7 @@ ui <- dashboardPage(
                     column(
                       width = 4,
                       box(
-                        title = "Temperature Records Data Adjustments",
+                        title = "Data Tools",
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
@@ -257,7 +257,7 @@ ui <- dashboardPage(
                 column(
                   width = 4,
                   box(
-                    title = "Temperature Records Data Adjustments",
+                    title = "Data Tools",
                     status = "primary",
                     solidHeader = TRUE,
                     width = 12,
@@ -309,7 +309,7 @@ ui <- dashboardPage(
                     column(
                       width = 4,
                       box(
-                        title = "Precipitation Data Adjustments",
+                        title = "Data Tools",
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
@@ -385,7 +385,7 @@ ui <- dashboardPage(
                     column(
                       width = 4,
                       box(
-                        title = "Temperature Anomaly Data Adjustments",
+                        title = "Data Tools",
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
@@ -420,7 +420,7 @@ ui <- dashboardPage(
                         title = "NOAA Precipitation Anomalies",
                         status = "primary",
                         solidHeader = TRUE,
-                        width = 15,
+                        width = 12,
                         plotlyOutput("NOAAPrecipAnomPlot", height = "600px")
                       )
                     )
@@ -434,7 +434,7 @@ ui <- dashboardPage(
                         title = "McFarland Precipitation Anomalies",
                         status = "primary",
                         solidHeader = TRUE,
-                        width = 15,
+                        width = 12,
                         plotlyOutput("McFarlandPrecipAnomPlot", height = "600px")
                       )
                     )
@@ -451,7 +451,7 @@ ui <- dashboardPage(
                     column(
                       width = 4,
                       box(
-                        title = "Temperature Records Data Adjustments",
+                        title = "Data Tools",
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,

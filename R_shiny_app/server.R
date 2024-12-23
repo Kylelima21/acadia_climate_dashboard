@@ -488,7 +488,8 @@ server <- function(input, output) {
                                  color_top2 = "darkred",    # Color for top records (var2, optional)
                                  color_other2 = "orange",
                                  show_var1 = TRUE,
-                                 show_var2 = TRUE) { # Color for other records (var2, optional)
+                                 show_var2 = TRUE,
+                                 units = "°C") { # Color for other records (var2, optional)
     
     # Filter data based on year range
     filtered_data <- data %>%
@@ -499,7 +500,14 @@ server <- function(input, output) {
       arrange(desc(.data[[value_col1]])) %>%
       mutate(
         highlight1 = ifelse(row_number() <= top_n, label_highlight1, label_other1),
-        date1 = as.Date(.data[[date_col1]])
+        date1 = as.Date(.data[[date_col1]]),
+        hover_text1 = sprintf(
+          "Date: %s<br>Value: %.2f %s<br>Rank: %d",
+          format(date1, "%Y-%m"),
+          .data[[value_col1]],
+          units,
+          row_number()
+        )
       )
     
     # Check if second variable exists
@@ -508,7 +516,14 @@ server <- function(input, output) {
         arrange(desc(.data[[value_col2]])) %>%
         mutate(
           highlight2 = ifelse(row_number() <= top_n, label_highlight2, label_other2),
-          date2 = as.Date(.data[[date_col2]])
+          date2 = as.Date(.data[[date_col2]]),
+          hover_text2 = sprintf(
+            "Date: %s<br>Value: %.2f %s<br>Rank: %d",
+            format(date2, "%Y-%m"),
+            .data[[value_col2]],
+            units,
+            row_number()
+          )
         )
     }
     
@@ -540,7 +555,8 @@ server <- function(input, output) {
         data = data1,
         aes(x = date1, 
             y = .data[[value_col1]],
-            color = highlight1),
+            color = highlight1,
+            text = hover_text1),
         size = 2
       )
     } 
@@ -560,7 +576,8 @@ server <- function(input, output) {
           data = data2,
           aes(x = date2, 
               y = .data[[value_col2]],
-              color = highlight2),
+              color = highlight2,
+              text = hover_text2),
           size = 2
         )
     }
@@ -597,7 +614,7 @@ server <- function(input, output) {
       )
     
     # Convert to plotly and disable legend clicking
-    ggplotly(p) %>%
+    ggplotly(p, tooltip = "text") %>%
       layout(
         showlegend = TRUE,
         legend = list(
@@ -631,7 +648,8 @@ server <- function(input, output) {
       color_top2 = "darkred",
       color_other2 = "orange",
       show_var1 = "mean_max_temp" %in% input$temp_records_display,
-      show_var2 = "max_temp" %in% input$temp_records_display
+      show_var2 = "max_temp" %in% input$temp_records_display,
+      units = "°C"
     )
   })
   
@@ -651,7 +669,8 @@ server <- function(input, output) {
       label_other1 = "Highest Precipitation Records",
       color_top1 = "darkblue",
       color_other1 = "lightblue",
-      # show_var1 = "max_precip" %in% input$precip_records_display
+      # show_var1 = "max_precip" %in% input$precip_records_display,
+      units = "in"
     )
   })
   
@@ -675,7 +694,8 @@ server <- function(input, output) {
                                  color_top2 = "darkblue",    # Color for top records (var2, optional)
                                  color_other2 = "light blue",
                                  show_var1 = TRUE,
-                                 show_var2 = TRUE) { 
+                                 show_var2 = TRUE,
+                                 units = "°C") { 
     
     # Filter data based on year range
     filtered_data <- data %>%
@@ -686,7 +706,14 @@ server <- function(input, output) {
       arrange(.data[[value_col1]]) %>%   
       mutate(
         highlight1 = ifelse(row_number() <= top_n, label_highlight1, label_other1),
-        date.tmean.min = as.Date(.data[[date_col1]])
+        date.tmean.min = as.Date(.data[[date_col1]]),
+        hover_text_mean_min = sprintf(
+          "Date: %s<br>Value: %.2f %s<br>Rank: %d",
+          format(date.tmean.min, "%Y-%m"),
+          .data[[value_col1]],
+          units,
+          row_number()
+        )
       )
     
     # Process second variable
@@ -695,7 +722,14 @@ server <- function(input, output) {
       arrange(.data[[value_col2]]) %>%   
       mutate(
         highlight2 = ifelse(row_number() <= top_n, label_highlight2, label_other2),
-        date.tmin.min = as.Date(.data[[date_col2]])
+        date.tmin.min = as.Date(.data[[date_col2]]),
+        hover_text_min = sprintf(
+          "Date: %s<br>Value: %.2f %s<br>Rank: %d",
+          format(date.tmin.min, "%Y-%m"),
+          .data[[value_col2]],
+          units,
+          row_number()
+        )
       )
     }
     
@@ -727,7 +761,8 @@ server <- function(input, output) {
         data = tmean.min,
         aes(x = date.tmean.min, 
             y = .data[[value_col1]],
-            color = highlight1),
+            color = highlight1,
+            text = hover_text_mean_min),
         size = 2
       )
     }
@@ -748,7 +783,8 @@ server <- function(input, output) {
           data = tmin.min,
           aes(x = date.tmin.min, 
               y = .data[[value_col2]],
-              color = highlight2),
+              color = highlight2,
+              text = hover_text_min),
           size = 2
         )
     }
@@ -785,7 +821,7 @@ server <- function(input, output) {
       )
     
     # Convert to plotly and disable legend clicking
-    ggplotly(p) %>%
+    ggplotly(p, tooltip = "text") %>%
       layout(
         showlegend = TRUE,
         legend = list(
@@ -819,7 +855,8 @@ server <- function(input, output) {
       color_top2 = "darkblue",
       color_other2 = "lightblue",
       show_var1 = "mean_min_temp" %in% input$min_temp_records_display,
-      show_var2 = "min_temp" %in% input$min_temp_records_display
+      show_var2 = "min_temp" %in% input$min_temp_records_display,
+      units = "°C"
     )
   })
   
@@ -839,7 +876,8 @@ server <- function(input, output) {
       label_other1 = "Lowest Precipitation Records",
       color_top1 = "black",
       color_other1 = "grey",
-      # show_var1 = "min_precip" %in% input$precip_records_display
+      # show_var1 = "min_precip" %in% input$precip_records_display,
+      units = "in"
     )
   })
   
