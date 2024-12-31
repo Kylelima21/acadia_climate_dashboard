@@ -15,7 +15,7 @@ library(lubridate)
 
 #Reading in CSV as a tibble
 
-McFarland.data <- read.csv("data/McFarland_Hill_export_20241022.csv") %>%
+McFarland.data <- read.csv("data/raw_data/McFarland_Hill_export_20241022.csv") %>%
   as_tibble()
 
 #-----------------------#
