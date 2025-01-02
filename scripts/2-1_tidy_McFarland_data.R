@@ -15,7 +15,7 @@ library(lubridate)
 
 #Reading in CSV as a tibble
 
-McFarland.data <- read.csv("data/raw_data/McFarland_Hill_export_20241022.csv") %>%
+mcfarland.data <- read.csv("data/raw_data/McFarland_Hill_export_20241022.csv") %>%
   as_tibble()
 
 #-----------------------#
@@ -23,12 +23,12 @@ McFarland.data <- read.csv("data/raw_data/McFarland_Hill_export_20241022.csv") %
 #-----------------------#
 
 # Convert to Date using as.POSIXct and format it
-clean.McFarland <- McFarland.data %>% 
+mcfarland.clean <- mcfarland.data %>% 
   mutate(
     
-    #change date column into standard format
+    #change date columns into standard format
     DATE_TIME = as.POSIXct(DATE_TIME, format = "%m/%d/%y %H:%M"),
-    DATE_TIME = format(DATE_TIME, "%Y-%m-%d %H:%M"),
+    UTC_DATE_TIME = as.POSIXct(UTC_DATE_TIME, format = "%m/%d/%y %H:%M", tz = "UTC"),
     
     #create new columns for year, month, and day
     year = year(DATE_TIME),
@@ -39,13 +39,54 @@ clean.McFarland <- McFarland.data %>%
     #replace -999 values with NAs across the entire data set
     across(everything(), ~ case_when(is.numeric(.) & . == -999 ~ NA, TRUE ~ .)),
     
+    #replace empty cells with NA
+    across(where(is.character), ~ na_if(., "")),
+    
     #combine temp columns into one column
-    TMP_DEGC_combined = coalesce(TMP_DEGC, TMP_2_DEGC)
-  )
+    TMP_DEGC_combined = coalesce(TMP_DEGC, TMP_2_DEGC),
+    
+    #add missing columns 
+    station.name = "Acadia National Park McFarland Hill",
+    lat = 44.3772,
+    long = -68.2608
+    
+  ) %>% 
+  
+  # Remove unneeded columns and rename
+  select(station.id = ABBR,
+         station.name,
+         lat,
+         long,
+         year,
+         month,
+         day,
+         date,
+         date.time.est = DATE_TIME,
+         date.time.utc = UTC_DATE_TIME,
+         ppt = RNF_MM_HR,
+         temp = TMP_DEGC_combined,
+         relative.humidity = RH_PERCENT,
+         scalar.wind.speed = SWS_M_S,
+         vector.wind.speed = VWS_M_S,
+         scalar.wind.direction = SWD_DEG,
+         vector.wind.direction = VWD_DEG,
+         solar.radiation = SOL_W_M2,
+         o3.ppb = O3_PPB,
+         so2.ppb = SO2_PPB,
+         co.ppb = CO_PPM,
+         no.ppb = NO_PPB,
+         pm2.5b = PM2_5B_UG_M3_LC,
+         pm2.5 = PM2_5_UG_M3_LC,
+         pm2.5f = PM2_5F_2_UG_M3_LC
+         
+  ) %>% 
+  
+  #remove empty columns
+  select(where(~ !all(is.na(.))))
 
 
 ##save outputs as csv
-write.csv(clean.McFarland, "data/McFarland_clean.csv", row.names = FALSE)
+# write.csv(clean.McFarland, "data/McFarland_clean.csv", row.names = FALSE)
 
 
 

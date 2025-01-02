@@ -23,13 +23,19 @@ serc.data <- read.csv("data/raw_data/SERC_D2258_export_20241119.csv") %>%
 #-----------------------#
 
 # Convert to Date using as.POSIXct and format it
-clean.serc <- serc.data  %>% 
+serc.clean <- serc.data  %>% 
   
   # Remove the first row with units
   slice(-1) %>%
   
   #transform dataset
   mutate(
+    
+    # Convert non-character columns to numeric
+    across(-c("Station_ID", "Date_Time", "wind_cardinal_direction_set_1d"), as.numeric),
+    
+    #replace empty cells with NA
+    across(where(is.character), ~ na_if(., "")),
     
     # parse the Date_Time column into POSIXct format in UTC
     Date_Time = as.POSIXct(Date_Time, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
@@ -41,7 +47,7 @@ clean.serc <- serc.data  %>%
     year = year(date.time.est),
     month = month(date.time.est),
     day = day(date.time.est),
-    date = as.Date(date.time.est), 
+    date = as.Date(date.time.est),
     
     #add missing columns 
     station.name = "Winter Harbor-SERC",
@@ -51,18 +57,35 @@ clean.serc <- serc.data  %>%
   ) %>% 
   
   # Remove unneeded columns and rename
-  select(station.ID = Station_ID,
+  select(station.id = Station_ID,
          station.name,
          lat,
          long,
-         ppt = precip_accum_since_local_midnight_set_1,
-         temp = air_temp_set_1,
          year,
          month,
          day,
-         date)
-
+         date,
+         date.time.est,
+         date.time.utc = Date_Time,
+         ppt.midnight = precip_accum_since_local_midnight_set_1,
+         ppt.24hr = precip_accum_24_hour_set_1,
+         temp = air_temp_set_1,
+         altimeter = altimeter_set_1,
+         relative.humidity = relative_humidity_set_1,
+         wind.speed = wind_speed_set_1,
+         wind.direction = wind_direction_set_1,
+         wind.gust = wind_gust_set_1,
+         wind.chill = wind_chill_set_1d,
+         wind.cardinal.direction = wind_cardinal_direction_set_1d,
+         heat.index = heat_index_set_1d,
+         dew.point.temp = dew_point_temperature_set_1d,
+         pressure = pressure_set_1d,
+         sea.level.pressure = sea_level_pressure_set_1d
+         ) %>% 
   
+  #remove empty columns
+  select(where(~ !all(is.na(.))))
+
 
 ##save outputs as csv
 #write.csv(clean.McFarland, "data/McFarland_clean.csv", row.names = FALSE)
