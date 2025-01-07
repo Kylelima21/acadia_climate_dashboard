@@ -37,11 +37,12 @@ clean_weather_data <- function(data, station_type = c("serc", "mcfarland")) {
       slice(-1) %>%
       
       mutate(
-        # Convert non-character columns to numeric
-        across(-c("Station_ID", "Date_Time", "wind_cardinal_direction_set_1d"), as.numeric),
         
         #replace empty cells with NA
-        across(where(is.character), ~ na_if(., "")),
+        across(where(is.character), ~ na_if(na_if(., ""), "None")),
+        
+        # Convert non-character columns to numeric
+        across(-c("Station_ID", "Date_Time", "wind_cardinal_direction_set_1d"), as.numeric),
         
         # parse the Date_Time column into POSIXct format in UTC
         Date_Time = as.POSIXct(Date_Time, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
@@ -158,4 +159,8 @@ serc.clean <- clean_weather_data(serc.data, station_type = "serc")
 
 # McFarland data
 mcfarland.clean <- clean_weather_data(mcfarland.data, station_type = "mcfarland")
+
+##save outputs as csv
+# write.csv(serc.clean, "data/processed_data/serc_clean.csv", row.names = FALSE)
+# write.csv(mcfarland.clean, "data/processed_data/mcfarland_clean.csv", row.names = FALSE)
 
