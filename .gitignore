@@ -50,3 +50,6 @@ rsconnect/
 
 # NOAA Gridded Data
 data/nClimGrid_nc/
+data/nClimGrid_mon/
+
+

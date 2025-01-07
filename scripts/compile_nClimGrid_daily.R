@@ -1,5 +1,5 @@
-## This script builds off from Kate Miller's climateNETN repository and functions
-## https://github.com/KateMMiller/climateNETN/tree/main
+## This script builds off from Kate Miller's climateNETN package
+## https://github.com/KateMMiller/climateNETN
 
 ## The data this script compiles and cleans is the NOAA nClimGrid-Daily dataset
 ## which can downloaded at:
@@ -24,6 +24,7 @@ library(sf)
 library(raster)
 library(lubridate)
 
+
 ## Install the climateNETN package from Kate
 devtools::install_github("KateMMiller/climateNETN")
 
@@ -34,15 +35,18 @@ devtools::install_github("KateMMiller/climateNETN")
 ####        Set up with climateNETN        ####
 #---------------------------------------------#
 
-## Specify that we only need Acadia data
+## Specify that we only need data from Acadia bounds
 park = "ACAD"
+
 
 ## Get the NETN centroids for filtering
 data("NETN_centroids")
 
+
 ## Use only Acadia centroid
 cent <- if(any(park == "all")){NETN_centroids
 } else {NETN_centroids[NETN_centroids$UnitCode %in% park,]}
+
 
 ## Filter data to a bounding box to make functions faster
 NETN_bbox <- data.frame(lat = c(47.38, 44.80, 38.71, 43.40),
@@ -142,10 +146,12 @@ mon_input <- vctrs::vec_c(months, moncurrent) %>%
   as.list()
 
 
+## Run this subset of data to test the purrr function
 # yrtest <- rep(1951:1952, 12) %>%
 #   sort()
 # 
 # montest <- rep(1:12, 2)
+
 
 ## Run the map2_dfr function for all years and months to get fully compiled daily data
 nclimgrid_daily <- purrr::map2_dfr(year_input, mon_input, compile_nclimgrid)
