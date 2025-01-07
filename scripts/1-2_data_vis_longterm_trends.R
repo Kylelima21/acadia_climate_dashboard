@@ -65,7 +65,7 @@ temp.McFarland <- clean.McFarland %>%
            temp.type = "McFarlandYearlyAvgTemp")
 
 #merge data sets together
-merged.temp.noaa.McFarland <- bind_rows(yearly_data_long_source, temp.McFarland.source)
+#merged.temp.noaa.McFarland <- bind_rows(yearly_data_long_source, temp.McFarland.source)
 
 ##save outputs as csv
 #write.csv(merged.temp.noaa.McFarland, "data/processed_data/merged_temp_noaa_McFarland.csv", row.names = FALSE)
