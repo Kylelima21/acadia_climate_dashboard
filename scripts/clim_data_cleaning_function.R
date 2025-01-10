@@ -54,7 +54,7 @@ clean_weather_data <- function(data, station_type = c("serc", "mcfarland")) {
         year = year(date.time.est),
         month = month(date.time.est),
         day = day(date.time.est),
-        date = as.Date(date.time.est),
+        date = date(date.time.est),
         
         #add station metadata
         station.name = "Winter Harbor-SERC",
