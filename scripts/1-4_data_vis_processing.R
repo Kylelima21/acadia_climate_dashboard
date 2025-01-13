@@ -281,140 +281,137 @@ if (!is.null(results)) {
 
 #' Calculate monthly baseline values
 #' @param data Input data frame
-#' @param value.col Name of the value column
+#' @param value.col Name of the value column to calculate baseline for
 #' @return Dataframe with monthly baseline values
-calculate_baseline <- function(data, value.col) {
-  if (!value.col %in% names(data)) {
-    stop(sprintf("Column '%s' not found in data", value.col))
-  }
-  
+calculate_monthly_baseline <- function(data, value.col) {
   data %>%
     group_by(month) %>%
-    summarise(
-      baseline = mean(.data[[value.col]], na.rm = TRUE),
-      .groups = "drop"
-    )
+    summarize(baseline = mean(.data[[value.col]], na.rm = TRUE))
 }
 
 #' Calculate anomalies from baseline
 #' @param data Input data frame
 #' @param baseline Baseline data frame
 #' @param value.col Name of the value column
-#' @param anomaly.prefix Prefix for anomaly column names
+#' @param include_percent Logical, whether to include percent anomaly
 #' @return Dataframe with calculated anomalies
-calculate_anomalies <- function(data, baseline, value.col, anomaly.prefix = "anomaly") {
-  # Input validation
-  required_cols <- c("month", value.col)
-  if (!all(required_cols %in% names(data))) {
-    stop("Missing required columns in data: ", 
-         paste(setdiff(required_cols, names(data)), collapse = ", "))
-  }
-  
-  if (!all(c("month", "baseline") %in% names(baseline))) {
-    stop("Baseline data must contain 'month' and 'baseline' columns")
-  }
-  
-  data %>%
+calculate_anomalies <- function(data, baseline, value.col, include_percent = FALSE) {
+  result <- data %>%
     left_join(baseline, by = "month") %>%
     mutate(
-      !!sym(paste0(anomaly.prefix, ".value")) := .data[[value.col]] - baseline,
-      !!sym(paste0(anomaly.prefix, ".percent")) := (.data[[value.col]] - baseline) / baseline * 100
-    ) %>%
+      anomaly = .data[[value.col]] - baseline
+    )
+  
+  if(include_percent) {
+    result <- result %>%
+      mutate(anomaly.percent = ((.data[[value.col]] - baseline) / baseline) * 100)
+  }
+  
+  result %>%
     filter(!is.na(year) & !is.na(month)) %>%
     mutate(
-      year.month = as.Date(paste(year, sprintf("%02d", month), "01", sep = "-"))
+      year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+      year.month = as.Date(year.month)
     )
 }
 
-#' Process climate data to calculate anomalies
-#' @param clean.data Input climate data
-#' @param value.col Name of the value column
-#' @param anomaly.prefix Prefix for anomaly columns
-#' @param current.year Current year for filtering
-#' @return Processed anomaly data
-process_anomalies <- function(clean.data, value.col, anomaly.prefix, current_year = get_current_year(), datetime.col = NULL) {
-  tryCatch({
-    # Validate input data
-    if (is.null(clean.data) || nrow(clean.data) == 0) {
-      stop("Input data is empty or NULL")
-    }
-    
-    # Process data if it's precipitation data with datetime
-    processed_data <- clean.data
-    if (!is.null(datetime.col) && value.col == "ppt") {
-      processed_data <- process_precipitation_data(clean.data, datetime.col, value.col)
-      value.col <- "precipitation"  # Update column name to match processed data
-    }
-    
-    # Calculate monthly averages
-    monthly.data <- clean.data %>%
-      group_by(year, month) %>%
-      summarise(
-        average.value = mean(.data[[value.col]], na.rm = TRUE),
-        .groups = "drop"
-      )
-    
-    # Calculate baseline
-    baseline <- calculate_baseline(monthly.data, "average.value")
-    
-    # Calculate anomalies
-    anomalies <- calculate_anomalies(
-      monthly.data, 
-      baseline, 
-      value.col = "average.value", 
-      anomaly.prefix = anomaly.prefix
-    )
-    
-    # Prepare for shiny dashboard
-    anomalies %>%
-      select(year, month, year.month, starts_with(anomaly.prefix)) %>%
-      filter(year < current_year)
-    
-  }, error = function(e) {
-    message("Error in process_anomalies: ", e$message)
-    return(NULL)
-  })
-}
-
-#' Rename anomaly columns with source prefix
-#' @param data Anomaly data
-#' @param prefix Source prefix to add
-#' @return Data with renamed columns
-rename_anomalies <- function(data, prefix) {
-  if (is.null(data)) return(NULL)
+#' Prepare data for Shiny dashboard
+#' @param anomaly_data Anomaly data
+#' @param source_prefix Prefix for source (e.g., "noaa", "mcfarland")
+#' @param type Type of anomaly ("temp" or "precip")
+#' @return Processed data for Shiny dashboard
+prepare_shiny_data <- function(anomaly_data, source_prefix, type) {
+  current_year <- as.numeric(format(Sys.Date(), "%Y"))
   
-  data %>%
-    rename_with(
-      ~ paste0(prefix, ".", .),
-      starts_with("temp.") | starts_with("precip.")
-    )
+  cols_to_select <- c("year", "month", "year.month", "anomaly")
+  new_names <- c(
+    "year", "month",
+    paste0(source_prefix, ".year.month"),
+    paste0(source_prefix, ".", type, ".anom")
+  )
+  
+  if("anomaly.percent" %in% names(anomaly_data)) {
+    cols_to_select <- c(cols_to_select, "anomaly.percent")
+    new_names <- c(new_names, paste0(source_prefix, ".percent.", type, ".anom"))
+  }
+  
+  anomaly_data %>%
+    select(all_of(cols_to_select)) %>%
+    rename_with(~new_names, all_of(cols_to_select)) %>%
+    filter(year < current_year)
 }
 
-# Process temperature anomalies
-shiny.temp.anomalies.noaa <- process_anomalies(noaa.monthly.data, "tmean", "temp")
-shiny.temp.anomalies.mcfarland <- process_anomalies(mcfarland.clean, "temp", "temp")
-shiny.temp.anomalies.serc <- process_anomalies(serc.clean, "temp", "temp")
+#' Process climate data and calculate anomalies
+#' @param data Input data frame
+#' @param value_col Name of value column
+#' @param source_prefix Source identifier (e.g., "noaa", "mcfarland")
+#' @param type Type of data ("temp" or "precip")
+#' @return List containing processed data and Shiny-ready data
+process_climate_data <- function(data, value_col, source_prefix, type) {
+  # Calculate baseline
+  baseline <- calculate_monthly_baseline(data, value_col)
+  
+  # Calculate anomalies
+  anomalies <- calculate_anomalies(
+    data, 
+    baseline, 
+    value_col, 
+    include_percent = (type == "precip")
+  )
+  
+  # Prepare Shiny data
+  shiny_data <- prepare_shiny_data(anomalies, source_prefix, type)
+  
+  list(
+    anomalies = anomalies,
+    shiny_data = shiny_data
+  )
+}
 
-# Process precipitation anomalies
-shiny.precip.anomalies.noaa <- process_anomalies(noaa.monthly.data, "ppt", "precip")
-shiny.precip.anomalies.mcfarland <- process_anomalies(mcfarland.clean, "ppt", "precip")
-shiny.precip.anomalies.serc <- process_anomalies(serc.clean, "ppt", "precip", datetime.col = "datetime")
+# Usage example:
+# Process NOAA temperature data
+noaa_temp <- process_climate_data(
+  noaa.monthly.data,
+  "tmean",
+  "noaa",
+  "temp"
+)
 
-# Rename columns
-shiny.temp.anomalies.noaa <- rename_anomalies(shiny.temp.anomalies.noaa, "noaa")
-shiny.temp.anomalies.mcfarland <- rename_anomalies(shiny.temp.anomalies.mcfarland, "mcfarland")
-shiny.temp.anomalies.serc <- rename_anomalies(shiny.temp.anomalies.serc, "serc")
-shiny.precip.anomalies.noaa <- rename_anomalies(shiny.precip.anomalies.noaa, "noaa")
-shiny.precip.anomalies.mcfarland <- rename_anomalies(shiny.precip.anomalies.mcfarland, "mcfarland")
-shiny.precip.anomalies.serc <- rename_anomalies(shiny.precip.anomalies.serc, "serc")
+# Process McFarland temperature data
+mcfarland_temp <- process_climate_data(
+  mcfarland.clean %>%
+    group_by(year, month) %>%
+    summarize(tmean = mean(temp, na.rm = TRUE)),
+  "tmean",
+  "mcfarland",
+  "temp"
+)
 
-# Merge datasets
-shiny.merged.anomalies <- shiny.temp.anomalies.noaa %>%
-  left_join(shiny.temp.anomalies.mcfarland, by = c("year", "month")) %>%
-  left_join(shiny.temp.anomalies.serc, by = c("year", "month")) %>%
-  left_join(shiny.precip.anomalies.noaa, by = c("year", "month")) %>%
-  left_join(shiny.precip.anomalies.mcfarland, by = c("year", "month")) %>%
-  left_join(shiny.precip.anomalies.serc, by = c("year", "month"))
+# Process NOAA precipitation data
+noaa_precip <- process_climate_data(
+  noaa.monthly.data,
+  "ppt",
+  "noaa",
+  "precip"
+)
+
+# Process McFarland precipitation data
+mcfarland_precip <- process_climate_data(
+  mcfarland.clean %>%
+    group_by(year, month) %>%
+    summarize(ppt = mean(ppt, na.rm = TRUE)),
+  "ppt",
+  "mcfarland",
+  "precip"
+)
+
+# Merge temperature anomalies
+shiny.merged.anom <- noaa_temp$shiny_data %>%
+  left_join(mcfarland_temp$shiny_data, by = c("year", "month"))
+
+# Merge precipitation anomalies
+shiny.merged.precip.anom <- noaa_precip$shiny_data %>%
+  left_join(mcfarland_precip$shiny_data, by = c("year", "month"))
 
 ##save outputs as csv
 # write.csv(shiny.merged.anomalies, "data/processed_data/shiny_merged_anom.csv", row.names = FALSE)
