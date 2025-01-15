@@ -100,7 +100,7 @@ process_precipitation_data <- function(data, datetime_col, precip_col) {
     # Ensure datetime is in correct format
     mutate(
       datetime = as.POSIXct(!!sym(datetime_col)),
-      date = lubridate::date(datetime),  # Use lubridate::date() to respect time zone
+      date = lubridate::date(datetime),  
       # Extract hour and minute for sorting
       hour = as.numeric(format(datetime, "%H")),
       minute = as.numeric(format(datetime, "%M"))
@@ -142,16 +142,16 @@ filtered_data_2 <- process_precipitation_data(
   precip_col = "ppt.24hr"
 )
 
-# #isolate midnight precip data and get the yearly mean precip from SERC data
-# serc.precip <- filtered_data %>% 
-#   drop_na(precipitation, year) %>%
-#   mutate(precipitation = precipitation * 0.0393701) %>% #convert mm of rain into inches of rain
-#   group_by(year) %>% 
-#   summarize(serc.precip = sum(precipitation, na.rm = TRUE))
-# 
-# #isolate 24hr precip data and get the yearly mean precip from SERC data
-# serc.precip.24hr <- filtered_data_2 %>% 
-#   drop_na(precipitation, year) %>%
-#   mutate(precipitation = precipitation * 0.0393701) %>% #convert mm of rain into inches of rain
-#   group_by(year) %>% 
-#   summarize(serc.precip = sum(precipitation, na.rm = TRUE))
+#isolate midnight precip data and get the yearly mean precip from SERC data
+serc.precip.midnight <- filtered_data %>%
+  drop_na(precipitation, year) %>%
+  mutate(precipitation = precipitation * 0.0393701) %>% #convert mm of rain into inches of rain
+  group_by(year) %>%
+  summarize(serc.precip = sum(precipitation, na.rm = TRUE))
+
+#isolate 24hr precip data and get the yearly mean precip from SERC data
+serc.precip.24hr <- filtered_data_2 %>%
+  drop_na(precipitation, year) %>%
+  mutate(precipitation = precipitation * 0.0393701) %>% #convert mm of rain into inches of rain
+  group_by(year) %>%
+  summarize(serc.precip = sum(precipitation, na.rm = TRUE))

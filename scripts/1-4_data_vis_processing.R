@@ -368,7 +368,7 @@ process_climate_data <- function(data, value_col, source_prefix, type) {
   )
 }
 
-# Usage example:
+# Usage:
 # Process NOAA temperature data
 noaa_temp <- process_climate_data(
   noaa.monthly.data,
