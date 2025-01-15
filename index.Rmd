@@ -6,25 +6,32 @@ output: html_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+## Acadia Climate Data Dashboard Project
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This project's github repository can be found here: <https://github.com/Kylelima21/acadia_climate_dashboard>
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+This file is for downloading Acadia National Park climate data and data cleaning scripts. This data is used in the Acadia Climate Data R Shiny Dashboard (). Cleaning scripts only require the input of the downloaded datasets to run in R.
 
-```{r cars}
-summary(cars)
-```
+## Data Download
 
-## Including Plots
+### NOAA
 
-You can also embed plots, for example:
+Daily: <https://www.ncei.noaa.gov/thredds/catalog/nclimgrid-daily/catalog.html> \* Data compiling script: <https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/compile_nClimGrid_daily.R>
 
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
+Monthly: <https://www.ncei.noaa.gov/thredds/catalog/data-in-development/nclimgrid/catalog.html> \* Data compiling script: <https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/complie_nClimGrid_monthly.R>
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+* Data download requires a script by Kyle Lima that builds off of Kate Miller's climateNETN package (<https://github.com/KateMMiller/climateNETN>).
+
+### McFarland Hill Atmospheric Research Station
+
+<https://ard-request.air-resource.com/data.aspx>
+
+### Winter Harbor-SERC weather station
+
+<https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=D2258>
+
+### Cleaning function for all sources:
+
+<https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/clim_data_cleaning_function.R>
