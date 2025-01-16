@@ -1,0 +1,253 @@
+
+/* Set core root defaults */
+@import url('https://fonts.googleapis.com/css?family=Rubik:100,200,300,400,500,600,700,800,900');
+
+:root {
+  --clr-base-blue: rgb(146, 206, 208, 1);
+  --clr-base-green: rgb(72, 150, 25, 1);
+  --clr-base-purple: rgba(13, 4, 42, 1);
+
+  --clr-opaque-blue: rgb(146, 206, 208, .8);
+  --clr-opaque-green: rgb(72, 150, 25, 0.8);
+  --clr-opaque-purple: rgba(13, 4, 42, 0.7);
+
+  --clr-body-boxes: rgba(122, 154, 157, 0.6);
+  
+  --clr-text-light: rgba(255, 255, 255, 1);
+  --clr-text-dark: rgba(0, 0, 0, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  font-family: 'Rubik', Sans-Serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+.title, .author {
+  display: none;
+}
+
+html:focus-within {
+  scroll-behavior: smooth;
+}
+
+a:focus {
+  outline: 2px solid rgba(255, 255, 255, 1);
+  outline-offset: 3px;
+}
+
+body {
+  text-rendering: optimizeSpeed;
+  line-height: 1.5;
+   background-color: var(--clr-base-blue);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-position: center;
+  overflow-x: hidden;
+}
+
+ul[role="list"],
+ol[role="list"] {
+  list-style: none;
+}
+
+.bodybody {
+  margin-top: 100px;
+  padding-right: 25px;
+  padding-left: 25px;
+}
+
+.body-title-box {
+  position: absolute;
+  top: 0;
+  left: 1%;
+  align-items: center;
+  justify-content: left;
+  color: var(--clr-text-light);
+}
+
+.body-titles {
+  margin-left: 1rem;
+  font-size: 30px;
+  font-weight: 500;
+}
+
+.body-box {
+  position: relative;
+  background-color: var(--clr-body-boxes);
+  margin: 50px auto;
+  width: 100%;
+  padding: 30px;
+  border-radius: 1rem;
+  box-shadow: 3px 3px 1rem rgba(0, 0, 0, 0.4);
+}
+
+.cite {
+  grid-area: images;
+  position: absolute;
+  color: black;
+  font-size: 18px;
+  font-weight: 500;
+  right: 30px;
+  bottom: 15px;
+}
+
+.main-container {
+  max-width: none !important;
+}
+
+.container-fluid {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+/* Title page styling*/
+
+.titlepage-box {
+  height: 100vh;
+  background-image: linear-gradient(100deg, var(--clr-base-purple), var(--clr-base-blue));
+  box-shadow: 3px 7px 1rem rgba(0, 0, 0, 0.4);
+  display: grid;
+  grid-template-columns: 50% 50%;
+  grid-template-areas:
+    "header gall"
+    "header gall"
+}
+
+.primary-header {
+  grid-area: header;
+  position: relative;
+  text-align: center; 
+  /*height: 5.9vw;*/
+  margin: 30px 0 0 0;
+  display: grid;
+  grid-template-columns: 31% 3% 33% 33%;
+  grid-template-rows: 8% 92%;
+  grid-template-areas:
+    "logo . header1 header2 ."
+    "title title title title title"
+}
+
+.cs-logo {
+  grid-area: logo;
+  background-color: white;
+  border-radius: 0.5rem;
+  padding: 1px 1px 1px 1px;
+  width: 12vw;
+  min-width: 100px;
+  justify-self: right;
+  box-shadow: 3px 3px 1rem rgba(0, 0, 0, 0.4);
+}
+
+.headerone {
+  grid-area: header1;
+  font-size: 16px;
+  color: var(--clr-text-light);
+  margin: auto;
+  font-weight: 600;
+}
+
+.headertwo {
+  grid-area: header2;
+  font-size: 16px;
+  color: var(--clr-text-light);
+  margin: auto;
+  font-weight: 600;
+}
+
+.title-box {
+  grid-area: title;
+  text-align: center;
+  padding: 80px 30px 0 50px;
+  color: var(--clr-text-light);
+  max-height: max-content;
+}
+
+.titlepage-title {
+  font-size: 100px;
+  font-weight: 100;
+  margin-top: 70px;
+  line-height: 1;
+}
+
+.titlepage-subtitle {
+  font-size: 25px;
+  font-weight: 400;
+}
+
+/* Body Section */
+
+/* Description Box */
+.descripbox {
+  border-radius: 1rem;
+  box-shadow: 3px 3px 1rem rgba(0, 0, 0, 0.4);
+  padding: 40px;
+  background-color: var(--clr-opaque-blue);
+  color: var(--clr-text-dark);
+  font-size: 20px;
+  margin-top: 20px;
+  line-height: 1.8; /* Improve readability */
+}
+
+/* Headings inside descripbox */
+.descripbox h3 {
+  font-size: 24px;
+  font-weight: 600;
+  margin-top: 20px;
+  margin-bottom: 15px;
+  color: var(--clr-text-dark);
+  border-bottom: 2px solid var(--clr-opaque-purple);
+  padding-bottom: 5px;
+}
+
+/* List Styles */
+.descripbox ul {
+  margin-top: 10px;
+  margin-left: 20px; /* Indent lists */
+  padding-left: 20px;
+  list-style-type: disc; /* Default bullet style */
+}
+
+.descripbox ul ul {
+  margin-top: 5px;
+  margin-left: 15px; /* Further indent for nested lists */
+  padding-left: 15px;
+  list-style-type: circle; /* Sub-list bullets */
+}
+
+/* List Item Styles */
+.descripbox ul li {
+  margin-bottom: 10px; /* Add spacing between list items */
+  font-size: 18px;
+}
+
+/* Link Styles */
+.descripbox a {
+  color: var(--clr-base-blue);
+  text-decoration: underline;
+  font-weight: 500;
+}
+
+.descripbox a:hover {
+  color: var(--clr-base-purple);
+  text-decoration: none;
+}
+
+/* Media query styling */
+@media (max-width: 768px) {
+  .titlepage-title {
+    font-size: 60px;
+  }
+  .cs-logo {
+    width: 20%;
+  }
+}
+
