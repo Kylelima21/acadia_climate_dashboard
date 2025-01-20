@@ -1,7 +1,6 @@
 ---
 title: "acadia_climate_data"
 author: "Schoodic Institute"
-date: "`r Sys.Date()`"
 output: 
   html_document:
     css: www/css/pages_style.css
@@ -10,70 +9,144 @@ output:
 ```{r echo = FALSE, include = FALSE}
 ```
 
+<!-- Wrap everything in the page wrapper -->
+
+<div class="page-wrapper">
+
 <!-- Title Page -->
 
 <div class = "titlepage-box">
 
 <!-- Header -->
 
-::: primary-header
+<div class = "primary-header">
 <img src="www/img/SchoodicInstitute_Horizontal_CMYK.png" alt="Schoodic Institute at Acadia National Park logo" class="cs-logo"/>
 
-::: headerone
+<div class = "headerone">
 ACADIA NATIONAL PARK
-:::
+</div>
 
 <!-- Title -->
 
-::: title-box
-::: titlepage-title
+<div class = "title-box">
+<div class = "titlepage-title">
 Acadia Climate Data Dashboard Project
-:::
+</div>
 
-::: titlepage-subtitle
+<div class = "titlepage-subtitle">
 This site is for downloading Acadia National Park climate data and data cleaning scripts. This data is used in the Acadia Climate Data R Shiny Dashboard (). Cleaning scripts only require the input of the downloaded datasets to run in R. This project's github repository can be found here: <https://github.com/Kylelima21/acadia_climate_dashboard>
-:::
-:::
-:::
+</div>
+</div>
+</div>
+</div>
 
 <!-- Body Content -->
 
-::: bodybody
+<div class = "bodybody">
+
 <!-- Background box -->
 
-::: {.body-box .species-box}
-    <div class="intro-title">
-      Data Download
-    </div>
-:::
+<div class = "body-box">
 
-::: descripbox
-    <h3>National Oceanic and Atmospheric Administration (NOAA)</h3>
-    <ul>
-      <li>Daily: <a href="https://www.ncei.noaa.gov/thredds/catalog/nclimgrid-daily/catalog.html">NOAA Daily Data</a>
-        <ul>
-          <li>Data compiling script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/compile_nClimGrid_daily.R">nClimGrid Daily Script</a></li>
-        </ul>
-      </li>
-      <li>Monthly: <a href="https://www.ncei.noaa.gov/thredds/catalog/data-in-development/nclimgrid/catalog.html">NOAA Monthly Data</a>
-        <ul>
-          <li>Data compiling script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/complie_nClimGrid_monthly.R">nClimGrid Monthly Script</a></li>
-        </ul>
-      </li>
-      <li>Data download requires cleaning scripts by Kyle Lima that build off Kate Miller's climateNETN package 
-          (<a href="https://github.com/KateMMiller/climateNETN">climateNETN</a>).</li>
-    </ul>
-    <h3>McFarland Hill Atmospheric Research Station</h3>
-    <ul>
-      <li><a href="https://ard-request.air-resource.com/data.aspx">Data Access</a></li>
-    </ul>
-    <h3>Winter Harbor-SERC Weather Station</h3>
-    <ul>
-      <li><a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=D2258">Weather Station Data</a></li>
-    </ul>
-    <h3>Cleaning Function for All Sources</h3>
-    <ul>
-      <li><a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/clim_data_cleaning_function.R">Climate Data Cleaning Function</a></li>
-    </ul>
-:::
-:::
+<div class = "intro-title">
+Data Download
+</div>
+
+<div class="descripbox">
+<section class="data-section">
+
+<h3>National Oceanic and Atmospheric Administration (NOAA)</h3>
+
+<ul class="primary-list">
+
+<li class="primary-item">
+
+Daily: <a href="https://www.ncei.noaa.gov/thredds/catalog/nclimgrid-daily/catalog.html">NOAA Daily Data</a>
+
+<ul class="secondary-list">
+
+<li class="secondary-item">
+
+Data compiling script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/compile_nClimGrid_daily.R">nClimGrid Daily Script</a>
+
+</li>
+
+</ul>
+
+</li>
+
+<li class="primary-item">
+
+Monthly: <a href="https://www.ncei.noaa.gov/thredds/catalog/data-in-development/nclimgrid/catalog.html">NOAA Monthly Data</a>
+
+<ul class="secondary-list">
+
+<li class="secondary-item">
+
+Data compiling script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/complie_nClimGrid_monthly.R">nClimGrid Monthly Script</a>
+
+</li>
+
+</ul>
+
+</li>
+
+<li class="primary-item">
+
+Data download requires cleaning scripts by Kyle Lima that build off Kate Miller's climateNETN package (<a href="https://github.com/KateMMiller/climateNETN">climateNETN</a>).
+
+</li>
+
+</ul>
+
+</section>
+
+<section class="data-section">
+
+<h3>McFarland Hill Atmospheric Research Station</h3>
+
+<ul class="primary-list">
+
+<li class="primary-item">
+
+<a href="https://ard-request.air-resource.com/data.aspx">Data Access</a>
+
+</li>
+
+</ul>
+
+</section>
+
+<section class="data-section">
+
+<h3>Winter Harbor-SERC Weather Station</h3>
+
+<ul class="primary-list">
+
+<li class="primary-item">
+
+<a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=D2258">Weather Station Data</a>
+
+</li>
+
+</ul>
+
+</section>
+
+<section class="data-section">
+
+<h3>Cleaning Function for All Sources</h3>
+
+<ul class="primary-list">
+
+<li class="primary-item">
+
+<a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/clim_data_cleaning_function.R">Climate Data Cleaning Function</a>
+
+</li>
+
+</ul>
+
+</section>
+</div>
+</div>

@@ -46,7 +46,7 @@ a:focus {
 body {
   text-rendering: optimizeSpeed;
   line-height: 1.5;
-   background-color: var(--clr-base-blue);
+  background-image: url("../img/back_img.JPG");
   background-size: cover;
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -109,17 +109,20 @@ ol[role="list"] {
   padding-right: 0;
 }
 
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+}
+
 /* Title page styling*/
 
 .titlepage-box {
   height: 100vh;
   background-image: linear-gradient(100deg, var(--clr-base-purple), var(--clr-base-blue));
   box-shadow: 3px 7px 1rem rgba(0, 0, 0, 0.4);
-  display: grid;
-  grid-template-columns: 50% 50%;
-  grid-template-areas:
-    "header gall"
-    "header gall"
+  margin-bottom: 0;
 }
 
 .primary-header {
@@ -132,7 +135,7 @@ ol[role="list"] {
   grid-template-columns: 31% 3% 33% 33%;
   grid-template-rows: 8% 92%;
   grid-template-areas:
-    "logo . header1 header2 ."
+    "logo . header1 . ."
     "title title title title title"
 }
 
@@ -155,14 +158,6 @@ ol[role="list"] {
   font-weight: 600;
 }
 
-.headertwo {
-  grid-area: header2;
-  font-size: 16px;
-  color: var(--clr-text-light);
-  margin: auto;
-  font-weight: 600;
-}
-
 .title-box {
   grid-area: title;
   text-align: center;
@@ -172,20 +167,35 @@ ol[role="list"] {
 }
 
 .titlepage-title {
-  font-size: 100px;
+  font-size: 70px;
   font-weight: 100;
   margin-top: 70px;
   line-height: 1;
 }
 
 .titlepage-subtitle {
-  font-size: 25px;
+  font-size: 20px;
   font-weight: 400;
 }
 
 /* Body Section */
 
-/* Description Box */
+.intro-title {
+  grid-area: intitle;
+  font-size: 50px;
+  font-weight: 500;
+  color: var(--clr-text-light);
+  background-image: linear-gradient(100deg, var(--clr-opaque-purple), var(--clr-opaque-blue));
+  border-radius: 1rem;
+  box-shadow: 3px 3px 1rem rgba(0, 0, 0, 0.4);
+  padding: 40px;
+  width: 100%;
+  margin-bottom: 50px;
+  text-align: left;
+  line-height: 1.3;
+}
+
+/* Description Box Base Styling */
 .descripbox {
   border-radius: 1rem;
   box-shadow: 3px 3px 1rem rgba(0, 0, 0, 0.4);
@@ -194,60 +204,131 @@ ol[role="list"] {
   color: var(--clr-text-dark);
   font-size: 20px;
   margin-top: 20px;
-  line-height: 1.8; /* Improve readability */
+  line-height: 1.8;
 }
 
-/* Headings inside descripbox */
-.descripbox h3 {
+/* Section Styling */
+.data-section {
+  margin-bottom: 30px;
+}
+
+.data-section:last-child {
+  margin-bottom: 0;
+}
+
+/* Heading Styling */
+.data-section h3 {
   font-size: 24px;
   font-weight: 600;
-  margin-top: 20px;
   margin-bottom: 15px;
   color: var(--clr-text-dark);
   border-bottom: 2px solid var(--clr-opaque-purple);
   padding-bottom: 5px;
 }
 
-/* List Styles */
-.descripbox ul {
-  margin-top: 10px;
-  margin-left: 20px; /* Indent lists */
+/* List Styling */
+.primary-list {
+  list-style-type: disc;
+  margin: 0 0 0 20px;
   padding-left: 20px;
-  list-style-type: disc; /* Default bullet style */
 }
 
-.descripbox ul ul {
-  margin-top: 5px;
-  margin-left: 15px; /* Further indent for nested lists */
-  padding-left: 15px;
-  list-style-type: circle; /* Sub-list bullets */
+.secondary-list {
+  list-style-type: circle;
+  margin: 8px 0 8px 20px;
+  padding-left: 20px;
 }
 
-/* List Item Styles */
-.descripbox ul li {
-  margin-bottom: 10px; /* Add spacing between list items */
+/* List Item Styling */
+.primary-item,
+.secondary-item {
+  margin-bottom: 12px;
+  line-height: 1.6;
   font-size: 18px;
 }
 
-/* Link Styles */
+.primary-item:last-child,
+.secondary-item:last-child {
+  margin-bottom: 0;
+}
+
+/* Link Styling */
 .descripbox a {
-  color: var(--clr-base-blue);
+  color: var(--clr-base-purple);
   text-decoration: underline;
-  font-weight: 500;
+  transition: color 0.2s ease;
 }
 
 .descripbox a:hover {
-  color: var(--clr-base-purple);
-  text-decoration: none;
+  color: var(--clr-base-green);
+}
+
+.descripbox a:focus {
+  outline: 2px solid var(--clr-base-purple);
+  outline-offset: 2px;
 }
 
 /* Media query styling */
-@media (max-width: 768px) {
+@media screen and (max-width: 440px) {
+  
+  .bodybody {
+    margin-left: 15px;
+    margin-right: 15px;
+    padding: 0;
+  }
+  
+  .bodybody {
+    padding: 25px 15px;
+  }
+  
+  .titlepage-box {
+    min-height: 100vh;
+    height: auto;
+    padding-bottom: 30px;
+  }
+  
+  .primary-header {
+    margin: 15px;
+    grid-template-columns: 33% 33% 33%;
+    grid-template-rows: 16% 84%;
+    grid-template-areas:
+        "logo  header1 header 1"
+        "title title title";
+  }
+  
+  .cs-logo {
+    justify-self: center;
+  }
+  
+  .title-box {
+    padding: 0;
+  }
+  
   .titlepage-title {
+    margin-top: 40px;
     font-size: 60px;
   }
-  .cs-logo {
-    width: 20%;
+  
+  .titlepage-subtitle {
+    font-size: 18px;
   }
+  
+  .intro-title {
+    margin: 0;
+    padding: 15px;
+    font-size: 40px;
+  }
+  
+    .descripbox {
+    padding: 20px;
+  }
+
+  .primary-list,
+  .secondary-list {
+    margin-left: 15px;
+    padding-left: 15px;
+  }
+  
 }
+  
 
