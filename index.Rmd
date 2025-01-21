@@ -17,15 +17,6 @@ output:
 
 <div class = "titlepage-box">
 
-<!-- Header -->
-
-<div class = "primary-header">
-<img src="www/img/SchoodicInstitute_Horizontal_CMYK.png" alt="Schoodic Institute at Acadia National Park logo" class="cs-logo"/>
-
-<div class = "headerone">
-ACADIA NATIONAL PARK
-</div>
-
 <!-- Title -->
 
 <div class = "title-box">
@@ -34,10 +25,18 @@ Acadia Climate Data Dashboard Project
 </div>
 
 <div class = "titlepage-subtitle">
-This site is for downloading Acadia National Park climate data and data cleaning scripts. This data is used in the Acadia Climate Data R Shiny Dashboard (). Cleaning scripts only require the input of the downloaded datasets to run in R. This project's github repository can be found here: <https://github.com/Kylelima21/acadia_climate_dashboard>
+This site is for downloading Acadia National Park climate data and data cleaning scripts. This data is used in the Acadia Climate Data R Shiny Dashboard (). Cleaning scripts only require the input of the downloaded datasets to run in R. 
+
+Project github repository: <a href="https://github.com/Kylelima21/acadia_climate_dashboard">Acadia Climate Dashboard</a>
 </div>
 </div>
-</div>
+
+<!-- Image stack -->
+<div class = "image-stack">
+  <img src="www/img/SchoodicInstitute_Horizontal_CMYK.png" alt="Schoodic Institute at Acadia National Park logo"
+        class="image-logo">
+ </div>
+  
 </div>
 
 <!-- Body Content -->
@@ -125,7 +124,7 @@ Data download requires cleaning scripts by Kyle Lima that build off Kate Miller'
 
 <li class="primary-item">
 
-<a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=D2258">Weather Station Data</a>
+<a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=D2258">Data Access</a>
 
 </li>
 
@@ -148,5 +147,6 @@ Data download requires cleaning scripts by Kyle Lima that build off Kate Miller'
 </ul>
 
 </section>
+
 </div>
 </div>
