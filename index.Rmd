@@ -26,16 +26,15 @@ Acadia Climate Data Dashboard Project
 
 <div class = "titlepage-subtitle">
 This site is for downloading Acadia National Park climate data and data cleaning scripts. This data is used in the Acadia Climate Data R Shiny Dashboard (). Cleaning scripts only require the input of the downloaded datasets to run in R. 
-
-Project github repository: <a href="https://github.com/Kylelima21/acadia_climate_dashboard">Acadia Climate Dashboard</a>
 </div>
 </div>
 
 <!-- Image stack -->
 <div class = "image-stack">
-  <img src="www/img/SchoodicInstitute_Horizontal_CMYK.png" alt="Schoodic Institute at Acadia National Park logo"
+  <img src="www/img/COPY_SchoodicInstitute_Horizontal_CMYK.png" alt="Schoodic Institute at Acadia National Park logo"
         class="image-logo">
- </div>
+  <p class="image-text"> <a href="https://github.com/Kylelima21/acadia_climate_dashboard">Github repository</a></p>
+</div>
   
 </div>
 
