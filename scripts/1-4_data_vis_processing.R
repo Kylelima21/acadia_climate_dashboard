@@ -84,7 +84,7 @@ calculate_yearly_temperature <- function(data, temp.col, max.col = NULL, min.col
   result <- data %>%
     group_by(year) %>%
     summarise(
-      YearlyAvgTemp = ifelse(all(is.na(.data[[temp.col]])),
+      temp = ifelse(all(is.na(.data[[temp.col]])),
                              NA_real_,
                              mean(.data[[temp.col]], na.rm = TRUE)),
       .groups = "drop"
@@ -97,7 +97,7 @@ calculate_yearly_temperature <- function(data, temp.col, max.col = NULL, min.col
         data %>%
           group_by(year) %>%
           summarise(
-            YearlyAvgMax = ifelse(all(is.na(.data[[max.col]])),
+            max.temp = ifelse(all(is.na(.data[[max.col]])),
                                   NA_real_,
                                   mean(.data[[max.col]], na.rm = TRUE)),
             .groups = "drop"
@@ -113,7 +113,7 @@ calculate_yearly_temperature <- function(data, temp.col, max.col = NULL, min.col
         data %>%
           group_by(year) %>%
           summarise(
-            YearlyAvgMin = ifelse(all(is.na(.data[[min.col]])),
+            min.temp = ifelse(all(is.na(.data[[min.col]])),
                                   NA_real_,
                                   mean(.data[[min.col]], na.rm = TRUE)),
             .groups = "drop"
@@ -145,7 +145,7 @@ calculate_yearly_precipitation <- function(data, precip.col, datetime.col = NULL
     mutate(ppt.in.hr = .data[[precip.col]] * MM_TO_INCHES) %>%
     group_by(year) %>%
     summarise(
-      YearlyTotalPrecip = ifelse(all(is.na(ppt.in.hr)), 
+      precip = ifelse(all(is.na(ppt.in.hr)), 
                                  NA_real_,
                                  sum(ppt.in.hr, na.rm = TRUE)),
       .groups = "drop"

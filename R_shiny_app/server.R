@@ -2,29 +2,66 @@
 
 server <- function(input, output) {
   
+  #----------------------#
+  ####    Map Output  ####
+  #----------------------#  
+  
+  output$LocationMap <- renderLeaflet({
+  # Define location data
+  locations <- data.frame(
+    name = c("McFarland Hill Atmospheric Research Station", "Winter Harbor-SERC Weather Station"),
+    lat = c(44.3772, 44.33567),
+    lng = c(-68.2608, -68.062)
+  )
+  
+  # Create the map
+  leaflet() %>%
+    # Add both base layers
+    addProviderTiles("Esri.WorldTopoMap", 
+                     group = "Topographic") %>%
+    addProviderTiles("Esri.WorldImagery", 
+                     group = "Satellite") %>%
+    setView(lng = -68.19, lat = 44.3386, zoom = 10) %>%  # Center on Acadia
+    addMarkers(
+      data = locations,
+      lng = ~lng, 
+      lat = ~lat,
+      popup = ~paste0("<strong>", name, "</strong>"),
+      group = "Stations"
+    ) %>%
+    addLayersControl(
+      baseGroups = c("Topographic", "Satellite"),
+      overlayGroups = c("Stations"),
+      options = layersControlOptions(collapsed = FALSE)
+    )
+  })
+  
+  
   #---------------------------------------#
   ####  Reactive data transformations  ####
   #---------------------------------------#   
-
+  
   # Reactive for temperature data
   temperature_data <- reactive({
-    shiny.merged.temp %>% 
+    temperature.data.merged %>% 
       rename(
         Year = year, 
-        `NOAA Average Temp` = temp.noaa,
-        `NOAA Average Max Temp` = max.noaa, 
-        `NOAA Average Min Temp` = min.noaa, 
-        `McFarland Average Temp` = mcfarland
+        `NOAA Average Temp` = noaa.temp,
+        `NOAA Average Max Temp` = noaa.max.temp, 
+        `NOAA Average Min Temp` = noaa.min.temp, 
+        `McFarland Average Temp` = mcfarland.temp,
+        `SERC Average Temp`= serc.temp
       )
   })
   
   # Reactive for precipitation data
   precipitation_data <- reactive({
-    shiny.merged.precip %>% 
+    precipitation.data.merged %>% 
       rename(
         Year = year, 
         `NOAA Precip` = noaa.precip,
-        `McFarland Precip` = McFarland.precip
+        `McFarland Precip` = mcfarland.precip,
+        `SERC Precip` = serc.precip
       )
   })
   
@@ -95,7 +132,9 @@ server <- function(input, output) {
       noaa_min = if ("lm_noaa_min_temp" %in% input$linesToShow) 
         lm(`NOAA Average Min Temp` ~ Year, data = data),
       mcfarland = if ("lm_mcfarland_temp" %in% input$linesToShow) 
-        lm(`McFarland Average Temp` ~ Year, data = data)
+        lm(`McFarland Average Temp` ~ Year, data = data),
+      serc = if ("lm_serc_temp" %in% input$linesToShow) 
+        lm(`SERC Average Temp` ~ Year, data = data)
     )
   })
   
@@ -108,7 +147,9 @@ server <- function(input, output) {
       noaa_precip = if ("lm_noaa_precip" %in% input$linesToShowPrecip) 
         lm(`NOAA Precip` ~ Year, data = data),
       mcfarland_precip = if ("lm_mcfarland_precip" %in% input$linesToShowPrecip) 
-        lm(`McFarland Precip` ~ Year, data = data)
+        lm(`McFarland Precip` ~ Year, data = data),
+      serc_precip = if ("lm_serc_precip" %in% input$linesToShowPrecip) 
+        lm(`SERC Precip` ~ Year, data = data)
     )
   })
   
@@ -232,7 +273,7 @@ server <- function(input, output) {
       }
     }
     
-    #add mcfarland temp
+    #add McFarland temp
     if ("McFarland Average Temp" %in% input$linesToShow) {
       p <- p + geom_line(aes(x = Year,
                              y = `McFarland Average Temp`,
@@ -244,13 +285,26 @@ server <- function(input, output) {
       }
     }
     
+    #add SERC temp
+    if ("SERC Average Temp" %in% input$linesToShow) {
+      p <- p + geom_line(aes(x = Year,
+                             y = `SERC Average Temp`,
+                             color = "SERC Average Temp."))
+      
+      if (!is.null(models$serc)) {
+        p <- add_model_line(p, models$serc, "SERC Average Temp")
+        
+      }
+    }
+    
     # Customize the legend and colors
     p <- p + scale_color_manual(
       values = c(
         "NOAA Average Temp." = "#000000", 
         "NOAA Average Maximum Temp." = "#CC3300", 
         "NOAA Average Minimum Temp." = "#003399", 
-        "McFarland Average Temp." = "#00CC00"
+        "McFarland Average Temp." = "#00CC00",
+        "SERC Average Temp." = "#996633"
       ),
       name = "Temperature Type"
     )
@@ -288,6 +342,11 @@ server <- function(input, output) {
     output$mcfarland_temp_model_summary <- renderPrint({
       req("lm_mcfarland_temp" %in% input$linesToShow)
       summary(temp_models()$mcfarland)
+    })
+    
+    output$serc_temp_model_summary <- renderPrint({
+      req("lm_serc_temp" %in% input$linesToShow)
+      summary(temp_models()$serc)
     })
   
   # Precipitation plot output ----------------------------------------
@@ -330,12 +389,25 @@ server <- function(input, output) {
         
       }
     }
+    
+    #add SERC precip data
+    if ("SERC Precip" %in% input$linesToShowPrecip) {
+      p2 <- p2 + geom_line(aes(x = Year,
+                               y = `SERC Precip`,
+                               color = "SERC Total Precip."))
+      
+      if (!is.null(models$serc_precip)) {
+        p2 <- add_model_line(p2, models$serc_precip, "SERC Precip")
+        
+      }
+    }
   
   # Customize the legend and colors
   p2 <- p2 + scale_color_manual(
     values = c(
       "NOAA Total Precip." = "#000000", 
-      "McFarland Total Precip." = "#00CC00"
+      "McFarland Total Precip." = "#00CC00",
+      "SERC Average Precip." = "#996633"
     ),
     name = "Precipitation Data"
   )
@@ -364,6 +436,10 @@ server <- function(input, output) {
       summary(precip_models()$mcfarland_precip)
     })
 
+    output$serc_precip_model_summary <- renderPrint({
+      req("lm_serc_precip" %in% input$linesToShowPrecip)
+      summary(precip_models()$serc_precip)
+    })
 
   #-----------------------#
   ####  Anomaly Plots  ####

@@ -4,7 +4,6 @@
 ####    Build R Shiny Dashboard     ####
 #--------------------------------------# 
 
-
 #### functions ####
 
 create_temp_records_panel <- function(plots_config) {
@@ -24,8 +23,8 @@ create_temp_records_panel <- function(plots_config) {
           width = 12,
           # Add checkbox group for line selection
           checkboxGroupInput(
-            config$checkbox_id,
-            "Select Data to Display:",
+            inputId = config$checkbox_id,
+            label = "Select Data to Display:",
             choices = config$checkbox_choices,
             selected = config$default_selected
           ),
@@ -85,9 +84,42 @@ ui <- dashboardPage(
     tabItems(
       # Tab for dashboard overview (add content here later)
       tabItem(tabName = "overview",
-              h2("Dashboard Overview"),
-              p("Content for the dashboard overview can go here.")
+              fluidRow(
+                # Left column with text
+                column(width = 6,
+                       box(
+                         title = "Dashboard Overview",
+                         status = "primary",
+                         solidHeader = TRUE,
+                         width = NULL,
+                         tags$img(
+                           src = "img/COPY_SchoodicInstitute_Horizontal_CMYK.png",
+                           width = "100%",
+                           style = "margin-bottom: 15px;",
+                           alt = "Schoodic Institute logo" 
+                         ),
+                         p("This R Shiny Dashboard summarizes climate data from the Acadia National Park region gathered from local weather stations and the National Oceanic and Atmospheric Administration (NOAA). Local data was gathered from the McFarland Hill Atmospheric Research Station and Winter Harbor-SERC weather station. Climate data was compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes."),
+                         tags$ul(
+                           tags$li(HTML('Data from NOAAs National Centers for Environmental Information (<a href="https://www.ncei.noaa.gov" target="_blank">NCEI </a>). Climate data was compiled and cleaned using R scripts by Kyle Lima, built from the climateNETN package by Kate Miller (<a href="https://github.com/KateMMiller/climateNETN" target="_blank">climateNETN </a>).')),
+                           tags$li("Climate summaries were created from hourly data collected by the McFarland Hill Atmospheric Research Station."),
+                           tags$li("Climate summaries were created from 15 minute interval data collected by Winter Harbor-SERC weather station (ID: D2258).")),
+                         p(HTML("<strong>Data Access</strong>: data from all sources used in this app and R scripts for data cleaning can be downloaded and found at this page: link."))
+                         )
+                      ),
+                # Right column with map
+                column(width = 6,
+                       box(
+                         title = "Weather Station Locations",
+                         status = "primary",
+                         solidHeader = TRUE,
+                         width = NULL,
+                         height = "600px",
+                         leafletOutput("LocationMap", height = "550px")
+                       )
+                )
+              )
       ),
+      
       
       # Tab for interactive temperature plot
       tabItem(tabName = "temp",
@@ -95,7 +127,6 @@ ui <- dashboardPage(
               tabsetPanel(
                 tabPanel(
                   "Temperature Trends",
-                  
                   
                   # Add fluidRow for the checkbox group and plot
                   fluidRow(
@@ -115,21 +146,23 @@ ui <- dashboardPage(
                                       "NOAA Average Temp." = "NOAA Average Temp",
                                       "NOAA Average Minimum Temp." = "NOAA Average Min Temp",
                                       "McFarland Average Temp." = "McFarland Average Temp",
+                                      "SERC Average Temp." = "SERC Average Temp",
                                       "Linear Model for NOAA Average Max Temp" = "lm_noaa_max_temp",
                                       "Linear Model for NOAA Average Temp" = "lm_noaa_temp",
                                       "Linear Model for NOAA Average Min Temp" = "lm_noaa_min_temp",
-                                      "Linear Model for McFarland Average Temp" = "lm_mcfarland_temp"
+                                      "Linear Model for McFarland Average Temp" = "lm_mcfarland_temp",
+                                      "Linear Model for SERC Average Temp" = "lm_serc_temp"
                           ),
-                          selected = c("NOAA Average Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp")
+                          selected = c("NOAA Average Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp", "SERC Average Temp")
                         ),
                       
                       # Add slider for year range
                           sliderInput(
                             inputId = "year_range_temp",
                             label = "Select Year Range:",
-                            min = min(shiny.merged.temp$year),
-                            max = max(shiny.merged.temp$year),
-                            value = c(min(shiny.merged.temp$year), max(shiny.merged.temp$year)),
+                            min = min(temperature.data.merged$year),
+                            max = max(temperature.data.merged$year),
+                            value = c(min(temperature.data.merged$year), max(temperature.data.merged$year)),
                             sep = ""
                         )
                       )
@@ -184,6 +217,12 @@ ui <- dashboardPage(
                           condition = "input.linesToShow.includes('lm_mcfarland_temp')",
                           h4("McFarland Temperature Model"),
                           verbatimTextOutput("mcfarland_temp_model_summary")
+                        ),
+                        # McFarland Temperature model stats
+                        conditionalPanel(
+                          condition = "input.linesToShow.includes('lm_serc_temp')",
+                          h4("SERC Temperature Model"),
+                          verbatimTextOutput("serc_temp_model_summary")
                         )
                       )
                     )
@@ -345,18 +384,20 @@ ui <- dashboardPage(
                           label = "Select Precipitation Data to Display:",
                           choices = c("NOAA Total Precip." = "NOAA Precip",
                                       "McFarland Total Precip." = "McFarland Precip",
+                                      "SERC Total Precip." = "SERC Precip",
                                       "Linear Model for NOAA Precip" = "lm_noaa_precip",
-                                      "Linear Model for McFarland Precip" = "lm_mcfarland_precip"),
-                          selected = c("NOAA Precip", "McFarland Precip")
+                                      "Linear Model for McFarland Precip" = "lm_mcfarland_precip",
+                                      "Linear Model for SERC Precip" = "lm_serc_precip"),
+                          selected = c("NOAA Precip", "McFarland Precip", "SERC Precip")
                         ),
                       
                       # Add slider for year range
                       sliderInput(
                         inputId = "year_range_precip",
                         label = "Select Year Range:",
-                        min = min(shiny.merged.precip$year),
-                        max = max(shiny.merged.precip$year),
-                        value = c(min(shiny.merged.precip$year), max(shiny.merged.precip$year)),
+                        min = min(precipitation.data.merged$year),
+                        max = max(precipitation.data.merged$year),
+                        value = c(min(precipitation.data.merged$year), max(precipitation.data.merged$year)),
                         sep = ""
                         )
                       )
@@ -372,7 +413,7 @@ ui <- dashboardPage(
                         plotlyOutput("PrecipPlot", height = "600px")
                       )
                     )
-                  ),
+                ),
                   
                   # fluidRow for model statistics
                   fluidRow(
@@ -396,6 +437,13 @@ ui <- dashboardPage(
                           condition = "input.linesToShowPrecip.includes('lm_mcfarland_precip')",
                           h4("McFarland Precipitation Model"),
                           verbatimTextOutput("mcfarland_precip_model_summary")
+                        ),
+                        
+                        # SERC precipitation model stats
+                        conditionalPanel(
+                          condition = "input.linesToShowPrecip.includes('lm_serc_precip')",
+                          h4("SERC Precipitation Model"),
+                          verbatimTextOutput("serc_precip_model_summary")
                         )
                       )
                     )
