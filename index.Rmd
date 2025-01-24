@@ -59,7 +59,7 @@ Data Download
 
 <li class="primary-item">
 
-Daily: <a href="https://www.ncei.noaa.gov/thredds/catalog/nclimgrid-daily/catalog.html">NOAA Daily Data</a>
+Daily: <a href="https://www.ncei.noaa.gov/products/land-based-station/nclimgrid-daily">NOAA Daily Data</a>
 
 <ul class="secondary-list">
 
@@ -75,7 +75,7 @@ Data compiling script: <a href="https://github.com/Kylelima21/acadia_climate_das
 
 <li class="primary-item">
 
-Monthly: <a href="https://www.ncei.noaa.gov/thredds/catalog/data-in-development/nclimgrid/catalog.html">NOAA Monthly Data</a>
+Monthly: <a href="https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00332">NOAA Monthly Data</a>
 
 <ul class="secondary-list">
 

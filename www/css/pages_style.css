@@ -125,7 +125,7 @@ ol[role="list"] {
   box-shadow: 3px 7px 1rem rgba(0, 0, 0, 0.4);
   display: grid;
   grid-template-columns: 60% 40%;
-  grid-template-rows: auto; /* Ensure grid rows adjust dynamically */
+  grid-template-rows: auto; 
   grid-template-areas: 
     "title gall";
 }
@@ -174,12 +174,13 @@ ol[role="list"] {
   grid-column: 2 / span 10;
   font-size: 20px; 
   color: var(--clr-text-light);
-  line-height: 20px;
+  line-height: 2px;
   background-color: var(--clr-base-white); 
-  padding: 20px; 
+  padding: 40px; 
   margin: 20px;
-  height: 20px;
+  height: auto;
   border-radius: 4px;
+  box-shadow: 3px 3px 1rem rgba(0, 0, 0, 0.4), -3px -3px 1rem rgba(0, 0, 0, 0.4);
 }
 
 /* Link Styling */
