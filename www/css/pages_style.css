@@ -120,7 +120,7 @@ ol[role="list"] {
 /* Title page styling*/
 
 .titlepage-box {
-  height: 80vh;
+  height: 70vh;
   background-image: linear-gradient(100deg, var(--clr-base-purple), var(--clr-base-blue));
   box-shadow: 3px 7px 1rem rgba(0, 0, 0, 0.4);
   display: grid;
@@ -133,21 +133,21 @@ ol[role="list"] {
 .title-box {
   grid-area: title;
   text-align: center;
-  padding: 80px 30px 0 50px;
+  padding: 100px 30px 0 50px;
   color: var(--clr-text-light);
   max-height: max-content;
 }
 
 .titlepage-title {
-  font-size: 60px;
+  font-size: 70px;
   font-weight: 100;
-  margin-top: 20px;
-  margin-bottom: 20px;
+  margin-top: 30px;
+  margin-bottom: 30px;
   line-height: 1;
 }
 
 .titlepage-subtitle {
-  font-size: 20px;
+  font-size: 28px;
   font-weight: 400;
 }
 
@@ -162,7 +162,7 @@ ol[role="list"] {
 }
 
 .image-logo {
-  grid-row: 5;
+  grid-row: 2;
   grid-column: 2 / span 10;
   z-index: 1;
   width: 100%;
@@ -170,14 +170,28 @@ ol[role="list"] {
 }
 
 .image-text {
-  grid-row: 13; 
+  grid-row: 11; 
   grid-column: 2 / span 10;
-  font-size: 20px; 
+  font-size: 28px; 
   color: var(--clr-text-light);
   line-height: 2px;
   background-color: var(--clr-base-white); 
   padding: 40px; 
-  margin: 20px;
+  margin: 10px;
+  height: auto;
+  border-radius: 4px;
+  box-shadow: 3px 3px 1rem rgba(0, 0, 0, 0.4), -3px -3px 1rem rgba(0, 0, 0, 0.4);
+}
+
+.image-text2 {
+  grid-row: 15; 
+  grid-column: 2 / span 10;
+  font-size: 28px; 
+  color: var(--clr-text-light);
+  line-height: 2px;
+  background-color: var(--clr-base-white); 
+  padding: 40px; 
+  margin: 10px;
   height: auto;
   border-radius: 4px;
   box-shadow: 3px 3px 1rem rgba(0, 0, 0, 0.4), -3px -3px 1rem rgba(0, 0, 0, 0.4);
@@ -239,7 +253,7 @@ ol[role="list"] {
 
 /* Heading Styling */
 .data-section h3 {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
   margin-bottom: 15px;
   color: var(--clr-text-dark);
@@ -265,7 +279,7 @@ ol[role="list"] {
 .secondary-item {
   margin-bottom: 12px;
   line-height: 1.6;
-  font-size: 18px;
+  font-size: 20px;
 }
 
 .primary-item:last-child,

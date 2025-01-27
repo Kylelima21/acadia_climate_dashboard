@@ -93,9 +93,9 @@ ui <- dashboardPage(
                          status = "primary",
                          solidHeader = TRUE,
                          width = NULL,
-                         tags$img(src = "img/SchoodicInstitute_Horizontal_CMYK.png",
-                                  width = "50%",
-                                  style = "margin-bottom: 15px;",
+                         tags$img(src = "img/COPY2_SchoodicInstitute_Horizontal_CMYK.png",
+                                  width = "100%",
+                                  style = "margin-bottom: 10px;",
                                   alt = "Schoodic Institute logo" 
                          ),
                          p("This R Shiny Dashboard summarizes climate data from the Acadia National Park region gathered from local weather stations and the National Oceanic and Atmospheric Administration (NOAA). Local data was gathered from the McFarland Hill Atmospheric Research Station and the Winter Harbor-SERC weather station. Climate data was compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes."),

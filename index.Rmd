@@ -25,7 +25,7 @@ Acadia Climate Data Dashboard Project
 </div>
 
 <div class = "titlepage-subtitle">
-This site is for downloading Acadia National Park climate data and data cleaning scripts. This data is used in the Acadia Climate Data R Shiny Dashboard (). Cleaning scripts only require the input of the downloaded datasets to run in R. 
+This site is for downloading Acadia National Park climate data and data cleaning scripts. This data is used in the Acadia Climate Data R Shiny Dashboard. Cleaning scripts only require the input of the downloaded datasets to run in R. 
 </div>
 </div>
 
@@ -34,6 +34,7 @@ This site is for downloading Acadia National Park climate data and data cleaning
   <img src="www/img/COPY_SchoodicInstitute_Horizontal_CMYK.png" alt="Schoodic Institute at Acadia National Park logo"
         class="image-logo">
   <p class="image-text"> <a href="https://github.com/Kylelima21/acadia_climate_dashboard">Github repository</a></p>
+  <p class="image-text2"> <a href="https://github.com/Kylelima21/acadia_climate_dashboard">R Shiny Dashboard</a></p>
 </div>
   
 </div>
@@ -59,13 +60,13 @@ Data Download
 
 <li class="primary-item">
 
-Daily: <a href="https://www.ncei.noaa.gov/products/land-based-station/nclimgrid-daily">NOAA Daily Data</a>
+<a href="https://www.ncei.noaa.gov/products/land-based-station/nclimgrid-daily">Daily NOAA Data</a>
 
 <ul class="secondary-list">
 
 <li class="secondary-item">
 
-Data compiling script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/compile_nClimGrid_daily.R">nClimGrid Daily Script</a>
+Data compiling and cleaning script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/compile_nClimGrid_daily.R">nClimGrid Daily Script</a>
 
 </li>
 
@@ -75,13 +76,13 @@ Data compiling script: <a href="https://github.com/Kylelima21/acadia_climate_das
 
 <li class="primary-item">
 
-Monthly: <a href="https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00332">NOAA Monthly Data</a>
+<a href="https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00332">Monthly NOAA Data</a>
 
 <ul class="secondary-list">
 
 <li class="secondary-item">
 
-Data compiling script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/complie_nClimGrid_monthly.R">nClimGrid Monthly Script</a>
+Data compiling and cleaning script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/complie_nClimGrid_monthly.R">nClimGrid Monthly Script</a>
 
 </li>
 
@@ -107,11 +108,19 @@ Data download requires cleaning scripts by Kyle Lima that build off Kate Miller'
 
 <li class="primary-item">
 
-<a href="https://ard-request.air-resource.com/data.aspx">Data Access</a>
+<a href="https://ard-request.air-resource.com/data.aspx">McFarland Hill data</a>
+
+<ul class="secondary-list">
+
+<li class="secondary-item">
+
+Data cleaning script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/clim_data_cleaning_function.R">Climate Data Cleaning Function</a>
 
 </li>
 
 </ul>
+
+</li>
 
 </section>
 
@@ -123,27 +132,19 @@ Data download requires cleaning scripts by Kyle Lima that build off Kate Miller'
 
 <li class="primary-item">
 
-<a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=D2258">Data Access</a>
+<a href="https://mesowest.utah.edu/cgi-bin/droman/meso_base_dyn.cgi?stn=D2258">SERC data</a>
+
+<ul class="secondary-list">
+
+<li class="secondary-item">
+
+Data cleaning script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/clim_data_cleaning_function.R">Climate Data Cleaning Function</a>
 
 </li>
 
 </ul>
 
-</section>
-
-<section class="data-section">
-
-<h3>Cleaning Function for All Sources</h3>
-
-<ul class="primary-list">
-
-<li class="primary-item">
-
-<a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/clim_data_cleaning_function.R">Climate Data Cleaning Function</a>
-
 </li>
-
-</ul>
 
 </section>
 
