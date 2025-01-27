@@ -321,7 +321,6 @@ calculate_anomalies <- function(data, baseline, value.col, include_percent = FAL
 #' @param type Type of anomaly ("temp" or "precip")
 #' @return Processed data for Shiny dashboard
 prepare_shiny_data <- function(anomaly_data, source_prefix, type) {
-  current_year <- as.numeric(format(Sys.Date(), "%Y"))
   
   cols_to_select <- c("year", "month", "year.month", "anomaly")
   new_names <- c(
@@ -337,8 +336,7 @@ prepare_shiny_data <- function(anomaly_data, source_prefix, type) {
   
   anomaly_data %>%
     select(all_of(cols_to_select)) %>%
-    rename_with(~new_names, all_of(cols_to_select)) %>%
-    filter(year < current_year)
+    rename_with(~new_names, all_of(cols_to_select))
 }
 
 #' Process climate data and calculate anomalies
@@ -369,6 +367,15 @@ process_climate_data <- function(data, value_col, source_prefix, type) {
 }
 
 # Usage:
+
+# first
+# Clean McFarland data (remove 1998)
+mcfarland.clean <- mcfarland.clean %>%
+  mutate(
+    temp = if_else(year == 1998, NA_real_, temp),
+    ppt = if_else(year == 1998, NA_real_, ppt)
+  )
+
 # Process NOAA temperature data
 noaa_temp <- process_climate_data(
   noaa.monthly.data,
@@ -384,6 +391,16 @@ mcfarland_temp <- process_climate_data(
     summarize(tmean = mean(temp, na.rm = TRUE)),
   "tmean",
   "mcfarland",
+  "temp"
+)
+
+# Process SERC temperature data
+serc_temp <- process_climate_data(
+  serc.clean %>%
+    group_by(year, month) %>%
+    summarize(tmean = mean(temp, na.rm = TRUE)),
+  "tmean",
+  "serc",
   "temp"
 )
 
@@ -405,21 +422,44 @@ mcfarland_precip <- process_climate_data(
   "precip"
 )
 
+# Process SERC precipitation data
+serc_precip <- process_climate_data(
+  serc.clean %>%
+    group_by(year, month) %>%
+    summarize(ppt = mean(ppt.24hr, na.rm = TRUE)),
+  "ppt",
+  "serc",
+  "precip"
+)
+
 # Merge temperature anomalies
-shiny.merged.anom <- noaa_temp$shiny_data %>%
-  left_join(mcfarland_temp$shiny_data, by = c("year", "month"))
+anom.temp.merged <- noaa_temp$shiny_data %>%
+  filter(year < get_current_year()) %>%
+  left_join(mcfarland_temp$shiny_data, by = c("year", "month")) %>% 
+  left_join(serc_temp$shiny_data, by = c("year", "month"))
 
 # Merge precipitation anomalies
-shiny.merged.precip.anom <- noaa_precip$shiny_data %>%
-  left_join(mcfarland_precip$shiny_data, by = c("year", "month"))
+anom.precip.merged <- noaa_precip$shiny_data %>%
+  filter(year < get_current_year()) %>%
+  left_join(mcfarland_precip$shiny_data, by = c("year", "month")) %>%
+  left_join(serc_precip$shiny_data, by = c("year", "month"))
 
 ##save outputs as csv
-# write.csv(shiny.merged.anomalies, "data/processed_data/shiny_merged_anom.csv", row.names = FALSE)
+# write.csv(anom.temp.merged, "data/processed_data/anom_temp_merged.csv", row.names = FALSE)
+# write.csv(anom.precip.merged, "data/processed_data/anom_precip_merged.csv", row.names = FALSE)
 
 
-#### Record plots---------------------------------------------------------------
+#### Record plots--------------------------------------------------------------
 
 calculate_weather_records <- function(daily.data, monthly.data) {
+  
+  # Convert precipitation from mm to inches at the start
+  daily.data <- daily.data %>%
+    mutate(ppt = ppt * MM_TO_INCHES)
+  
+  monthly.data <- monthly.data %>%
+    mutate(ppt = ppt * MM_TO_INCHES)
+  
   # Function to create year.month date format
   create_year_month <- function(data) {
     data %>%
@@ -435,6 +475,7 @@ calculate_weather_records <- function(daily.data, monthly.data) {
       filter(!!sym(var.name) == ifelse(stat.type == "max", 
                                        max(!!sym(var.name), na.rm = TRUE),
                                        min(!!sym(var.name), na.rm = TRUE))) %>%
+      slice(1) %>% 
       ungroup() %>%
       select(UnitCode, long, lat, !!sym(var.name), year, date) %>%
       rename(
@@ -452,6 +493,7 @@ calculate_weather_records <- function(daily.data, monthly.data) {
       filter(!!sym(var.name) == ifelse(stat.type == "max", 
                                        max(!!sym(var.name), na.rm = TRUE),
                                        min(!!sym(var.name), na.rm = TRUE))) %>%
+      slice(1) %>% 
       ungroup() %>%
       select(UnitCode, long, lat, !!sym(var.name), year, year.month) %>%
       rename(
@@ -497,20 +539,32 @@ calculate_weather_records <- function(daily.data, monthly.data) {
   # Combine monthly records
   shiny.monthly.records <- monthly.records$highest.mean %>%
     left_join(monthly.records$highest.max, 
-              by = c("year", "UnitCode", "long", "lat")) %>%
+              by = c("year", "unit.code", "long", "lat")) %>%
     left_join(monthly.records$lowest.mean, 
-              by = c("year", "UnitCode", "long", "lat")) %>%
+              by = c("year", "unit.code", "long", "lat")) %>%
     left_join(monthly.records$lowest.min, 
-              by = c("year", "UnitCode", "long", "lat")) %>%
+              by = c("year", "unit.code", "long", "lat")) %>%
     left_join(monthly.records$highest.precip, 
-              by = c("year", "UnitCode", "long", "lat")) %>%
+              by = c("year", "unit.code", "long", "lat")) %>%
     left_join(monthly.records$lowest.precip, 
-              by = c("year", "UnitCode", "long", "lat"))
+              by = c("year", "unit.code", "long", "lat"))
   
-# Save outputs
-# write.csv(shiny.daily.records, "data/processed_data/shiny_daily_records.csv", row.names = FALSE)
-# write.csv(shiny.monthly.records, "data/processed_data/shiny_monthly_records.csv", row.names = FALSE)
+  # Return both datasets
+  return(list(
+    daily = shiny.daily.records,
+    monthly = shiny.monthly.records
+  ))
   
 }
 
+#call function and generate records results
+results <- calculate_weather_records(
+  daily.data = noaa.daily.data, 
+  monthly.data = noaa.monthly.data)
 
+shiny.daily.records <- results$daily
+shiny.monthly.records <- results$monthly
+
+# Save outputs
+# write.csv(shiny.daily.records, "data/processed_data/shiny_daily_records.csv", row.names = FALSE)
+# write.csv(shiny.monthly.records, "data/processed_data/shiny_monthly_records.csv", row.names = FALSE)
