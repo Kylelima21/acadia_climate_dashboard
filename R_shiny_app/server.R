@@ -43,7 +43,7 @@ server <- function(input, output) {
   
   # Reactive for temperature data
   temperature_data <- reactive({
-    temperature.data.merged %>% 
+    temp.data.merged %>% 
       rename(
         Year = year, 
         `NOAA Average Temp` = noaa.temp,
@@ -56,7 +56,7 @@ server <- function(input, output) {
   
   # Reactive for precipitation data
   precipitation_data <- reactive({
-    precipitation.data.merged %>% 
+    precip.data.merged %>% 
       rename(
         Year = year, 
         `NOAA Precip` = noaa.precip,
@@ -67,12 +67,13 @@ server <- function(input, output) {
   
   # Reactive for temperature anomaly data
   temp_anomaly_data <- reactive({
-    shiny.merged.anom %>%
+    anom.temp.merged %>%
       rename(
         Year = year, 
         `Year-Month` = noaa.year.month, 
-        `NOAA Temp Anom` = noaa.anom,
-        `McFarland Temp Anom` = mcfarland.anom
+        `NOAA Temp Anom` = noaa.temp.anom,
+        `McFarland Temp Anom` = mcfarland.temp.anom,
+        `SERC Temp Anom` = serc.temp.anom
       ) %>%
       mutate(
         `Year-Month` = as.Date(`Year-Month`),
@@ -83,6 +84,10 @@ server <- function(input, output) {
         mcfarland_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
           "<br>McFarland Temp Anomaly:", round(`McFarland Temp Anom`, 4)
+        ),
+        serc_hover_text = paste(
+          "Year-Month:", format(`Year-Month`, "%Y-%m"),
+          "<br>SERC Temp Anomaly:", round(`SERC Temp Anom`, 4)
         )
       )  %>%
       # Add filter based on slider input
@@ -94,12 +99,13 @@ server <- function(input, output) {
   
   # Reactive for precipitation anomaly data
   precip_anomaly_data <- reactive({
-    shiny.merged.precip.anom %>%
+    anom.precip.merged %>%
       rename(
         Year = year, 
         `Year-Month` = noaa.year.month, 
         `NOAA Precip Anom` = noaa.percent.precip.anom,
-        `McFarland Precip Anom` = mcfarland.percent.precip.anom
+        `McFarland Precip Anom` = mcfarland.percent.precip.anom,
+        `SERC Precip Anom` = serc.percent.precip.anom
       ) %>%
       mutate(
         `Year-Month` = as.Date(`Year-Month`),
@@ -110,6 +116,10 @@ server <- function(input, output) {
         mcfarland_precip_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
           "<br>McFarland Precip Anomaly:", round(`McFarland Precip Anom`, 4)
+        ),
+        serc_precip_hover_text = paste(
+          "Year-Month:", format(`Year-Month`, "%Y-%m"),
+          "<br>SERC Precip Anomaly:", round(`SERC Precip Anom`, 4)
         )
       ) %>%
       # Add filter based on slider input
@@ -492,6 +502,7 @@ server <- function(input, output) {
   }
   
 #create anomaly plots
+    
   # For NOAA temperature anomalies
   output$NOAAAnomPlot <- renderPlotly({
     create_anomaly_plot(
@@ -516,6 +527,18 @@ server <- function(input, output) {
     )
   })
   
+  # For SERC temperature anomalies
+  output$SERCAnomPlot <- renderPlotly({
+    create_anomaly_plot(
+      data = temp_anomaly_data(),
+      x_col = "Year-Month",
+      y_col = "SERC Temp Anom",
+      hover_text_col = "serc_hover_text",
+      legend_title = "SERC Temp Anomaly Data",
+      break_interval = "5 years"
+    )
+  })
+  
   # For NOAA precipitation anomalies
   output$NOAAPrecipAnomPlot <- renderPlotly({
     create_anomaly_plot(
@@ -536,6 +559,18 @@ server <- function(input, output) {
       y_col = "McFarland Precip Anom",
       hover_text_col = "mcfarland_precip_hover_text",
       legend_title = "McFarland Precip Anomaly Data",
+      break_interval = "5 years"
+    )
+  })
+  
+  # For SERC precipitation anomalies
+  output$SERCPrecipAnomPlot <- renderPlotly({
+    create_anomaly_plot(
+      data = precip_anomaly_data(),
+      x_col = "Year-Month",
+      y_col = "SERC Precip Anom",
+      hover_text_col = "serc_precip_hover_text",
+      legend_title = "SERC Precip Anomaly Data",
       break_interval = "5 years"
     )
   })
@@ -707,7 +742,7 @@ server <- function(input, output) {
   # max temp record plot output
   output$MaxTempRecordsPlot <- renderPlotly({
     create_record_plot(
-      data = shiny.monthly.records,
+      data = record.noaa.monthly,
       date_col1 = "tmean.max.ym",    
       date_col2 = "tmax.max.ym",    
       value_col1 = "tmean.max",
@@ -734,7 +769,7 @@ server <- function(input, output) {
   # daily max temp record plot output
   output$DailyMaxRecordsPlot <- renderPlotly({
     create_record_plot(
-      data = shiny.daily.temp.records,
+      data = records.noaa.daily,
       date_col1 = "tmean.max.date",    
       date_col2 = "tmax.max.date",    
       value_col1 = "tmean.max",
@@ -761,7 +796,7 @@ server <- function(input, output) {
   # max precip record plot output
   output$MaxPrecipRecordsPlot <- renderPlotly({
     create_record_plot(
-      data = shiny.monthly.precip.records,
+      data = records.noaa.monthly,
       date_col1 = "ppt.max.ym",    
       date_col2 = NULL,    
       value_col1 = "ppt.max",
@@ -944,7 +979,7 @@ server <- function(input, output) {
   # min temp record plot output
   output$MinTempRecordsPlot <- renderPlotly({
     record_lows(
-      data = shiny.monthly.records,
+      data = records.noaa.monthly,
       date_col1 = "tmean.min.ym",    
       date_col2 = "tmin.min.ym",    
       value_col1 = "tmean.min",
@@ -971,7 +1006,7 @@ server <- function(input, output) {
   # daily min temp record plot output
   output$DailyMinRecordsPlot <- renderPlotly({
     record_lows(
-      data = shiny.daily.temp.records,
+      data = records.noaa.daily,
       date_col1 = "tmean.min.date",    
       date_col2 = "tmin.min.date",    
       value_col1 = "tmean.min",
@@ -998,7 +1033,7 @@ server <- function(input, output) {
   # min precip record plot output
   output$MinPrecipRecordsPlot <- renderPlotly({
     record_lows(
-      data = shiny.monthly.precip.records,
+      data = records.noaa.monthly,
       date_col1 = "ppt.min.ym",    
       date_col2 = NULL,    
       value_col1 = "ppt.min",

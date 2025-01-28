@@ -6,6 +6,7 @@
 
 #### functions ####
 
+## function for generating data manipulation panel next to plots (e.i. check boxes, sliders, etc.)
 create_temp_records_panel <- function(plots_config) {
   # plots_config should be a list of lists, each containing configuration for one plot
   lapply(plots_config, function(config) {
@@ -160,9 +161,9 @@ ui <- dashboardPage(
                           sliderInput(
                             inputId = "year_range_temp",
                             label = "Select Year Range:",
-                            min = min(temperature.data.merged$year),
-                            max = max(temperature.data.merged$year),
-                            value = c(min(temperature.data.merged$year), max(temperature.data.merged$year)),
+                            min = min(temp.data.merged$year),
+                            max = max(temp.data.merged$year),
+                            value = c(min(temp.data.merged$year), max(temp.data.merged$year)),
                             sep = ""
                         )
                       )
@@ -191,34 +192,34 @@ ui <- dashboardPage(
                         solidHeader = TRUE,
                         width = 12,
                         
-                        # NOAA Average Temperature model stats
+                        # NOAA average temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_noaa_temp')",
                           h4("NOAA Average Temperature Model"),
                           verbatimTextOutput("noaa_temp_model_summary")
                         ),
                         
-                        # NOAA Maximum Temperature model stats
+                        # NOAA max temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_noaa_max_temp')",
                           h4("NOAA Maximum Temperature Model"),
                           verbatimTextOutput("noaa_max_temp_model_summary")
                         ),
                         
-                        # NOAA Minimum Temperature model stats
+                        # NOAA min temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_noaa_min_temp')",
                           h4("NOAA Minimum Temperature Model"),
                           verbatimTextOutput("noaa_min_temp_model_summary")
                         ),
                         
-                        # McFarland Temperature model stats
+                        # McFarland temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_mcfarland_temp')",
                           h4("McFarland Temperature Model"),
                           verbatimTextOutput("mcfarland_temp_model_summary")
                         ),
-                        # McFarland Temperature model stats
+                        # SERC temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_serc_temp')",
                           h4("SERC Temperature Model"),
@@ -257,16 +258,16 @@ ui <- dashboardPage(
                         sliderInput(
                           inputId = "year_range_temp_anom",
                           label = "Select Year Range:",
-                          min = min(shiny.merged.anom$year),
-                          max = max(shiny.merged.anom$year),
-                          value = c(min(shiny.merged.anom$year), max(shiny.merged.anom$year)),
+                          min = min(anom.temp.merged$year),
+                          max = max(anom.temp.merged$year),
+                          value = c(min(anom.temp.merged$year), max(anom.temp.merged$year)),
                           sep = ""
                         )
                       )
                     )
                   ),
                   
-                  #NOAA anom plot
+                  #NOAA temp anom plot
                   fluidRow(
                     column(
                       width = 12,
@@ -280,7 +281,7 @@ ui <- dashboardPage(
                     )
                   ),
                   
-                  #McFarland anom plot 
+                  #McFarland temp anom plot 
                   fluidRow(
                     column(
                       width = 12,
@@ -290,6 +291,20 @@ ui <- dashboardPage(
                         solidHeader = TRUE,
                         width = 12,
                         plotlyOutput("McFarlandAnomPlot", height = "600px")
+                      )
+                    )
+                  ),
+                  
+                  #SERC temp anom plot 
+                  fluidRow(
+                    column(
+                      width = 12,
+                      box(
+                        title = "SERC Temperature Anomalies",
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        plotlyOutput("SERCAnomPlot", height = "600px")
                       )
                     )
                   )
@@ -308,7 +323,7 @@ ui <- dashboardPage(
                         year_range_id = "year_range_records",
                         checkbox_id = "temp_records_display",
                         plot_id = "MaxTempRecordsPlot",
-                        data_source = shiny.monthly.records,  # Original data source
+                        data_source = record.noaa.monthly,
                         checkbox_choices = c(
                           "Monthly Maximum Mean Temperature Records" = "mean_max_temp",
                           "Monthly Maximum Temperature Records" = "max_temp"
@@ -322,7 +337,7 @@ ui <- dashboardPage(
                         year_range_id = "year_range_records2",
                         checkbox_id = "min_temp_records_display",
                         plot_id = "MinTempRecordsPlot",
-                        data_source = shiny.monthly.records,  # Original data source
+                        data_source = record.noaa.monthly,
                         checkbox_choices = c(
                           "Monthly Minimum Mean Temperature Records" = "mean_min_temp",
                           "Monthly Minimum Temperature Records" = "min_temp"
@@ -336,7 +351,7 @@ ui <- dashboardPage(
                         year_range_id = "year_range_records3",
                         checkbox_id = "daily_max_temp_display",
                         plot_id = "DailyMaxRecordsPlot",
-                        data_source = shiny.daily.temp.records,  
+                        data_source = records.noaa.daily,  
                         checkbox_choices = c(
                           "Daily Maximum Mean Temperature Records" = "daily_mean_max_temp",
                           "Daily Maximum Temperature Records" = "daily_max_temp"
@@ -350,7 +365,7 @@ ui <- dashboardPage(
                         year_range_id = "year_range_records4",
                         checkbox_id = "daily_min_temp_display",
                         plot_id = "DailyMinRecordsPlot",
-                        data_source = shiny.daily.temp.records,  
+                        data_source = records.noaa.daily,  
                         checkbox_choices = c(
                           "Daily Minimum Mean Temperature Records" = "daily_mean_min_temp",
                           "Daily Minimum Temperature Records" = "daily_min_temp"
@@ -395,9 +410,9 @@ ui <- dashboardPage(
                       sliderInput(
                         inputId = "year_range_precip",
                         label = "Select Year Range:",
-                        min = min(precipitation.data.merged$year),
-                        max = max(precipitation.data.merged$year),
-                        value = c(min(precipitation.data.merged$year), max(precipitation.data.merged$year)),
+                        min = min(precip.data.merged$year),
+                        max = max(precip.data.merged$year),
+                        value = c(min(precip.data.merged$year), max(precip.data.merged$year)),
                         sep = ""
                         )
                       )
@@ -425,21 +440,21 @@ ui <- dashboardPage(
                         solidHeader = TRUE,
                         width = 12,
                         
-                        # NOAA precipitation model stats
+                        # NOAA precip model stats
                         conditionalPanel(
                           condition = "input.linesToShowPrecip.includes('lm_noaa_precip')",
                           h4("NOAA Precipitation Model"),
                           verbatimTextOutput("noaa_precip_model_summary")
                         ),
                         
-                        # McFarland precipitation model stats
+                        # McFarland precip model stats
                         conditionalPanel(
                           condition = "input.linesToShowPrecip.includes('lm_mcfarland_precip')",
                           h4("McFarland Precipitation Model"),
                           verbatimTextOutput("mcfarland_precip_model_summary")
                         ),
                         
-                        # SERC precipitation model stats
+                        # SERC precip model stats
                         conditionalPanel(
                           condition = "input.linesToShowPrecip.includes('lm_serc_precip')",
                           h4("SERC Precipitation Model"),
@@ -478,16 +493,16 @@ ui <- dashboardPage(
                         sliderInput(
                           inputId = "year_range_precip_anom",
                           label = "Select Year Range:",
-                          min = min(shiny.merged.precip.anom$year),
-                          max = max(shiny.merged.precip.anom$year),
-                          value = c(min(shiny.merged.precip.anom$year), max(shiny.merged.precip.anom$year)),
+                          min = min(anom.precip.merged$year),
+                          max = max(anom.precip.merged$year),
+                          value = c(min(anom.precip.merged$year), max(anom.precip.merged$year)),
                           sep = ""
                         )
                       )
                     )
                   ),
                   
-                  #NOAA anom plot
+                  #NOAA precip anom plot
                   fluidRow(
                     column(
                       width = 12,
@@ -501,7 +516,7 @@ ui <- dashboardPage(
                     )
                   ),
                   
-                  #McFarland anom plot 
+                  #McFarland precip anom plot 
                   fluidRow(
                     column(
                       width = 12,
@@ -511,6 +526,20 @@ ui <- dashboardPage(
                         solidHeader = TRUE,
                         width = 12,
                         plotlyOutput("McFarlandPrecipAnomPlot", height = "600px")
+                      )
+                    )
+                  ),
+                  
+                  #SERC precip anom plot 
+                  fluidRow(
+                    column(
+                      width = 12,
+                      box(
+                        title = "SERC Precipitation Anomalies",
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        plotlyOutput("SERCPrecipAnomPlot", height = "600px")
                       )
                     )
                   )
@@ -545,9 +574,9 @@ ui <- dashboardPage(
                       sliderInput(
                         inputId = "year_range_precip",
                         label = "Select Year Range:",
-                        min = min(shiny.monthly.precip.records$year),
-                        max = max(shiny.monthly.precip.records$year),
-                        value = c(min(shiny.monthly.precip.records$year), max(shiny.monthly.precip.records$year)),
+                        min = min(record.noaa.monthly$year),
+                        max = max(record.noaa.monthly$year),
+                        value = c(min(record.noaa.monthly$year), max(record.noaa.monthly$year)),
                         sep = "" # Prevent commas in year values
                       )
                     )
