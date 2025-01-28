@@ -268,13 +268,13 @@ process_weather_data <- function() {
 #generate results
 results <- process_weather_data()
 if (!is.null(results)) {
-  temperature.data.merged <- results$temperature
-  precipitation.data.merged <- results$precipitation
+  temp.data.merged <- results$temperature
+  precip.data.merged <- results$precipitation
 }
 
 # Save outputs to CSV
-# write.csv(temperature.data.merged, "data/processed_data/temperature_data_merged.csv", row.names = FALSE)
-# write.csv(precipitation.data.merged, "data/processed_data/precipitation_data_merged.csv", row.names = FALSE)
+# write.csv(temp.data.merged, "data/processed_data/temp_data_merged.csv", row.names = FALSE)
+# write.csv(precip.data.merged, "data/processed_data/precip_data_merged.csv", row.names = FALSE)
 
 
 #### Calculate Anomalies--------------------------------------------------------
@@ -345,7 +345,8 @@ prepare_shiny_data <- function(anomaly_data, source_prefix, type) {
 #' @param source_prefix Source identifier (e.g., "noaa", "mcfarland")
 #' @param type Type of data ("temp" or "precip")
 #' @return List containing processed data and Shiny-ready data
-process_climate_data <- function(data, value_col, source_prefix, type) {
+process_climate_data <- function(data, value_col, source_prefix, type, exclude_years = NULL) {
+  
   # Calculate baseline
   baseline <- calculate_monthly_baseline(data, value_col)
   
@@ -367,15 +368,6 @@ process_climate_data <- function(data, value_col, source_prefix, type) {
 }
 
 # Usage:
-
-# first
-# Clean McFarland data (remove 1998)
-mcfarland.clean <- mcfarland.clean %>%
-  mutate(
-    temp = if_else(year == 1998, NA_real_, temp),
-    ppt = if_else(year == 1998, NA_real_, ppt)
-  )
-
 # Process NOAA temperature data
 noaa_temp <- process_climate_data(
   noaa.monthly.data,
@@ -562,9 +554,9 @@ results <- calculate_weather_records(
   daily.data = noaa.daily.data, 
   monthly.data = noaa.monthly.data)
 
-shiny.daily.records <- results$daily
-shiny.monthly.records <- results$monthly
+records.noaa.daily <- results$daily
+records.noaa.monthly <- results$monthly
 
 # Save outputs
-# write.csv(shiny.daily.records, "data/processed_data/shiny_daily_records.csv", row.names = FALSE)
-# write.csv(shiny.monthly.records, "data/processed_data/shiny_monthly_records.csv", row.names = FALSE)
+# write.csv(records.noaa.daily, "data/processed_data/records_noaa_daily.csv", row.names = FALSE)
+# write.csv(records.noaa.monthly, "data/processed_data/records_noaa_monthly.csv", row.names = FALSE)
