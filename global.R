@@ -20,21 +20,14 @@ library(leaflet)
 ####    Read Data    ####
 #-----------------------#
 
-shiny.merged.temp <- read.csv("data/processed_data/shiny_merged_temp.csv")
+temp.data.merged <- read.csv("data/processed_data/temp_data_merged.csv")
 
-shiny.merged.precip <- read.csv("data/processed_data/shiny_merged_precip.csv")
+precip.data.merged <- read.csv("data/processed_data/precip_data_merged.csv")
 
-shiny.merged.anom <- read.csv("data/processed_data/shiny_merged_anom.csv")
+anom.temp.merged <- read.csv("data/processed_data/anom_temp_merged.csv")
 
-shiny.merged.precip.anom <- read.csv("data/processed_data/shiny_merged_precip_anom.csv")
+anom.precip.merged <- read.csv("data/processed_data/anom_precip_merged.csv")
 
-shiny.monthly.records <- read.csv("data/processed_data/shiny_monthly_records.csv")
+records.noaa.daily <- read.csv("data/processed_data/records_noaa_daily.csv")
 
-shiny.monthly.precip.records <- read.csv("data/processed_data/shiny_monthly_precip_records.csv")
-
-shiny.daily.temp.records <- read.csv("data/processed_data/shiny_daily_temp_records.csv")
-
-temperature.data.merged <- read.csv("data/processed_data/temperature_data_merged.csv")
-
-precipitation.data.merged <- read.csv("data/processed_data/precipitation_data_merged.csv")
-
+records.noaa.monthly <- read.csv("data/processed_data/records_noaa_monthly.csv")

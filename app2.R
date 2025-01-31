@@ -1,9 +1,15 @@
 #### Starting up ####
 
+#--------------------------------------#
+####    Build R Shiny Dashboard     ####
+#--------------------------------------# 
+
 ## Source the data and packages
 source("global.R")
 
-## Create Function
+#### functions ####
+
+## function for generating data manipulation panel next to plots (e.i. check boxes, sliders, etc.)
 create_temp_records_panel <- function(plots_config) {
   # plots_config should be a list of lists, each containing configuration for one plot
   lapply(plots_config, function(config) {
@@ -52,9 +58,7 @@ create_temp_records_panel <- function(plots_config) {
 }
 
 
-
-
-#### User interface (ui)
+#### User interface (ui) ####
 
 ui <- dashboardPage(
   
@@ -86,28 +90,51 @@ ui <- dashboardPage(
       # Tab for dashboard overview (add content here later)
       tabItem(tabName = "overview",
               fluidRow(
-                # Left column with text
-                column(width = 6,
+                # row with text and images
+                column(width = 12,
                        box(
                          title = "Dashboard Overview",
                          status = "primary",
                          solidHeader = TRUE,
                          width = NULL,
+                         fluidRow(
+                           # Left column for images
+                           column(
+                             width = 4,
+                         div(
+                           style = "text-align: center;",
                          tags$img(src = "img/COPY2_SchoodicInstitute_Horizontal_CMYK.png",
                                   width = "100%",
-                                  style = "margin-bottom: 10px;",
+                                  style = "margin-bottom: 20px; margin-top: 20px",
                                   alt = "Schoodic Institute logo" 
                          ),
+                         tags$img(
+                           src = "img/dashboard_overview_acadia_full.jpg",
+                           width = "100%",
+                           style = "margin-bottom: 10px; border: 2px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 5px;",
+                           alt = "View of Acadia National Park from Schoodic Head" 
+                         ))),
+                         column(
+                           width = 8,
+                           div(
+                             style = "font-size: 16px; line-height: 1.6;",
                          p("This R Shiny Dashboard summarizes climate data from the Acadia National Park region gathered from local weather stations and the National Oceanic and Atmospheric Administration (NOAA). Local data was gathered from the McFarland Hill Atmospheric Research Station and the Winter Harbor-SERC weather station. Climate data was compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes."),
                          tags$ul(
-                           tags$li(HTML('Climate summaries were created from daily and monthly gridded climate data downloaded from NOAA\'s National Centers for Environmental Information (<a href="https://www.ncei.noaa.gov" target="_blank">NCEI</a>). Climate data was compiled and cleaned using R scripts by Kyle Lima, built from the climateNETN package by Kate Miller (<a href="https://github.com/KateMMiller/climateNETN" target="_blank">climateNETN</a>).')),
+                           style = "font-size: 16px;",
+                           tags$li(HTML('Climate summaries were created from daily and monthly gridded climate data downloaded from NOAA\'s National Centers for Environmental Information (<a href="https://www.ncei.noaa.gov" target="_blank">NCEI </a>). Climate data was compiled and cleaned using R scripts by Kyle Lima, built from the climateNETN package by Kate Miller (<a href="https://github.com/KateMMiller/climateNETN" target="_blank">climateNETN </a>).')),
                            tags$li("Climate summaries were created from hourly data collected by the McFarland Hill Atmospheric Research Station."),
                            tags$li("Climate summaries were created from 15 minute interval data collected by the Winter Harbor-SERC weather station (ID: D2258).")),
                          p(HTML("<strong>Data Access</strong>: data from all sources used in this app and R scripts for data cleaning can be downloaded and found at this page: link."))
+                         )
                        )
-                ),
-                # Right column with map
-                column(width = 6,
+                      )
+                )
+              )
+              ),
+              
+              #second row with map
+              fluidRow(
+                column(width = 12,
                        box(
                          title = "Weather Station Locations",
                          status = "primary",
@@ -132,7 +159,7 @@ ui <- dashboardPage(
                   fluidRow(
                     # Column for the checkbox group input
                     column(
-                      width = 4, 
+                      width = 4,
                       box(
                         title = "Data Tools",
                         status = "primary", 
@@ -160,9 +187,9 @@ ui <- dashboardPage(
                         sliderInput(
                           inputId = "year_range_temp",
                           label = "Select Year Range:",
-                          min = min(temperature.data.merged$year),
-                          max = max(temperature.data.merged$year),
-                          value = c(min(temperature.data.merged$year), max(temperature.data.merged$year)),
+                          min = min(temp.data.merged$year),
+                          max = max(temp.data.merged$year),
+                          value = c(min(temp.data.merged$year), max(temp.data.merged$year)),
                           sep = ""
                         )
                       )
@@ -191,34 +218,34 @@ ui <- dashboardPage(
                         solidHeader = TRUE,
                         width = 12,
                         
-                        # NOAA Average Temperature model stats
+                        # NOAA average temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_noaa_temp')",
                           h4("NOAA Average Temperature Model"),
                           verbatimTextOutput("noaa_temp_model_summary")
                         ),
                         
-                        # NOAA Maximum Temperature model stats
+                        # NOAA max temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_noaa_max_temp')",
                           h4("NOAA Maximum Temperature Model"),
                           verbatimTextOutput("noaa_max_temp_model_summary")
                         ),
                         
-                        # NOAA Minimum Temperature model stats
+                        # NOAA min temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_noaa_min_temp')",
                           h4("NOAA Minimum Temperature Model"),
                           verbatimTextOutput("noaa_min_temp_model_summary")
                         ),
                         
-                        # McFarland Temperature model stats
+                        # McFarland temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_mcfarland_temp')",
                           h4("McFarland Temperature Model"),
                           verbatimTextOutput("mcfarland_temp_model_summary")
                         ),
-                        # McFarland Temperature model stats
+                        # SERC temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_serc_temp')",
                           h4("SERC Temperature Model"),
@@ -257,16 +284,16 @@ ui <- dashboardPage(
                         sliderInput(
                           inputId = "year_range_temp_anom",
                           label = "Select Year Range:",
-                          min = min(shiny.merged.anom$year),
-                          max = max(shiny.merged.anom$year),
-                          value = c(min(shiny.merged.anom$year), max(shiny.merged.anom$year)),
+                          min = min(anom.temp.merged$year),
+                          max = max(anom.temp.merged$year),
+                          value = c(min(anom.temp.merged$year), max(anom.temp.merged$year)),
                           sep = ""
                         )
                       )
                     )
                   ),
                   
-                  #NOAA anom plot
+                  #NOAA temp anom plot
                   fluidRow(
                     column(
                       width = 12,
@@ -280,7 +307,7 @@ ui <- dashboardPage(
                     )
                   ),
                   
-                  #McFarland anom plot 
+                  #McFarland temp anom plot 
                   fluidRow(
                     column(
                       width = 12,
@@ -290,6 +317,20 @@ ui <- dashboardPage(
                         solidHeader = TRUE,
                         width = 12,
                         plotlyOutput("McFarlandAnomPlot", height = "600px")
+                      )
+                    )
+                  ),
+                  
+                  #SERC temp anom plot 
+                  fluidRow(
+                    column(
+                      width = 12,
+                      box(
+                        title = "SERC Temperature Anomalies",
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        plotlyOutput("SERCAnomPlot", height = "600px")
                       )
                     )
                   )
@@ -308,7 +349,7 @@ ui <- dashboardPage(
                         year_range_id = "year_range_records",
                         checkbox_id = "temp_records_display",
                         plot_id = "MaxTempRecordsPlot",
-                        data_source = shiny.monthly.records,  # Original data source
+                        data_source = record.noaa.monthly,
                         checkbox_choices = c(
                           "Monthly Maximum Mean Temperature Records" = "mean_max_temp",
                           "Monthly Maximum Temperature Records" = "max_temp"
@@ -322,7 +363,7 @@ ui <- dashboardPage(
                         year_range_id = "year_range_records2",
                         checkbox_id = "min_temp_records_display",
                         plot_id = "MinTempRecordsPlot",
-                        data_source = shiny.monthly.records,  # Original data source
+                        data_source = record.noaa.monthly,
                         checkbox_choices = c(
                           "Monthly Minimum Mean Temperature Records" = "mean_min_temp",
                           "Monthly Minimum Temperature Records" = "min_temp"
@@ -336,7 +377,7 @@ ui <- dashboardPage(
                         year_range_id = "year_range_records3",
                         checkbox_id = "daily_max_temp_display",
                         plot_id = "DailyMaxRecordsPlot",
-                        data_source = shiny.daily.temp.records,  
+                        data_source = records.noaa.daily,  
                         checkbox_choices = c(
                           "Daily Maximum Mean Temperature Records" = "daily_mean_max_temp",
                           "Daily Maximum Temperature Records" = "daily_max_temp"
@@ -350,7 +391,7 @@ ui <- dashboardPage(
                         year_range_id = "year_range_records4",
                         checkbox_id = "daily_min_temp_display",
                         plot_id = "DailyMinRecordsPlot",
-                        data_source = shiny.daily.temp.records,  
+                        data_source = records.noaa.daily,  
                         checkbox_choices = c(
                           "Daily Minimum Mean Temperature Records" = "daily_mean_min_temp",
                           "Daily Minimum Temperature Records" = "daily_min_temp"
@@ -395,9 +436,9 @@ ui <- dashboardPage(
                         sliderInput(
                           inputId = "year_range_precip",
                           label = "Select Year Range:",
-                          min = min(precipitation.data.merged$year),
-                          max = max(precipitation.data.merged$year),
-                          value = c(min(precipitation.data.merged$year), max(precipitation.data.merged$year)),
+                          min = min(precip.data.merged$year),
+                          max = max(precip.data.merged$year),
+                          value = c(min(precip.data.merged$year), max(precip.data.merged$year)),
                           sep = ""
                         )
                       )
@@ -425,21 +466,21 @@ ui <- dashboardPage(
                         solidHeader = TRUE,
                         width = 12,
                         
-                        # NOAA precipitation model stats
+                        # NOAA precip model stats
                         conditionalPanel(
                           condition = "input.linesToShowPrecip.includes('lm_noaa_precip')",
                           h4("NOAA Precipitation Model"),
                           verbatimTextOutput("noaa_precip_model_summary")
                         ),
                         
-                        # McFarland precipitation model stats
+                        # McFarland precip model stats
                         conditionalPanel(
                           condition = "input.linesToShowPrecip.includes('lm_mcfarland_precip')",
                           h4("McFarland Precipitation Model"),
                           verbatimTextOutput("mcfarland_precip_model_summary")
                         ),
                         
-                        # SERC precipitation model stats
+                        # SERC precip model stats
                         conditionalPanel(
                           condition = "input.linesToShowPrecip.includes('lm_serc_precip')",
                           h4("SERC Precipitation Model"),
@@ -478,16 +519,16 @@ ui <- dashboardPage(
                         sliderInput(
                           inputId = "year_range_precip_anom",
                           label = "Select Year Range:",
-                          min = min(shiny.merged.precip.anom$year),
-                          max = max(shiny.merged.precip.anom$year),
-                          value = c(min(shiny.merged.precip.anom$year), max(shiny.merged.precip.anom$year)),
+                          min = min(anom.precip.merged$year),
+                          max = max(anom.precip.merged$year),
+                          value = c(min(anom.precip.merged$year), max(anom.precip.merged$year)),
                           sep = ""
                         )
                       )
                     )
                   ),
                   
-                  #NOAA anom plot
+                  #NOAA precip anom plot
                   fluidRow(
                     column(
                       width = 12,
@@ -501,7 +542,7 @@ ui <- dashboardPage(
                     )
                   ),
                   
-                  #McFarland anom plot 
+                  #McFarland precip anom plot 
                   fluidRow(
                     column(
                       width = 12,
@@ -511,6 +552,20 @@ ui <- dashboardPage(
                         solidHeader = TRUE,
                         width = 12,
                         plotlyOutput("McFarlandPrecipAnomPlot", height = "600px")
+                      )
+                    )
+                  ),
+                  
+                  #SERC precip anom plot 
+                  fluidRow(
+                    column(
+                      width = 12,
+                      box(
+                        title = "SERC Precipitation Anomalies",
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        plotlyOutput("SERCPrecipAnomPlot", height = "600px")
                       )
                     )
                   )
@@ -545,9 +600,9 @@ ui <- dashboardPage(
                         sliderInput(
                           inputId = "year_range_precip",
                           label = "Select Year Range:",
-                          min = min(shiny.monthly.precip.records$year),
-                          max = max(shiny.monthly.precip.records$year),
-                          value = c(min(shiny.monthly.precip.records$year), max(shiny.monthly.precip.records$year)),
+                          min = min(record.noaa.monthly$year),
+                          max = max(record.noaa.monthly$year),
+                          value = c(min(record.noaa.monthly$year), max(record.noaa.monthly$year)),
                           sep = "" # Prevent commas in year values
                         )
                       )
@@ -594,9 +649,7 @@ ui <- dashboardPage(
 )
 
 
-
-
-# server component
+#### server component ####
 
 server <- function(input, output) {
   
@@ -607,9 +660,9 @@ server <- function(input, output) {
   output$LocationMap <- renderLeaflet({
     # Define location data
     locations <- data.frame(
-      name = c("McFarland Hill Atmospheric Research Station", "Winter Harbor-SERC Weather Station"),
-      lat = c(44.3772, 44.33567),
-      lng = c(-68.2608, -68.062)
+      name = c("McFarland Hill Atmospheric Research Station", "Winter Harbor-SERC Weather Station", "NOAA - Acadia National Park"),
+      lat = c(44.3772, 44.33567, 44.372907),
+      lng = c(-68.2608, -68.062, -68.258257)
     )
     
     # Create the map
@@ -619,12 +672,13 @@ server <- function(input, output) {
                        group = "Topographic") %>%
       addProviderTiles("Esri.WorldImagery", 
                        group = "Satellite") %>%
-      setView(lng = -68.19, lat = 44.3386, zoom = 10) %>%  # Center on Acadia
+      setView(lng = -68.19, lat = 44.3386, zoom = 11) %>%  # Center on Acadia
       addMarkers(
         data = locations,
         lng = ~lng, 
         lat = ~lat,
-        popup = ~paste0("<strong>", name, "</strong>"),
+        popup = ~paste0("<strong>", name, "</strong><br>",
+                        lat, lng),
         group = "Stations"
       ) %>%
       addLayersControl(
@@ -641,7 +695,7 @@ server <- function(input, output) {
   
   # Reactive for temperature data
   temperature_data <- reactive({
-    temperature.data.merged %>% 
+    temp.data.merged %>% 
       rename(
         Year = year, 
         `NOAA Average Temp` = noaa.temp,
@@ -654,7 +708,7 @@ server <- function(input, output) {
   
   # Reactive for precipitation data
   precipitation_data <- reactive({
-    precipitation.data.merged %>% 
+    precip.data.merged %>% 
       rename(
         Year = year, 
         `NOAA Precip` = noaa.precip,
@@ -665,22 +719,27 @@ server <- function(input, output) {
   
   # Reactive for temperature anomaly data
   temp_anomaly_data <- reactive({
-    shiny.merged.anom %>%
+    anom.temp.merged %>%
       rename(
         Year = year, 
         `Year-Month` = noaa.year.month, 
-        `NOAA Temp Anom` = noaa.anom,
-        `McFarland Temp Anom` = mcfarland.anom
+        `NOAA Temp Anomaly (°C)` = noaa.temp.anom,
+        `McFarland Temp Anomaly (°C)` = mcfarland.temp.anom,
+        `SERC Temp Anomaly (°C)` = serc.temp.anom
       ) %>%
       mutate(
         `Year-Month` = as.Date(`Year-Month`),
         noaa_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>NOAA Temp Anomaly:", round(`NOAA Temp Anom`, 4)
+          "<br>NOAA Temp Anomaly:", round(`NOAA Temp Anomaly (°C)`, 4)
         ),
         mcfarland_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>McFarland Temp Anomaly:", round(`McFarland Temp Anom`, 4)
+          "<br>McFarland Temp Anomaly:", round(`McFarland Temp Anomaly (°C)`, 4)
+        ),
+        serc_hover_text = paste(
+          "Year-Month:", format(`Year-Month`, "%Y-%m"),
+          "<br>SERC Temp Anomaly:", round(`SERC Temp Anomaly (°C)`, 4)
         )
       )  %>%
       # Add filter based on slider input
@@ -692,22 +751,27 @@ server <- function(input, output) {
   
   # Reactive for precipitation anomaly data
   precip_anomaly_data <- reactive({
-    shiny.merged.precip.anom %>%
+    anom.precip.merged %>%
       rename(
         Year = year, 
         `Year-Month` = noaa.year.month, 
-        `NOAA Precip Anom` = noaa.percent.precip.anom,
-        `McFarland Precip Anom` = mcfarland.percent.precip.anom
+        `NOAA Precip Anomaly (%)` = noaa.percent.precip.anom,
+        `McFarland Precip Anomaly (%)` = mcfarland.percent.precip.anom,
+        `SERC Precip Anomaly (%)` = serc.percent.precip.anom
       ) %>%
       mutate(
         `Year-Month` = as.Date(`Year-Month`),
         noaa_precip_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>NOAA Precip Anomaly:", round(`NOAA Precip Anom`, 4)
+          "<br>NOAA Precip Anomaly:", round(`NOAA Precip Anomaly (%)`, 4)
         ),
         mcfarland_precip_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>McFarland Precip Anomaly:", round(`McFarland Precip Anom`, 4)
+          "<br>McFarland Precip Anomaly:", round(`McFarland Precip Anomaly (%)`, 4)
+        ),
+        serc_precip_hover_text = paste(
+          "Year-Month:", format(`Year-Month`, "%Y-%m"),
+          "<br>SERC Precip Anomaly:", round(`SERC Precip Anomaly (%)`, 4)
         )
       ) %>%
       # Add filter based on slider input
@@ -1046,7 +1110,7 @@ server <- function(input, output) {
   #create anomaly plot function
   create_anomaly_plot <- function(data, 
                                   x_col = "Year-Month", 
-                                  y_col = "NOAA Temp Anom", 
+                                  y_col = "NOAA Temp Anomaly (°C)", 
                                   hover_text_col = "noaa_hover_text",
                                   legend_title = "Anomaly Data",
                                   break_interval = "10 years") {
@@ -1090,12 +1154,13 @@ server <- function(input, output) {
   }
   
   #create anomaly plots
+  
   # For NOAA temperature anomalies
   output$NOAAAnomPlot <- renderPlotly({
     create_anomaly_plot(
       data = temp_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "NOAA Temp Anom",
+      y_col = "NOAA Temp Anomaly (°C)",
       hover_text_col = "noaa_hover_text",
       legend_title = "NOAA Temp Anomaly Data",
       break_interval = "10 years"
@@ -1107,9 +1172,21 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = temp_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "McFarland Temp Anom",
+      y_col = "McFarland Temp Anomaly (°C)",
       hover_text_col = "mcfarland_hover_text",
       legend_title = "McFarland Temp Anomaly Data",
+      break_interval = "5 years"
+    )
+  })
+  
+  # For SERC temperature anomalies
+  output$SERCAnomPlot <- renderPlotly({
+    create_anomaly_plot(
+      data = temp_anomaly_data(),
+      x_col = "Year-Month",
+      y_col = "SERC Temp Anomaly (°C)",
+      hover_text_col = "serc_hover_text",
+      legend_title = "SERC Temp Anomaly Data",
       break_interval = "5 years"
     )
   })
@@ -1119,7 +1196,7 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = precip_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "NOAA Precip Anom",
+      y_col = "NOAA Precip Anomaly (%)",
       hover_text_col = "noaa_precip_hover_text",
       legend_title = "NOAA Precip Anomaly Data",
       break_interval = "10 years"
@@ -1131,9 +1208,21 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = precip_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "McFarland Precip Anom",
+      y_col = "McFarland Precip Anomaly (%)",
       hover_text_col = "mcfarland_precip_hover_text",
       legend_title = "McFarland Precip Anomaly Data",
+      break_interval = "5 years"
+    )
+  })
+  
+  # For SERC precipitation anomalies
+  output$SERCPrecipAnomPlot <- renderPlotly({
+    create_anomaly_plot(
+      data = precip_anomaly_data(),
+      x_col = "Year-Month",
+      y_col = "SERC Precip Anomaly (%)",
+      hover_text_col = "serc_precip_hover_text",
+      legend_title = "SERC Precip Anomaly Data",
       break_interval = "5 years"
     )
   })
@@ -1305,7 +1394,7 @@ server <- function(input, output) {
   # max temp record plot output
   output$MaxTempRecordsPlot <- renderPlotly({
     create_record_plot(
-      data = shiny.monthly.records,
+      data = record.noaa.monthly,
       date_col1 = "tmean.max.ym",    
       date_col2 = "tmax.max.ym",    
       value_col1 = "tmean.max",
@@ -1332,7 +1421,7 @@ server <- function(input, output) {
   # daily max temp record plot output
   output$DailyMaxRecordsPlot <- renderPlotly({
     create_record_plot(
-      data = shiny.daily.temp.records,
+      data = records.noaa.daily,
       date_col1 = "tmean.max.date",    
       date_col2 = "tmax.max.date",    
       value_col1 = "tmean.max",
@@ -1359,7 +1448,7 @@ server <- function(input, output) {
   # max precip record plot output
   output$MaxPrecipRecordsPlot <- renderPlotly({
     create_record_plot(
-      data = shiny.monthly.precip.records,
+      data = records.noaa.monthly,
       date_col1 = "ppt.max.ym",    
       date_col2 = NULL,    
       value_col1 = "ppt.max",
@@ -1542,7 +1631,7 @@ server <- function(input, output) {
   # min temp record plot output
   output$MinTempRecordsPlot <- renderPlotly({
     record_lows(
-      data = shiny.monthly.records,
+      data = records.noaa.monthly,
       date_col1 = "tmean.min.ym",    
       date_col2 = "tmin.min.ym",    
       value_col1 = "tmean.min",
@@ -1569,7 +1658,7 @@ server <- function(input, output) {
   # daily min temp record plot output
   output$DailyMinRecordsPlot <- renderPlotly({
     record_lows(
-      data = shiny.daily.temp.records,
+      data = records.noaa.daily,
       date_col1 = "tmean.min.date",    
       date_col2 = "tmin.min.date",    
       value_col1 = "tmean.min",
@@ -1596,7 +1685,7 @@ server <- function(input, output) {
   # min precip record plot output
   output$MinPrecipRecordsPlot <- renderPlotly({
     record_lows(
-      data = shiny.monthly.precip.records,
+      data = records.noaa.monthly,
       date_col1 = "ppt.min.ym",    
       date_col2 = NULL,    
       value_col1 = "ppt.min",

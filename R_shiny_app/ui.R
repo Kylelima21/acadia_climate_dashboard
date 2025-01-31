@@ -86,29 +86,51 @@ ui <- dashboardPage(
       # Tab for dashboard overview (add content here later)
       tabItem(tabName = "overview",
               fluidRow(
-                # Left column with text
-                column(width = 6,
+                # row with text and images
+                column(width = 12,
                        box(
                          title = "Dashboard Overview",
                          status = "primary",
                          solidHeader = TRUE,
                          width = NULL,
-                         p(tags$img(
-                          src = "img/COPY_SchoodicInstitute_Horizontal_CMYK.png",
-                           width = "100%",
-                           style = "margin-bottom: 15px;",
-                           alt = "Schoodic Institute logo" 
-                         )),
-                         p("This R Shiny Dashboard summarizes climate data from the Acadia National Park region gathered from local weather stations and the National Oceanic and Atmospheric Administration (NOAA). Local data was gathered from the McFarland Hill Atmospheric Research Station and the Winter Harbor-SERC weather station. Climate data was compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes."),
-                         tags$ul(
-                           tags$li(HTML('Climate summaries were created from daily and monthly gridded climate data downloaded from NOAA\'s National Centers for Environmental Information (<a href="https://www.ncei.noaa.gov" target="_blank">NCEI </a>). Climate data was compiled and cleaned using R scripts by Kyle Lima, built from the climateNETN package by Kate Miller (<a href="https://github.com/KateMMiller/climateNETN" target="_blank">climateNETN </a>).')),
-                           tags$li("Climate summaries were created from hourly data collected by the McFarland Hill Atmospheric Research Station."),
-                           tags$li("Climate summaries were created from 15 minute interval data collected by the Winter Harbor-SERC weather station (ID: D2258).")),
-                         p(HTML("<strong>Data Access</strong>: data from all sources used in this app and R scripts for data cleaning can be downloaded and found at this page: link."))
+                         fluidRow(
+                           # Left column for images
+                           column(
+                             width = 4,
+                             div(
+                               style = "text-align: center;",
+                               tags$img(src = "img/COPY2_SchoodicInstitute_Horizontal_CMYK.png",
+                                        width = "100%",
+                                        style = "margin-bottom: 20px; margin-top: 20px",
+                                        alt = "Schoodic Institute logo" 
+                               ),
+                               tags$img(
+                                 src = "img/dashboard_overview_acadia_full.jpg",
+                                 width = "100%",
+                                 style = "margin-bottom: 10px; border: 2px solid #ccc; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 5px;",
+                                 alt = "View of Acadia National Park from Schoodic Head" 
+                               ))),
+                           column(
+                             width = 8,
+                             div(
+                               style = "font-size: 16px; line-height: 1.6;",
+                               p("This R Shiny Dashboard summarizes climate data from the Acadia National Park region gathered from local weather stations and the National Oceanic and Atmospheric Administration (NOAA). Local data was gathered from the McFarland Hill Atmospheric Research Station and the Winter Harbor-SERC weather station. Climate data was compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes."),
+                               tags$ul(
+                                 style = "font-size: 16px;",
+                                 tags$li(HTML('Climate summaries were created from daily and monthly gridded climate data downloaded from NOAA\'s National Centers for Environmental Information (<a href="https://www.ncei.noaa.gov" target="_blank">NCEI </a>). Climate data was compiled and cleaned using R scripts by Kyle Lima, built from the climateNETN package by Kate Miller (<a href="https://github.com/KateMMiller/climateNETN" target="_blank">climateNETN </a>).')),
+                                 tags$li("Climate summaries were created from hourly data collected by the McFarland Hill Atmospheric Research Station."),
+                                 tags$li("Climate summaries were created from 15 minute interval data collected by the Winter Harbor-SERC weather station (ID: D2258).")),
+                               p(HTML("<strong>Data Access</strong>: data from all sources used in this app and R scripts for data cleaning can be downloaded and found at this page: link."))
+                             )
+                           )
                          )
-                      ),
-                # Right column with map
-                column(width = 6,
+                       )
+                )
+              ),
+              
+              #second row with map
+              fluidRow(
+                column(width = 12,
                        box(
                          title = "Weather Station Locations",
                          status = "primary",
@@ -117,7 +139,7 @@ ui <- dashboardPage(
                          height = "600px",
                          leafletOutput("LocationMap", height = "550px")
                        )
-                )
+               )
               )
       ),
       
@@ -133,7 +155,7 @@ ui <- dashboardPage(
                   fluidRow(
                     # Column for the checkbox group input
                     column(
-                      width = 4, 
+                      width = 4,
                       box(
                         title = "Data Tools",
                         status = "primary", 

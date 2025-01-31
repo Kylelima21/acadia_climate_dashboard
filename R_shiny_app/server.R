@@ -9,9 +9,9 @@ server <- function(input, output) {
   output$LocationMap <- renderLeaflet({
   # Define location data
   locations <- data.frame(
-    name = c("McFarland Hill Atmospheric Research Station", "Winter Harbor-SERC Weather Station"),
-    lat = c(44.3772, 44.33567),
-    lng = c(-68.2608, -68.062)
+    name = c("McFarland Hill Atmospheric Research Station", "Winter Harbor-SERC Weather Station", "NOAA - Acadia National Park"),
+    lat = c(44.3772, 44.33567, 44.372907),
+    lng = c(-68.2608, -68.062, -68.258257)
   )
   
   # Create the map
@@ -21,12 +21,13 @@ server <- function(input, output) {
                      group = "Topographic") %>%
     addProviderTiles("Esri.WorldImagery", 
                      group = "Satellite") %>%
-    setView(lng = -68.19, lat = 44.3386, zoom = 10) %>%  # Center on Acadia
+    setView(lng = -68.19, lat = 44.3386, zoom = 11) %>%  # Center on Acadia
     addMarkers(
       data = locations,
       lng = ~lng, 
       lat = ~lat,
-      popup = ~paste0("<strong>", name, "</strong>"),
+      popup = ~paste0("<strong>", name, "</strong><br>",
+                      lat, lng),
       group = "Stations"
     ) %>%
     addLayersControl(
@@ -71,23 +72,23 @@ server <- function(input, output) {
       rename(
         Year = year, 
         `Year-Month` = noaa.year.month, 
-        `NOAA Temp Anom` = noaa.temp.anom,
-        `McFarland Temp Anom` = mcfarland.temp.anom,
-        `SERC Temp Anom` = serc.temp.anom
+        `NOAA Temp Anomaly (°C)` = noaa.temp.anom,
+        `McFarland Temp Anomaly (°C)` = mcfarland.temp.anom,
+        `SERC Temp Anomaly (°C)` = serc.temp.anom
       ) %>%
       mutate(
         `Year-Month` = as.Date(`Year-Month`),
         noaa_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>NOAA Temp Anomaly:", round(`NOAA Temp Anom`, 4)
+          "<br>NOAA Temp Anomaly:", round(`NOAA Temp Anomaly (°C)`, 4)
         ),
         mcfarland_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>McFarland Temp Anomaly:", round(`McFarland Temp Anom`, 4)
+          "<br>McFarland Temp Anomaly:", round(`McFarland Temp Anomaly (°C)`, 4)
         ),
         serc_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>SERC Temp Anomaly:", round(`SERC Temp Anom`, 4)
+          "<br>SERC Temp Anomaly:", round(`SERC Temp Anomaly (°C)`, 4)
         )
       )  %>%
       # Add filter based on slider input
@@ -103,23 +104,23 @@ server <- function(input, output) {
       rename(
         Year = year, 
         `Year-Month` = noaa.year.month, 
-        `NOAA Precip Anom` = noaa.percent.precip.anom,
-        `McFarland Precip Anom` = mcfarland.percent.precip.anom,
-        `SERC Precip Anom` = serc.percent.precip.anom
+        `NOAA Precip Anomaly (%)` = noaa.percent.precip.anom,
+        `McFarland Precip Anomaly (%)` = mcfarland.percent.precip.anom,
+        `SERC Precip Anomaly (%)` = serc.percent.precip.anom
       ) %>%
       mutate(
         `Year-Month` = as.Date(`Year-Month`),
         noaa_precip_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>NOAA Precip Anomaly:", round(`NOAA Precip Anom`, 4)
+          "<br>NOAA Precip Anomaly:", round(`NOAA Precip Anomaly (%)`, 4)
         ),
         mcfarland_precip_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>McFarland Precip Anomaly:", round(`McFarland Precip Anom`, 4)
+          "<br>McFarland Precip Anomaly:", round(`McFarland Precip Anomaly (%)`, 4)
         ),
         serc_precip_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>SERC Precip Anomaly:", round(`SERC Precip Anom`, 4)
+          "<br>SERC Precip Anomaly:", round(`SERC Precip Anomaly (%)`, 4)
         )
       ) %>%
       # Add filter based on slider input
@@ -458,7 +459,7 @@ server <- function(input, output) {
   #create anomaly plot function
   create_anomaly_plot <- function(data, 
                                   x_col = "Year-Month", 
-                                  y_col = "NOAA Temp Anom", 
+                                  y_col = "NOAA Temp Anomaly (°C)", 
                                   hover_text_col = "noaa_hover_text",
                                   legend_title = "Anomaly Data",
                                   break_interval = "10 years") {
@@ -508,7 +509,7 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = temp_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "NOAA Temp Anom",
+      y_col = "NOAA Temp Anomaly (°C)",
       hover_text_col = "noaa_hover_text",
       legend_title = "NOAA Temp Anomaly Data",
       break_interval = "10 years"
@@ -520,7 +521,7 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = temp_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "McFarland Temp Anom",
+      y_col = "McFarland Temp Anomaly (°C)",
       hover_text_col = "mcfarland_hover_text",
       legend_title = "McFarland Temp Anomaly Data",
       break_interval = "5 years"
@@ -532,7 +533,7 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = temp_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "SERC Temp Anom",
+      y_col = "SERC Temp Anomaly (°C)",
       hover_text_col = "serc_hover_text",
       legend_title = "SERC Temp Anomaly Data",
       break_interval = "5 years"
@@ -544,7 +545,7 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = precip_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "NOAA Precip Anom",
+      y_col = "NOAA Precip Anomaly (%)",
       hover_text_col = "noaa_precip_hover_text",
       legend_title = "NOAA Precip Anomaly Data",
       break_interval = "10 years"
@@ -556,7 +557,7 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = precip_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "McFarland Precip Anom",
+      y_col = "McFarland Precip Anomaly (%)",
       hover_text_col = "mcfarland_precip_hover_text",
       legend_title = "McFarland Precip Anomaly Data",
       break_interval = "5 years"
@@ -568,7 +569,7 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = precip_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "SERC Precip Anom",
+      y_col = "SERC Precip Anomaly (%)",
       hover_text_col = "serc_precip_hover_text",
       legend_title = "SERC Precip Anomaly Data",
       break_interval = "5 years"
