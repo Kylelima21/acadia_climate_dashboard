@@ -31,11 +31,11 @@ serc.clean <- serc.data  %>%
   #transform dataset
   mutate(
     
+    #replace empty cells with NA
+    across(where(is.character), ~ na_if(na_if(., ""), "None")),
+    
     # Convert non-character columns to numeric
     across(-c("Station_ID", "Date_Time", "wind_cardinal_direction_set_1d"), as.numeric),
-    
-    #replace empty cells with NA
-    across(where(is.character), ~ na_if(., "")),
     
     # parse the Date_Time column into POSIXct format in UTC
     Date_Time = as.POSIXct(Date_Time, format = "%Y-%m-%dT%H:%M:%SZ", tz = "UTC"),
@@ -47,7 +47,7 @@ serc.clean <- serc.data  %>%
     year = year(date.time.est),
     month = month(date.time.est),
     day = day(date.time.est),
-    date = as.Date(date.time.est),
+    date = date(date.time.est),
     
     #add missing columns 
     station.name = "Winter Harbor-SERC",
@@ -87,5 +87,71 @@ serc.clean <- serc.data  %>%
   select(where(~ !all(is.na(.))))
 
 
+
+
 ##save outputs as csv
 #write.csv(clean.McFarland, "data/McFarland_clean.csv", row.names = FALSE)
+
+
+#testing further tiding - isolating the last precip records per day
+
+process_precipitation_data <- function(data, datetime_col, precip_col) { 
+  result <- data %>%
+    # Ensure datetime is in correct format
+    mutate(
+      datetime = as.POSIXct(!!sym(datetime_col)),
+      date = lubridate::date(datetime),  
+      # Extract hour and minute for sorting
+      hour = as.numeric(format(datetime, "%H")),
+      minute = as.numeric(format(datetime, "%M"))
+    ) %>%
+    # Group by date
+    group_by(date) %>%
+    # Arrange by hour and minute in descending order to get latest time first
+    arrange(desc(hour), desc(minute), .by_group = TRUE) %>%
+    # Take first record (which will be the latest time) of each day
+    slice_head(n = 1) %>%
+    # Select only needed columns
+    select(
+      year,
+      date,
+      datetime,
+      precipitation = !!sym(precip_col)
+    ) %>%
+    ungroup()
+  
+  # Print some diagnostic information
+  print("Sample of processed data:")
+  print(head(result %>% 
+               mutate(time = format(datetime, "%H:%M:%S")) %>%
+               select(year, date, time, precipitation), 
+             n = 10))
+  
+  return(result)
+}
+
+filtered_data <- process_precipitation_data(
+  data = serc.clean,
+  datetime_col = "date.time.est",
+  precip_col = "ppt.midnight"
+)
+
+filtered_data_2 <- process_precipitation_data(
+  data = serc.clean,
+  datetime_col = "date.time.est",
+  precip_col = "ppt.24hr"
+)
+
+#isolate midnight precip data and get the yearly mean precip from SERC data
+serc.precip.midnight <- filtered_data %>%
+  drop_na(precipitation, year) %>%
+  mutate(precipitation = precipitation * 0.0393701) %>% #convert mm of rain into inches of rain
+  group_by(year) %>%
+  summarize(serc.precip = sum(precipitation, na.rm = TRUE))
+
+#isolate 24hr precip data and get the yearly mean precip from SERC data
+serc.precip.24hr <- filtered_data_2 %>%
+  drop_na(precipitation, year) %>%
+  mutate(precipitation = precipitation * 0.0393701) %>% #convert mm of rain into inches of rain
+  group_by(year) %>%
+  summarize(serc.precip = sum(precipitation, na.rm = TRUE))

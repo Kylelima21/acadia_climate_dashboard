@@ -549,7 +549,7 @@ shiny.daily.temp.records <- highest_mean_daily_temps %>%
   left_join(lowest_min_daily_temps, by = c("year", "unit.code", "long", "lat")) 
 
 ##save outputs as csv
-write.csv(shiny.daily.temp.records, "data/processed_data/shiny_daily_temp_records.csv", row.names = FALSE)
+#write.csv(shiny.daily.temp.records, "data/processed_data/shiny_daily_temp_records.csv", row.names = FALSE)
 
 
 ##monthly temp
