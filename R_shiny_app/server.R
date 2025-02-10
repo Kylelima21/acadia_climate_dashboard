@@ -743,7 +743,7 @@ server <- function(input, output) {
   # max temp record plot output
   output$MaxTempRecordsPlot <- renderPlotly({
     create_record_plot(
-      data = record.noaa.monthly,
+      data = records.noaa.monthly,
       date_col1 = "tmean.max.ym",    
       date_col2 = "tmax.max.ym",    
       value_col1 = "tmean.max",
