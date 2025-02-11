@@ -164,6 +164,70 @@ server <- function(input, output) {
     )
   })
   
+  # Reactive for monthly sea level data
+  monthly_sea_level_data <- reactive({
+    frenchman.monthly.clean %>%
+      rename(
+        Year = year, 
+        `Year-Month` = year.month, 
+        `Monthly Mean Sea Level (m)` = mean.sea.level.m,
+      ) %>%
+      mutate(
+        `Year-Month` = as.Date(`Year-Month`),
+        monthly_sea_hover_text = paste(
+          "Year-Month:", format(`Year-Month`, "%Y-%m"),
+          "<br>Mean Sea Level (m):", round(`Monthly Mean Sea Level (m)`, 3)
+        )
+      ) %>%
+      # Add filter based on slider input
+      filter(
+        Year >= input$year_range_monthly_sea_level[1],
+        Year <= input$year_range_monthly_sea_level[2]
+      )
+  })
+  
+  # Reactive for annual sea level data
+  annual_sea_level_data <- reactive({
+    frenchman.annual.clean %>%
+      rename(
+        Year = year, 
+        `Annual Mean Sea Level (m)` = mean.sea.level.m,
+      ) %>%
+      mutate(
+        annual_sea_hover_text = paste(
+          "Year:", Year,
+          "<br>Mean Sea Level (m):", round(`Annual Mean Sea Level (m)`, 3)
+        )
+      ) %>%
+      # Add filter based on slider input
+      filter(
+        Year >= input$year_range_annual_sea_level[1],
+        Year <= input$year_range_annual_sea_level[2]
+      )
+  })
+  
+  # Reactive for monthly sea level model
+  monthly_sea_model <- reactive({
+    data <- monthly_sea_level_data() %>%
+      filter(Year >= input$year_range_monthly_sea_level[1], Year <= input$year_range_monthly_sea_level[2])
+    
+    list(
+      monthly_sea = if ("lm_monthly_sea" %in% input$linesToShowMonthlySea) 
+        lm(`Monthly Mean Sea Level (m)` ~ Year, data = data)
+    )
+  })
+  
+  # Reactive for annual sea level model
+  annual_sea_model <- reactive({
+    data <-  annual_sea_level_data() %>%
+      filter(Year >= input$year_range_annual_sea_level[1], Year <= input$year_range_annual_sea_level[2])
+    
+    list(
+      annual_sea = if ("lm_annual_sea" %in% input$linesToShowAnnualSea) 
+        lm(`Annual Mean Sea Level (m)` ~ Year, data = data)
+    )
+  })
+  
 
   #----------------------#
   ####   Functions    ####
@@ -1053,6 +1117,116 @@ server <- function(input, output) {
     )
   })
   
+  
+  # sea level plots
+  output$MonthlySeaLevel <- renderPlotly({
+    data <- monthly_sea_level_data ()
+    models <- monthly_sea_model()
+    
+    # Filter data based on year range from slider
+    filtered_data <- data %>%
+      filter(Year >= input$year_range_monthly_sea_level[1], Year <= input$year_range_monthly_sea_level[2])
+    
+    #create ggplot output
+    p3 <- ggplot(filtered_data, aes(x = Year)) +
+      scale_x_continuous(breaks = pretty(filtered_data$Year)) +
+      labs(title = "Monthly Mean Sea Level",
+           x = "Year",
+           y = "Monthly Mean Sea Level (m)") +
+      theme_minimal()
+    
+    # Plot sea level monthly data and option to add linear model
+    if ("Monthly Mean Sea Level (m)" %in% input$linesToShowMonthlySea) {
+      p3 <- p3 + geom_line(aes(x = Year,
+                             y = `Monthly Mean Sea Level (m)`,
+                             color = "Monthly Mean Sea Level (m)"))
+      
+      if (!is.null(models$monthly_sea)) {
+        p3 <- add_model_line(p3, models$monthly_sea, "Monthly Mean Sea Level (m)")
+        
+      }
+    }
+    
+    # Customize the legend and colors
+    p3 <- p3 + scale_color_manual(
+      values = c(
+        "Monthly Mean Sea Level (m)" = "#000000"
+      ),
+      name = "Monthly Sea Level Data"
+    )
+  
+  # Convert to plotly and customize hover text
+  temp_plt <- ggplotly(p3) %>%
+    layout(
+      showlegend = TRUE, 
+      legend = list(itemclick = FALSE, itemdoubleclick = FALSE),
+      hovermode = "x unified",
+      hoverlabel = list(bgcolor = "white"),
+      xaxis = list(hoverformat = "%Y")
+    ) %>%
+    customize_hover_text(units = "m") 
+})
+
+  # annual sea level plot
+  output$AnnualSeaLevel <- renderPlotly({
+    data <- annual_sea_level_data ()
+    models <- annual_sea_model()
+    
+    # Filter data based on year range from slider
+    filtered_data <- data %>%
+      filter(Year >= input$year_range_annual_sea_level[1], Year <= input$year_range_annual_sea_level[2])
+    
+    #create ggplot output
+    p4 <- ggplot(filtered_data, aes(x = Year)) +
+      scale_x_continuous(breaks = pretty(filtered_data$Year)) +
+      labs(title = "Annual Mean Sea Level",
+           x = "Year",
+           y = "Annual Mean Sea Level (m)") +
+      theme_minimal()
+    
+    # Plot sea level monthly data and option to add linear model
+    if ("Annual Mean Sea Level (m)" %in% input$linesToShowAnnualSea) {
+      p4 <- p4 + geom_line(aes(x = Year,
+                               y = `Annual Mean Sea Level (m)`,
+                               color = "Annual Mean Sea Level (m)"))
+      
+      if (!is.null(models$annual_sea)) {
+        p4 <- add_model_line(p4, models$annual_sea, "Annual Mean Sea Level (m)")
+        
+      }
+    }
+    
+    # Customize the legend and colors
+    p4 <- p4 + scale_color_manual(
+      values = c(
+        "Annual Mean Sea Level (m)" = "#000000"
+      ),
+      name = "Annual Sea Level Data"
+    )
+    
+    # Convert to plotly and customize hover text
+    temp_plt <- ggplotly(p4) %>%
+      layout(
+        showlegend = TRUE, 
+        legend = list(itemclick = FALSE, itemdoubleclick = FALSE),
+        hovermode = "x unified",
+        hoverlabel = list(bgcolor = "white"),
+        xaxis = list(hoverformat = "%Y")
+      ) %>%
+      customize_hover_text(units = "m") 
+  })
+
+# sea level model summaries -----------------------------------------
+
+output$monthly_sea_model_summary <- renderPrint({
+  req("lm_monthly_sea" %in% input$linesToShowMonthlySea)
+  summary(monthly_sea_model()$monthly_sea)
+})
+  
+output$annual_sea_model_summary <- renderPrint({
+  req("lm_annual_sea" %in% input$linesToShowAnnualSea)
+  summary(annual_sea_model()$annual_sea)
+})
   
 }
 

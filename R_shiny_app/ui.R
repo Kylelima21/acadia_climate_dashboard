@@ -680,12 +680,143 @@ ui <- dashboardPage(
       
       # Tab for interactive sea level plots
       tabItem(tabName = "sea",
-              h2("Sea Level Trends"),
-              p("Plots for sea level trends.")
+              
+              # Add figure/descriptive text 
+              br(),
+              fluidRow(
+                column(width = 12,
+                       box(
+                         status = "primary",
+                         solidHeader = TRUE,
+                         width = 12,
+                         p("Plotted are monthly sea level trends.")
+                       )
+                )
+              ),
+              
+              # First fluidRow with slider and text box side by side
+              fluidRow(
+                # Column for the slider (left side)
+                column(
+                  width = 4,
+                  box(
+                    title = "Data Tools",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    # Add checkbox group for line selection
+                    checkboxGroupInput(
+                      inputId = "linesToShowMonthlySea",
+                      label = "Select Temperature Data to Display:",
+                      choices = c("Monthly Sea Level (m)" = "Monthly Sea Level (m)",
+                                  "Linear Model for Monthly Sea Level" = "lm_monthly_sea"),
+                      selected = c("Monthly Sea Level (m)")
+                    ),
+                    
+                    sliderInput(
+                      inputId = "year_range_monthly_sea_level",
+                      label = "Select Year Range:",
+                      min = min(frenchman.monthly.clean$year),
+                      max = max(frenchman.monthly.clean$year),
+                      value = c(min(frenchman.monthly.clean$year), max(frenchman.monthly.clean$year)),
+                      sep = ""
+                    )
+                  )
+                ),
+              
+              #Monthly Sea Level Plot
+                column(
+                  width = 8,
+                  box(
+                    title = "Bar Harbor Monthly Sea Level Trends",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    plotlyOutput("MonthlySeaLevel", height = "600px")
+                  )
+                )
+              ),
+              
+              # fluidRow for model statistics
+              fluidRow(
+                column(
+                  width = 12,
+                  box(
+                    title = "Model Statistics",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    
+                    # NOAA average temp model stats
+                    conditionalPanel(
+                      condition = "input.linesToShowMonthlySea.includes('lm_monthly_sea')",
+                      h4("Monthly Average Sea Level Model"),
+                      verbatimTextOutput("monthly_sea_model_summary")
+                    )))),
+              
+              # First fluidRow with slider and text box side by side
+              fluidRow(
+                # Column for the slider (left side)
+                column(
+                  width = 4,
+                  box(
+                    title = "Data Tools",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    # Add checkbox group for line selection
+                    checkboxGroupInput(
+                      inputId = "linesToShowAnnualSea",
+                      label = "Select Temperature Data to Display:",
+                      choices = c("Monthly Sea Level (m)" = "Monthly Sea Level (m)",
+                                  "Linear Model for Monthly Sea Level" = "lm_monthly_sea"),
+                      selected = c("Monthly Sea Level (m)")
+                    ),
+                    sliderInput(
+                      inputId = "year_range_annual_sea_level",
+                      label = "Select Year Range:",
+                      min = min(frenchman.annual.clean$year),
+                      max = max(frenchman.annual.clean$year),
+                      value = c(min(frenchman.annual.clean$year), max(frenchman.annual.clean$year)),
+                      sep = ""
+                    )
+                  )
+                ),
+              
+              # annual sea level plot
+                column(
+                  width = 8,
+                  box(
+                    title = "Bar Harbor Annual Sea Level Trends",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    plotlyOutput("AnnualSeaLevel", height = "600px")
+                  )
+                )
+              ),
+              
+              # fluidRow for model statistics
+              fluidRow(
+                column(
+                  width = 12,
+                  box(
+                    title = "Model Statistics",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    
+                    # NOAA average temp model stats
+                    conditionalPanel(
+                      condition = "input.linesToShowAnnualSea.includes('lm_annual_sea')",
+                      h4("Annual Average Sea Level Model"),
+                      verbatimTextOutput("annual_sea_model_summary")
+                    ))))
+              
+        )
       )
     )
   )
- )
 
 
 
