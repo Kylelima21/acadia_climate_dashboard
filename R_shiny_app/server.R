@@ -8,31 +8,50 @@ server <- function(input, output) {
   
   output$LocationMap <- renderLeaflet({
   # Define location data
-  locations <- data.frame(
+  station_locations <- data.frame(
     name = c("McFarland Hill Atmospheric Research Station", "Winter Harbor-SERC Weather Station", "NOAA - Acadia National Park"),
     lat = c(44.3772, 44.33567, 44.372907),
     lng = c(-68.2608, -68.062, -68.258257)
   )
   
+  buoy_locations <- data.frame(
+    name = c("Bar Harbor, Frenchman Bay Buoy"),
+    lat = c(44.391667),
+    lng = c(-68.205)
+  )
+  
   # Create the map
   leaflet() %>%
     # Add both base layers
-    addProviderTiles("Esri.WorldTopoMap", 
-                     group = "Topographic") %>%
-    addProviderTiles("Esri.WorldImagery", 
-                     group = "Satellite") %>%
+    addProviderTiles("Esri.WorldTopoMap", group = "Topographic") %>%
+    addProviderTiles("Esri.WorldImagery", group = "Satellite") %>%
     setView(lng = -68.19, lat = 44.3386, zoom = 11) %>%  # Center on Acadia
+    
+    #Add markers for stations
     addMarkers(
-      data = locations,
+      data = station_locations,
       lng = ~lng, 
       lat = ~lat,
-      popup = ~paste0("<strong>", name, "</strong><br>",
-                      lat, lng),
+      popup = ~paste0("<strong>", name, "</strong><br>", lat, ", ", lng),
       group = "Stations"
     ) %>%
+    
+    # Add marker for buoys
+    addCircleMarkers(
+      data = buoy_locations,
+      lng = ~lng, 
+      lat = ~lat,
+      radius = 6,  # Adjust marker size
+      color = "green",  # Outline color
+      fillColor = "yellow",  # Fill color
+      fillOpacity = 0.8,
+      popup = ~paste0("<strong>", name, "</strong><br>", lat, ", ", lng),
+      group = "Buoys"
+    ) %>%
+    
     addLayersControl(
       baseGroups = c("Topographic", "Satellite"),
-      overlayGroups = c("Stations"),
+      overlayGroups = c("Stations", "Buoys"),
       options = layersControlOptions(collapsed = FALSE)
     )
   })
@@ -381,14 +400,20 @@ server <- function(input, output) {
         "McFarland Average Temp." = "#00CC00",
         "SERC Average Temp." = "#996633"
       ),
-      name = "Temperature Type"
+      name = "Temperature Data"
     )
     
     # Convert to plotly and customize hover text
     temp_plt <- ggplotly(p) %>%
       layout(
         showlegend = TRUE, 
-        legend = list(itemclick = FALSE, itemdoubleclick = FALSE),
+        legend = list(
+          itemclick = FALSE, 
+          itemdoubleclick = FALSE,
+          orientation = "h", 
+          x = 0.5, 
+          y = -0.2,
+          xanchor = "center"),
         hovermode = "x unified",
         hoverlabel = list(bgcolor = "white"),
         xaxis = list(hoverformat = "%Y")
@@ -491,7 +516,13 @@ server <- function(input, output) {
   precip_plt <- ggplotly(p2) %>%
     layout(
       showlegend = TRUE,
-      legend = list(itemclick = FALSE, itemdoubleclick = FALSE),
+      legend = list(
+        itemclick = FALSE, 
+        itemdoubleclick = FALSE,
+        orientation = "h", 
+        x = 0.5, 
+        y = -0.2,
+        xanchor = "center"),
       hovermode = "x unified",
       hoverlabel = list(bgcolor = "white"),
       xaxis = list(hoverformat = "%Y")
@@ -559,7 +590,11 @@ server <- function(input, output) {
         showlegend = TRUE,
         legend = list(
           itemclick = FALSE, 
-          itemdoubleclick = FALSE),
+          itemdoubleclick = FALSE,
+          orientation = "h", 
+          x = 0.5, 
+          y = -0.2,
+          xanchor = "center"),
         hovermode = "x unified",
         hoverlabel = list(bgcolor = "white"),
         xaxis = list(title = "Year")
@@ -1118,115 +1153,148 @@ server <- function(input, output) {
   })
   
   
-  # sea level plots
+  #-----------------------------#
+  ####  Sea Level Plot Function  ####
+  #-----------------------------#  
+  
+  create_sea_level_plot <- function(data,
+                                    x_col = "Year-Month",
+                                    y_col = "Monthly Mean Sea Level (m)",
+                                    hover_text_col = "monthly_sea_hover_text",
+                                    plot_title = "Sea Level",
+                                    show_trend = FALSE,
+                                    model = NULL,
+                                    is_date = TRUE,
+                                    line_color = "#000000",
+                                    line_label = "Sea Level",
+                                    input_check) {
+    
+    
+     # Create base plot
+    s <- ggplot(data) +
+      labs(title = plot_title,
+           x = "Year",
+           y = y_col) +
+      theme_minimal()
+    
+    # Add main sea level line ONLY if it is selected
+    if (line_label %in% input_check) {
+      s <- s + geom_line(aes(
+        x = .data[[x_col]],
+        y = .data[[y_col]],
+        text = .data[[hover_text_col]],
+        color = line_label,
+        group = 1  # Ensures correct grouping for Plotly
+      ), size = 0.5)
+    }
+    
+    # Add appropriate scale based on x-axis type
+    if (is_date) {
+      s <- s + scale_x_date(
+        breaks = scales::breaks_width("10 years"),
+        labels = scales::date_format("%Y")
+      )
+    } else {
+      s <- s + scale_x_continuous(
+        breaks = scales::pretty_breaks(n = 10)
+      )
+    }
+    
+    # Add color scale
+    s <- s + scale_color_manual(
+      values = c(
+        setNames(line_color, line_label)
+      ),
+      name = "Sea Level Data"
+    )
+    
+    # Add trend line if requested
+    if (show_trend && !is.null(model)) {
+      s <- s + 
+        geom_smooth(
+          aes(x = .data[[x_col]], y = .data[[y_col]]),
+          method = "lm",
+          se = TRUE,
+          fill = "grey80",
+          alpha = 0.5,
+          color = NA
+        ) +
+        geom_line(
+          aes(x = .data[[x_col]], y = .data[[y_col]]),
+          stat = "smooth",
+          method = "lm",
+          color = "black",
+          linewidth = 0.8
+        )
+    }
+    
+    # Convert to plotly and customize
+    ggplotly(s, tooltip = "text") %>%
+      layout(
+        showlegend = TRUE,
+        legend = list(
+          itemclick = FALSE, 
+          itemdoubleclick = FALSE,
+          orientation = "h", 
+          x = 0.5, 
+          y = -0.2,
+          xanchor = "center"),
+        hovermode = "x unified",
+        hoverlabel = list(bgcolor = "white")
+      )
+  }
+  
+  # Use the function in your outputs
   output$MonthlySeaLevel <- renderPlotly({
-    data <- monthly_sea_level_data ()
+    data <- monthly_sea_level_data()
     models <- monthly_sea_model()
     
-    # Filter data based on year range from slider
-    filtered_data <- data %>%
-      filter(Year >= input$year_range_monthly_sea_level[1], Year <= input$year_range_monthly_sea_level[2])
-    
-    #create ggplot output
-    p3 <- ggplot(filtered_data, aes(x = Year)) +
-      scale_x_continuous(breaks = pretty(filtered_data$Year)) +
-      labs(title = "Monthly Mean Sea Level",
-           x = "Year",
-           y = "Monthly Mean Sea Level (m)") +
-      theme_minimal()
-    
-    # Plot sea level monthly data and option to add linear model
-    if ("Monthly Mean Sea Level (m)" %in% input$linesToShowMonthlySea) {
-      p3 <- p3 + geom_line(aes(x = Year,
-                             y = `Monthly Mean Sea Level (m)`,
-                             color = "Monthly Mean Sea Level (m)"))
-      
-      if (!is.null(models$monthly_sea)) {
-        p3 <- add_model_line(p3, models$monthly_sea, "Monthly Mean Sea Level (m)")
-        
-      }
-    }
-    
-    # Customize the legend and colors
-    p3 <- p3 + scale_color_manual(
-      values = c(
-        "Monthly Mean Sea Level (m)" = "#000000"
-      ),
-      name = "Monthly Sea Level Data"
+    create_sea_level_plot(
+      data = data,
+      x_col = "Year-Month",
+      y_col = "Monthly Mean Sea Level (m)",
+      hover_text_col = "monthly_sea_hover_text",
+      plot_title = "Monthly Mean Sea Level",
+      show_trend = "lm_monthly_sea" %in% input$linesToShowMonthlySea,
+      model = models$monthly_sea,
+      is_date = TRUE,
+      line_color = "blue",
+      line_label = "Monthly Mean Sea Level (m)",
+      input_check = input$linesToShowMonthlySea
     )
+  })
   
-  # Convert to plotly and customize hover text
-  temp_plt <- ggplotly(p3) %>%
-    layout(
-      showlegend = TRUE, 
-      legend = list(itemclick = FALSE, itemdoubleclick = FALSE),
-      hovermode = "x unified",
-      hoverlabel = list(bgcolor = "white"),
-      xaxis = list(hoverformat = "%Y")
-    ) %>%
-    customize_hover_text(units = "m") 
-})
-
-  # annual sea level plot
   output$AnnualSeaLevel <- renderPlotly({
-    data <- annual_sea_level_data ()
+    data <- annual_sea_level_data()
     models <- annual_sea_model()
     
-    # Filter data based on year range from slider
-    filtered_data <- data %>%
-      filter(Year >= input$year_range_annual_sea_level[1], Year <= input$year_range_annual_sea_level[2])
-    
-    #create ggplot output
-    p4 <- ggplot(filtered_data, aes(x = Year)) +
-      scale_x_continuous(breaks = pretty(filtered_data$Year)) +
-      labs(title = "Annual Mean Sea Level",
-           x = "Year",
-           y = "Annual Mean Sea Level (m)") +
-      theme_minimal()
-    
-    # Plot sea level monthly data and option to add linear model
-    if ("Annual Mean Sea Level (m)" %in% input$linesToShowAnnualSea) {
-      p4 <- p4 + geom_line(aes(x = Year,
-                               y = `Annual Mean Sea Level (m)`,
-                               color = "Annual Mean Sea Level (m)"))
-      
-      if (!is.null(models$annual_sea)) {
-        p4 <- add_model_line(p4, models$annual_sea, "Annual Mean Sea Level (m)")
-        
-      }
-    }
-    
-    # Customize the legend and colors
-    p4 <- p4 + scale_color_manual(
-      values = c(
-        "Annual Mean Sea Level (m)" = "#000000"
-      ),
-      name = "Annual Sea Level Data"
+    create_sea_level_plot(
+      data = data,
+      x_col = "Year",
+      y_col = "Annual Mean Sea Level (m)",
+      hover_text_col = "annual_sea_hover_text",
+      plot_title = "Annual Mean Sea Level",
+      show_trend = "lm_annual_sea" %in% input$linesToShowAnnualSea,
+      model = models$annual_sea,
+      is_date = FALSE,
+      line_color = "blue",
+      line_label = "Annual Mean Sea Level (m)",
+      input_check = input$linesToShowAnnualSea
     )
-    
-    # Convert to plotly and customize hover text
-    temp_plt <- ggplotly(p4) %>%
-      layout(
-        showlegend = TRUE, 
-        legend = list(itemclick = FALSE, itemdoubleclick = FALSE),
-        hovermode = "x unified",
-        hoverlabel = list(bgcolor = "white"),
-        xaxis = list(hoverformat = "%Y")
-      ) %>%
-      customize_hover_text(units = "m") 
   })
-
-# sea level model summaries -----------------------------------------
-
-output$monthly_sea_model_summary <- renderPrint({
-  req("lm_monthly_sea" %in% input$linesToShowMonthlySea)
-  summary(monthly_sea_model()$monthly_sea)
-})
   
-output$annual_sea_model_summary <- renderPrint({
-  req("lm_annual_sea" %in% input$linesToShowAnnualSea)
-  summary(annual_sea_model()$annual_sea)
-})
+  # sea level model summaries -----------------------------------------
+  
+  output$monthly_sea_model_summary <- renderPrint({
+    req("lm_monthly_sea" %in% input$linesToShowMonthlySea)
+    summary(monthly_sea_model()$monthly_sea)
+  })
+  
+  output$annual_sea_model_summary <- renderPrint({
+    req("lm_annual_sea" %in% input$linesToShowAnnualSea)
+    summary(annual_sea_model()$annual_sea)
+  })
+  
   
 }
 

@@ -708,9 +708,9 @@ ui <- dashboardPage(
                     checkboxGroupInput(
                       inputId = "linesToShowMonthlySea",
                       label = "Select Temperature Data to Display:",
-                      choices = c("Monthly Sea Level (m)" = "Monthly Sea Level (m)",
+                      choices = c("Monthly Mean Sea Level (m)" = "Monthly Mean Sea Level (m)",
                                   "Linear Model for Monthly Sea Level" = "lm_monthly_sea"),
-                      selected = c("Monthly Sea Level (m)")
+                      selected = c("Monthly Mean Sea Level (m)")
                     ),
                     
                     sliderInput(
@@ -768,9 +768,9 @@ ui <- dashboardPage(
                     checkboxGroupInput(
                       inputId = "linesToShowAnnualSea",
                       label = "Select Temperature Data to Display:",
-                      choices = c("Monthly Sea Level (m)" = "Monthly Sea Level (m)",
-                                  "Linear Model for Monthly Sea Level" = "lm_monthly_sea"),
-                      selected = c("Monthly Sea Level (m)")
+                      choices = c("Annual Mean Sea Level (m)" = "Annual Mean Sea Level (m)",
+                                  "Linear Model for Annual Sea Level" = "lm_annual_sea"),
+                      selected = c("Annual Mean Sea Level (m)")
                     ),
                     sliderInput(
                       inputId = "year_range_annual_sea_level",
