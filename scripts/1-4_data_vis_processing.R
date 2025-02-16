@@ -28,6 +28,9 @@ mcfarland.clean <- read.csv("data/processed_data/mcfarland_clean.csv")
 #SERC 
 serc.clean <- read.csv("data/processed_data/serc_clean.csv")
 
+#normals
+normals.data <- read.csv("data/processed_data/noaa_normals_clean.csv")
+
 #-----------------------#
 ####    Data Manip   ####
 #-----------------------#
@@ -279,32 +282,21 @@ if (!is.null(results)) {
 
 #### Calculate Anomalies--------------------------------------------------------
 
-#' Calculate monthly baseline values
-#' @param data Input data frame
-#' @param value.col Name of the value column to calculate baseline for
-#' @return Dataframe with monthly baseline values
-calculate_monthly_baseline <- function(data, value.col) {
-  data %>%
-    group_by(month) %>%
-    summarize(baseline = mean(.data[[value.col]], na.rm = TRUE))
-}
-
 #' Calculate anomalies from baseline
 #' @param data Input data frame
 #' @param baseline Baseline data frame
 #' @param value.col Name of the value column
 #' @param include_percent Logical, whether to include percent anomaly
 #' @return Dataframe with calculated anomalies
-calculate_anomalies <- function(data, baseline, value.col, include_percent = FALSE) {
+calculate_anomalies <- function(data, value.col, normals.col, include_percent = FALSE) {
   result <- data %>%
-    left_join(baseline, by = "month") %>%
     mutate(
-      anomaly = .data[[value.col]] - baseline
+      anomaly = .data[[value.col]] - .data[[normals.col]]
     )
   
   if(include_percent) {
     result <- result %>%
-      mutate(anomaly.percent = ((.data[[value.col]] - baseline) / baseline) * 100)
+      mutate(anomaly.percent = ((.data[[value.col]] - .data[[normals.col]]) / .data[[normals.col]]) * 100)
   }
   
   result %>%
@@ -345,16 +337,28 @@ prepare_shiny_data <- function(anomaly_data, source_prefix, type) {
 #' @param source_prefix Source identifier (e.g., "noaa", "mcfarland")
 #' @param type Type of data ("temp" or "precip")
 #' @return List containing processed data and Shiny-ready data
-process_climate_data <- function(data, value_col, source_prefix, type, exclude_years = NULL) {
+process_climate_data <- function(data, value.col, normals.col, source_prefix, type, exclude_years = NULL) {
   
-  # Calculate baseline
-  baseline <- calculate_monthly_baseline(data, value_col)
+  # Convert precipitation from mm to inches if necessary
+  if (type == "precip") {
+    data <- data %>%
+      mutate(!!value.col := .data[[value.col]] * MM_TO_INCHES)
+  }
+  
+  # Merge main data with normals data on 'month'
+  data <- data %>%
+    left_join(normals.data, by = "month")  # Ensure 'month' exists in both datasets
+  
+  # Check if normals column exists after join
+  if (!(normals.col %in% names(data))) {
+    stop(paste("Column", normals.col, "not found in merged dataset. Check column names!"))
+  }
   
   # Calculate anomalies
   anomalies <- calculate_anomalies(
     data, 
-    baseline, 
-    value_col, 
+    value.col, 
+    normals.col,
     include_percent = (type == "precip")
   )
   
@@ -372,6 +376,7 @@ process_climate_data <- function(data, value_col, source_prefix, type, exclude_y
 noaa_temp <- process_climate_data(
   noaa.monthly.data,
   "tmean",
+  "tmean.normal",
   "noaa",
   "temp"
 )
@@ -382,6 +387,7 @@ mcfarland_temp <- process_climate_data(
     group_by(year, month) %>%
     summarize(tmean = mean(temp, na.rm = TRUE)),
   "tmean",
+  "tmean.normal",
   "mcfarland",
   "temp"
 )
@@ -392,6 +398,7 @@ serc_temp <- process_climate_data(
     group_by(year, month) %>%
     summarize(tmean = mean(temp, na.rm = TRUE)),
   "tmean",
+  "tmean.normal",
   "serc",
   "temp"
 )
@@ -400,6 +407,7 @@ serc_temp <- process_climate_data(
 noaa_precip <- process_climate_data(
   noaa.monthly.data,
   "ppt",
+  "ppt.normal",
   "noaa",
   "precip"
 )
@@ -410,6 +418,7 @@ mcfarland_precip <- process_climate_data(
     group_by(year, month) %>%
     summarize(ppt = mean(ppt, na.rm = TRUE)),
   "ppt",
+  "ppt.normal",
   "mcfarland",
   "precip"
 )
@@ -420,6 +429,7 @@ serc_precip <- process_climate_data(
     group_by(year, month) %>%
     summarize(ppt = mean(ppt.24hr, na.rm = TRUE)),
   "ppt",
+  "ppt.normal",
   "serc",
   "precip"
 )
