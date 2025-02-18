@@ -353,17 +353,12 @@ calculate_anomalies <- function(data, value.col, baseline.col, include_percent =
   }
   
   # Handle year.month creation separately to avoid NA date issues
-  result <- result %>%
+  result %>%
     filter(!is.na(year) & !is.na(month)) %>%
     mutate(
-      year.month = if_else(
-        !is.na(anomaly) & !is.na(year) & !is.na(month),
-        as.Date(paste(year, sprintf("%02d", month), "01", sep = "-")),
-        as.Date(NA)
+      year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
+      year.month = as.Date(year.month)
       )
-    )
-  
-  return(result)
 }
 
 #' Prepare data for Shiny dashboard

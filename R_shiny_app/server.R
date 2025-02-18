@@ -325,7 +325,7 @@ server <- function(input, output) {
     #create ggplot output
     p <- ggplot(filtered_data, aes(x = Year)) +
       scale_x_continuous(breaks = pretty(filtered_data$Year)) +
-      labs(title = "Average Temperature (1895-2024)",
+      labs(title = NULL,
            x = "Year",
            y = "Temperature (°C)") +
       theme_minimal()
@@ -400,7 +400,7 @@ server <- function(input, output) {
         "McFarland Average Temp." = "#00CC00",
         "SERC Average Temp." = "#996633"
       ),
-      name = "Temperature Data"
+      name = NULL
     )
     
     # Convert to plotly and customize hover text
@@ -460,7 +460,7 @@ server <- function(input, output) {
     
     p2 <- ggplot(filtered_data, aes(x = Year)) +
       scale_x_continuous(breaks = pretty(filtered_data$Year)) +
-      labs(title = "Total Precipitation (1895-2024)",
+      labs(title = NULL,
            x = "Year",
            y = "Total Precipitation (in)") +
       theme_minimal()
@@ -509,7 +509,7 @@ server <- function(input, output) {
       "McFarland Total Precip." = "#00CC00",
       "SERC Average Precip." = "#996633"
     ),
-    name = "Precipitation Data"
+    name = NULL
   )
   
   # Convert to plotly and customize hover text
@@ -610,7 +610,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "NOAA Temp Anomaly (°C)",
       hover_text_col = "noaa_hover_text",
-      legend_title = "NOAA Temp Anomaly Data",
+      legend_title = NULL,
       break_interval = "10 years"
     )
   })
@@ -622,7 +622,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "McFarland Temp Anomaly (°C)",
       hover_text_col = "mcfarland_hover_text",
-      legend_title = "McFarland Temp Anomaly Data",
+      legend_title = NULL,
       break_interval = "5 years"
     )
   })
@@ -634,7 +634,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "SERC Temp Anomaly (°C)",
       hover_text_col = "serc_hover_text",
-      legend_title = "SERC Temp Anomaly Data",
+      legend_title = NULL,
       break_interval = "5 years"
     )
   })
@@ -646,7 +646,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "NOAA Precip Anomaly (%)",
       hover_text_col = "noaa_precip_hover_text",
-      legend_title = "NOAA Precip Anomaly Data",
+      legend_title = NULL,
       break_interval = "10 years"
     )
   })
@@ -658,7 +658,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "McFarland Precip Anomaly (%)",
       hover_text_col = "mcfarland_precip_hover_text",
-      legend_title = "McFarland Precip Anomaly Data",
+      legend_title = NULL,
       break_interval = "5 years"
     )
   })
@@ -670,7 +670,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "SERC Precip Anomaly (%)",
       hover_text_col = "serc_precip_hover_text",
-      legend_title = "SERC Precip Anomaly Data",
+      legend_title = NULL,
       break_interval = "5 years"
     )
   })
@@ -803,7 +803,7 @@ server <- function(input, output) {
           if (!is.null(color_top2)) setNames(color_top2, label_highlight2) else NULL,
           if (!is.null(color_other2)) setNames(color_other2, label_other2) else NULL
         ),
-        name = "Records"
+        name = NULL
       ) +
       scale_x_date(
         breaks = seq(
@@ -1040,7 +1040,7 @@ server <- function(input, output) {
           if (!is.null(color_top2)) setNames(color_top2, label_highlight2) else NULL,
           if (!is.null(color_other2)) setNames(color_other2, label_other2) else NULL
         ),
-        name = "Records"
+        name = NULL
       ) +
       scale_x_date(
         breaks = seq(
@@ -1161,7 +1161,7 @@ server <- function(input, output) {
                                     x_col = "Year-Month",
                                     y_col = "Monthly Mean Sea Level (m)",
                                     hover_text_col = "monthly_sea_hover_text",
-                                    plot_title = "Sea Level",
+                                    plot_title = NULL,
                                     show_trend = FALSE,
                                     model = NULL,
                                     is_date = TRUE,
@@ -1185,7 +1185,7 @@ server <- function(input, output) {
         text = .data[[hover_text_col]],
         color = line_label,
         group = 1  # Ensures correct grouping for Plotly
-      ), size = 0.5)
+      ), size = 0.3)
     }
     
     # Add appropriate scale based on x-axis type
@@ -1205,7 +1205,7 @@ server <- function(input, output) {
       values = c(
         setNames(line_color, line_label)
       ),
-      name = "Sea Level Data"
+      name = NULL
     )
     
     # Add trend line if requested

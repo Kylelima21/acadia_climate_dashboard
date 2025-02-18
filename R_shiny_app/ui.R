@@ -208,7 +208,7 @@ ui <- dashboardPage(
                     column(
                       width = 8,
                       box(
-                        title = "Long-Term Temperature Trends", 
+                        title = "Long-Term Annual Temperature Trends", 
                         status = "primary", 
                         solidHeader = TRUE, 
                         width = 12,
@@ -369,56 +369,56 @@ ui <- dashboardPage(
                     list(
                       # First plot (monthly maximum temperatures)
                       list(
-                        plot_title = "Monthly Maximum NOAA Temperature Records",
+                        plot_title = "Highest Monthly NOAA Temperature Records",
                         year_range_id = "year_range_records",
                         checkbox_id = "temp_records_display",
                         plot_id = "MaxTempRecordsPlot",
                         data_source = records.noaa.monthly,
                         checkbox_choices = c(
-                          "Monthly Highest Mean Temperature Records" = "mean_max_temp",
-                          "Monthly Highest Maximum Temperature Records" = "max_temp"
+                          "Highest Monthly Mean Temperature Records" = "mean_max_temp",
+                          "Highest Monthly Maximum Temperature Records" = "max_temp"
                         ),
                         default_selected = c("mean_max_temp")
                       ),
                       
                       # Second plot (monthly minimum temperatures)
                       list(
-                        plot_title = "Monthly Minimum NOAA Temperature Records",
+                        plot_title = "Lowest Monthly NOAA Temperature Records",
                         year_range_id = "year_range_records2",
                         checkbox_id = "min_temp_records_display",
                         plot_id = "MinTempRecordsPlot",
                         data_source = records.noaa.monthly,
                         checkbox_choices = c(
-                          "Monthly Lowest Mean Temperature Records" = "mean_min_temp",
-                          "Monthly Lowest Minimum Temperature Records" = "min_temp"
+                          "Lowest Monthly Mean Temperature Records" = "mean_min_temp",
+                          "Lowest Monthly Minimum Temperature Records" = "min_temp"
                         ),
                         default_selected = c("mean_min_temp")
                       ),
                       
                       # Third plot (daily maximum temperatures)
                       list(
-                        plot_title = "Daily Maximum NOAA Temperature Records",
+                        plot_title = "Highest Daily NOAA Temperature Records",
                         year_range_id = "year_range_records3",
                         checkbox_id = "daily_max_temp_display",
                         plot_id = "DailyMaxRecordsPlot",
                         data_source = records.noaa.daily,  
                         checkbox_choices = c(
-                          "Daily Highest Mean Temperature Records" = "daily_mean_max_temp",
-                          "Daily Highest Maximum Temperature Records" = "daily_max_temp"
+                          "Highest Daily Mean Temperature Records" = "daily_mean_max_temp",
+                          "Highest Daily Maximum Temperature Records" = "daily_max_temp"
                         ),
                         default_selected = c("daily_mean_max_temp")
                       ),
                       
                       # Fourth plot (daily maximum temperatures)
                       list(
-                        plot_title = "Daily Minimum NOAA Temperature Records",
+                        plot_title = "Lowest Daily NOAA Temperature Records",
                         year_range_id = "year_range_records4",
                         checkbox_id = "daily_min_temp_display",
                         plot_id = "DailyMinRecordsPlot",
                         data_source = records.noaa.daily,  
                         checkbox_choices = c(
-                          "Daily Lowest Mean Temperature Records" = "daily_mean_min_temp",
-                          "Daily Lowest Minimum Temperature Records" = "daily_min_temp"
+                          "Lowest Daily Mean Temperature Records" = "daily_mean_min_temp",
+                          "Lowest Daily Minimum Temperature Records" = "daily_min_temp"
                         ),
                         default_selected = c("daily_mean_min_temp")
                       )
@@ -484,7 +484,7 @@ ui <- dashboardPage(
                     column(
                       width = 8,
                       box(
-                        title = "Long-Term Precipitation Trends",
+                        title = "Long-Term Annual Precipitation Trends",
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
@@ -643,7 +643,7 @@ ui <- dashboardPage(
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
-                        p("Plotted are the monthly highest mean precipitation records of each year and the monthly lowest mean precipitation records of each year.")
+                        p("Plotted are the highest monthly mean precipitation records of each year and the lowest monthly mean precipitation records of each year.")
                       )
                     )
                   ),
@@ -653,7 +653,7 @@ ui <- dashboardPage(
                     column(
                     width = 12,
                     box(
-                      title = "Maximim NOAA Precipitation Records", 
+                      title = "Highest NOAA Precipitation Records", 
                       status = "primary", 
                       solidHeader = TRUE, 
                       width = 12,
@@ -666,7 +666,7 @@ ui <- dashboardPage(
                     column(
                       width = 12,
                       box(
-                        title = "Minimum NOAA Precipitation Records", 
+                        title = "Lowest NOAA Precipitation Records", 
                         status = "primary", 
                         solidHeader = TRUE, 
                         width = 12,
