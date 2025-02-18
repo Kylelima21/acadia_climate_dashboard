@@ -35,6 +35,8 @@ normals.data <- read.csv("data/processed_data/noaa_normals_clean.csv")
 ####    Data Manip   ####
 #-----------------------#
 
+#### FIRST! load constants and get current year---------------------------------
+
 # Constants
 MM_TO_INCHES <- 0.0393701
 
@@ -44,7 +46,7 @@ get_current_year <- function() {
   as.numeric(format(Sys.Date(), "%Y"))
 }
 
-#### Processing climate data for long-term trend plots-------------------
+#### Processing climate data for long-term trend plots--------------------------
 
 #' Process precipitation data with datetime handling
 #' @param data Dataframe containing precipitation data
@@ -282,29 +284,86 @@ if (!is.null(results)) {
 
 #### Calculate Anomalies--------------------------------------------------------
 
+# Clean McFarland data (replace values with NA for specific years)
+mcfarland.clean.anom <- mcfarland.clean %>%
+  mutate(
+    temp = if_else(year %in% c(1998), NA_real_, temp),
+    ppt = if_else(year %in% c(1998), NA_real_, ppt)
+  )
+
+# Clean SERC data (replace values with NA for specific years)
+serc.clean.anom <- serc.clean %>%
+  mutate(
+    ppt.midnight = if_else(
+      between(year, 2009, 2014) | (year == 2015 & month %in% c(1:6)), 
+      NA_real_, 
+      ppt.midnight
+    )
+  )
+
+#' Process SERC precipitation data to get correct daily totals
+#' @param data Dataframe containing SERC precipitation data
+#' @param datetime.col Name of datetime column
+#' @param precip.col Name of precipitation column
+#' @return Dataframe with daily precipitation totals
+process_serc_precip <- function(data, datetime.col, precip.col) {
+  data %>%
+    mutate(
+      datetime = as.POSIXct(.data[[datetime.col]]),
+      date = lubridate::date(datetime),
+      hour = as.numeric(format(datetime, "%H")),
+      minute = as.numeric(format(datetime, "%M"))
+    ) %>%
+    group_by(date) %>%
+    arrange(desc(hour), desc(minute), .by_group = TRUE) %>%
+    slice_head(n = 1) %>%  # Select last recorded value of the day
+    ungroup()
+}
+
+#' Calculate monthly baseline values
+#' @param data Input data frame
+#' @param value.col Name of the value column to calculate baseline for
+#' @return Dataframe with monthly baseline values
+calculate_monthly_baseline <- function(data, value.col, start_year, end_year) {
+  data %>%
+    filter(year >= start_year & year <= end_year) %>%
+    group_by(month) %>%
+    summarize(baseline = mean(.data[[value.col]], na.rm = TRUE), .groups = "drop")
+}
+
 #' Calculate anomalies from baseline
 #' @param data Input data frame
-#' @param baseline Baseline data frame
 #' @param value.col Name of the value column
+#' @param baseline.col Name of the baseline column
 #' @param include_percent Logical, whether to include percent anomaly
 #' @return Dataframe with calculated anomalies
-calculate_anomalies <- function(data, value.col, normals.col, include_percent = FALSE) {
+calculate_anomalies <- function(data, value.col, baseline.col, include_percent = FALSE) {
   result <- data %>%
     mutate(
-      anomaly = .data[[value.col]] - .data[[normals.col]]
+      anomaly = if_else(!is.na(.data[[value.col]]),
+                        .data[[value.col]] - .data[[baseline.col]],
+                        NA_real_)
     )
   
-  if(include_percent) {
+  if (include_percent) {
     result <- result %>%
-      mutate(anomaly.percent = ((.data[[value.col]] - .data[[normals.col]]) / .data[[normals.col]]) * 100)
+      mutate(anomaly.percent = if_else(!is.na(.data[[value.col]]) & .data[[baseline.col]] != 0,
+                                       ((.data[[value.col]] - .data[[baseline.col]]) / .data[[baseline.col]]) * 100,
+                                       NA_real_))
   }
   
-  result %>%
+  # Handle year.month creation separately to avoid NA date issues
+  result <- result %>%
     filter(!is.na(year) & !is.na(month)) %>%
     mutate(
-      year.month = paste(year, sprintf("%02d", month), "01", sep = "-"),
-      year.month = as.Date(year.month)
+      year.month = if_else(
+        !is.na(anomaly) & !is.na(year) & !is.na(month),
+        as.Date(paste(year, sprintf("%02d", month), "01", sep = "-")),
+        as.Date(NA)
+      )
     )
+  
+  return(result)
 }
 
 #' Prepare data for Shiny dashboard
@@ -313,7 +372,6 @@ calculate_anomalies <- function(data, value.col, normals.col, include_percent = 
 #' @param type Type of anomaly ("temp" or "precip")
 #' @return Processed data for Shiny dashboard
 prepare_shiny_data <- function(anomaly_data, source_prefix, type) {
-  
   cols_to_select <- c("year", "month", "year.month", "anomaly")
   new_names <- c(
     "year", "month",
@@ -321,7 +379,7 @@ prepare_shiny_data <- function(anomaly_data, source_prefix, type) {
     paste0(source_prefix, ".", type, ".anom")
   )
   
-  if("anomaly.percent" %in% names(anomaly_data)) {
+  if ("anomaly.percent" %in% names(anomaly_data)) {
     cols_to_select <- c(cols_to_select, "anomaly.percent")
     new_names <- c(new_names, paste0(source_prefix, ".percent.", type, ".anom"))
   }
@@ -333,36 +391,52 @@ prepare_shiny_data <- function(anomaly_data, source_prefix, type) {
 
 #' Process climate data and calculate anomalies
 #' @param data Input data frame
-#' @param value_col Name of value column
+#' @param value.col Name of value column
 #' @param source_prefix Source identifier (e.g., "noaa", "mcfarland")
 #' @param type Type of data ("temp" or "precip")
+#' @param baseline_source "calculate" for computed baseline, "provided" for external baseline
+#' @param normals.col (Optional) Name of the provided baseline column if baseline_source = "provided"
 #' @return List containing processed data and Shiny-ready data
-process_climate_data <- function(data, value.col, normals.col, source_prefix, type, exclude_years = NULL) {
+process_climate_data <- function(data, value.col, source_prefix, type, baseline_source, normals.col = NULL, datetime.col = NULL, start_year = NULL, end_year = NULL) {
   
-  # Convert precipitation from mm to inches if necessary
+  # Fix SERC precipitation before computing anomalies
+  if (source_prefix == "serc" && type == "precip" && !is.null(datetime.col)) {
+    data <- process_serc_precip(data, datetime.col, value.col)  # Correct daily totals
+  }
+  
+  ## Convert precipitation from mm to inches
   if (type == "precip") {
     data <- data %>%
       mutate(!!value.col := .data[[value.col]] * MM_TO_INCHES)
   }
   
-  # Merge main data with normals data on 'month'
-  data <- data %>%
-    left_join(normals.data, by = "month")  # Ensure 'month' exists in both datasets
-  
-  # Check if normals column exists after join
-  if (!(normals.col %in% names(data))) {
-    stop(paste("Column", normals.col, "not found in merged dataset. Check column names!"))
+  # Calculate or use provided baseline from normals dataset
+  if (baseline_source == "calculate") {
+    if (!is.null(start_year) & !is.null(end_year)) {
+      baseline <- calculate_monthly_baseline(data, value.col, start_year, end_year)
+    } else {
+      baseline <- calculate_monthly_baseline(data, value.col)
+    }
+    data <- data %>% left_join(baseline, by = "month")
+    baseline.col <- "baseline"
+  } else if (baseline_source == "provided") {
+    # Ensure data is merged with the normals dataset first
+    data <- data %>% left_join(normals.data, by = "month")  # Ensure 'month' exists in both datasets
+    
+    if (is.null(normals.col) || !(normals.col %in% names(data))) {
+      stop("Invalid or missing normals column for provided baseline.")
+    }
+    baseline.col <- normals.col
+  } else {
+    stop("Invalid baseline_source. Use 'calculate' or 'provided'.")
   }
   
   # Calculate anomalies
   anomalies <- calculate_anomalies(
-    data, 
-    value.col, 
-    normals.col,
-    include_percent = (type == "precip")
+    data, value.col, baseline.col, include_percent = (type == "precip")
   )
   
-  # Prepare Shiny data
+  # Prepare data for visualization
   shiny_data <- prepare_shiny_data(anomalies, source_prefix, type)
   
   list(
@@ -371,84 +445,82 @@ process_climate_data <- function(data, value.col, normals.col, source_prefix, ty
   )
 }
 
-# Usage:
-# Process NOAA temperature data
+# NOAA (manual baseline calculation)
 noaa_temp <- process_climate_data(
   noaa.monthly.data,
   "tmean",
-  "tmean.normal",
   "noaa",
-  "temp"
+  "temp",
+  "calculate",
+  start_year = 1901,  
+  end_year = 2000  
 )
 
-# Process McFarland temperature data
-mcfarland_temp <- process_climate_data(
-  mcfarland.clean %>%
-    group_by(year, month) %>%
-    summarize(tmean = mean(temp, na.rm = TRUE)),
-  "tmean",
-  "tmean.normal",
-  "mcfarland",
-  "temp"
-)
-
-# Process SERC temperature data
-serc_temp <- process_climate_data(
-  serc.clean %>%
-    group_by(year, month) %>%
-    summarize(tmean = mean(temp, na.rm = TRUE)),
-  "tmean",
-  "tmean.normal",
-  "serc",
-  "temp"
-)
-
-# Process NOAA precipitation data
 noaa_precip <- process_climate_data(
   noaa.monthly.data,
   "ppt",
-  "ppt.normal",
   "noaa",
-  "precip"
+  "precip",
+  "calculate",
+  start_year = 1901,  
+  end_year = 2000
 )
 
-# Process McFarland precipitation data
-mcfarland_precip <- process_climate_data(
-  mcfarland.clean %>%
-    group_by(year, month) %>%
-    summarize(ppt = mean(ppt, na.rm = TRUE)),
-  "ppt",
-  "ppt.normal",
+# McFarland (provided normals)
+mcfarland_temp <- process_climate_data(
+  mcfarland.clean.anom %>% group_by(year, month) %>% summarize(tmean = mean(temp, na.rm = TRUE), .groups = "drop"),
+  "tmean",
   "mcfarland",
-  "precip"
+  "temp",
+  "provided",
+  "tmean.normal"
 )
 
-# Process SERC precipitation data
-serc_precip <- process_climate_data(
-  serc.clean %>%
-    group_by(year, month) %>%
-    summarize(ppt = mean(ppt.24hr, na.rm = TRUE)),
+mcfarland_precip <- process_climate_data(
+  mcfarland.clean.anom %>% group_by(year, month) %>% summarize(ppt = sum(ppt, na.rm = TRUE), .groups = "drop"),
   "ppt",
-  "ppt.normal",
+  "mcfarland",
+  "precip",
+  "provided",
+  "ppt.normal"
+)
+
+# SERC (provided normals)
+serc_temp <- process_climate_data(
+  serc.clean.anom %>% group_by(year, month) %>% summarize(tmean = mean(temp, na.rm = TRUE), .groups = "drop"),
+  "tmean",
   "serc",
-  "precip"
+  "temp",
+  "provided",
+  "tmean.normal"
+)
+
+serc_precip <- process_climate_data(
+  process_serc_precip(serc.clean.anom, "date.time.est", "ppt.midnight") %>% 
+    group_by(year, month) %>% 
+    summarize(ppt = sum(ppt.midnight, na.rm = TRUE), .groups = "drop"),
+  "ppt",
+  "serc",
+  "precip",
+  "provided",
+  "ppt.normal"
 )
 
 # Merge temperature anomalies
-anom.temp.merged <- noaa_temp$shiny_data %>%
+anom.temp.merged.new <- noaa_temp$shiny_data %>%
   filter(year < get_current_year()) %>%
-  left_join(mcfarland_temp$shiny_data, by = c("year", "month")) %>% 
+  left_join(mcfarland_temp$shiny_data, by = c("year", "month")) %>%
   left_join(serc_temp$shiny_data, by = c("year", "month"))
 
 # Merge precipitation anomalies
-anom.precip.merged <- noaa_precip$shiny_data %>%
+anom.precip.merged.new <- noaa_precip$shiny_data %>%
   filter(year < get_current_year()) %>%
   left_join(mcfarland_precip$shiny_data, by = c("year", "month")) %>%
   left_join(serc_precip$shiny_data, by = c("year", "month"))
 
-##save outputs as csv
-# write.csv(anom.temp.merged, "data/processed_data/anom_temp_merged.csv", row.names = FALSE)
-# write.csv(anom.precip.merged, "data/processed_data/anom_precip_merged.csv", row.names = FALSE)
+# Save outputs as CSV
+# write.csv(anom.temp.merged.new, "data/processed_data/anom_temp_merged.csv", row.names = FALSE)
+# write.csv(anom.precip.merged.new, "data/processed_data/anom_precip_merged.csv", row.names = FALSE)
 
 
 #### Record plots--------------------------------------------------------------
