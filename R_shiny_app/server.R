@@ -15,7 +15,7 @@ server <- function(input, output) {
   )
   
   buoy_locations <- data.frame(
-    name = c("Bar Harbor, Frenchman Bay Buoy"),
+    name = c("Bar Harbor, Frenchman Bay Station"),
     lat = c(44.391667),
     lng = c(-68.205)
   )
@@ -46,12 +46,12 @@ server <- function(input, output) {
       fillColor = "yellow",  # Fill color
       fillOpacity = 0.8,
       popup = ~paste0("<strong>", name, "</strong><br>", lat, ", ", lng),
-      group = "Buoys"
+      group = "Stations"
     ) %>%
     
     addLayersControl(
       baseGroups = c("Topographic", "Satellite"),
-      overlayGroups = c("Stations", "Buoys"),
+      overlayGroups = c("Stations"),
       options = layersControlOptions(collapsed = FALSE)
     )
   })

@@ -21,9 +21,9 @@ serc.data <- read.csv("data/raw_data/SERC_D2258_export_20241119.csv") %>%
 mcfarland.data <- read.csv("data/raw_data/McFarland_Hill_export_20241022.csv") %>%
   as_tibble()
 
-#-----------------------#
-####    Data Manip   ####
-#-----------------------#
+#-----------------------------------#
+####    Data Cleaning Function   ####
+#-----------------------------------#
 
 clean_weather_data <- function(data, station_type = c("serc", "mcfarland")) {
   

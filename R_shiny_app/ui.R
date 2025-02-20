@@ -114,12 +114,13 @@ ui <- dashboardPage(
                              width = 8,
                              div(
                                style = "font-size: 16px; line-height: 1.6;",
-                               p("This R Shiny Dashboard summarizes climate data from the Acadia National Park region gathered from local weather stations and the National Oceanic and Atmospheric Administration (NOAA). Local data was gathered from the McFarland Hill Atmospheric Research Station and the Winter Harbor-SERC weather station. Climate data was compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes."),
+                               p("This R Shiny Dashboard summarizes climate data from Acadia National Park gathered from local weather stations, the National Oceanic and Atmospheric Administration (NOAA), and the National Oceanography Centre (NOC). Local data was gathered from the McFarland Hill Atmospheric Research Station and Winter Harbor-SERC weather station. Climate data was compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes as well as long-term sea level trends. "),
                                tags$ul(
                                  style = "font-size: 16px;",
                                  tags$li(HTML('Climate summaries were created from daily and monthly gridded climate data downloaded from NOAA\'s National Centers for Environmental Information (<a href="https://www.ncei.noaa.gov" target="_blank">NCEI </a>). Climate data was compiled and cleaned using R scripts by Kyle Lima, built from the climateNETN package by Kate Miller (<a href="https://github.com/KateMMiller/climateNETN" target="_blank">climateNETN </a>).')),
                                  tags$li("Climate summaries were created from hourly data collected by the McFarland Hill Atmospheric Research Station."),
-                                 tags$li("Climate summaries were created from 15 minute interval data collected by the Winter Harbor-SERC weather station (ID: D2258).")),
+                                 tags$li("Climate summaries were created from 15 minute interval data collected by the Winter Harbor-SERC weather station (ID: D2258)."),
+                                 tags$li("Sea level trend visualizations were created from monthly and annual mean sea level data collected by the Bar Harbor, Frenchman Bay, ME Station (ID: 525) and documented by the Permanent Service for Mean Sea Level (PSMSL), based at the NOC, which specializes in providing tide gauge data around the world.")),
                                p(HTML("<strong>Data Access</strong>: data from all sources used in this app and R scripts for data cleaning can be downloaded and found at this page: link."))
                              )
                            )
@@ -689,7 +690,7 @@ ui <- dashboardPage(
                          status = "primary",
                          solidHeader = TRUE,
                          width = 12,
-                         p("Plotted are monthly sea level trends.")
+                         p("Plotted are monthly sea level trends from 1947 to 2023 and annual sea level trends from 1948 to 2024 from the Bar Harbor, Frenchman Bay, ME Station (Station ID: 525). Data are derived from the Permanent Service for Mean Sea Level (PSMSL).")
                        )
                 )
               ),
