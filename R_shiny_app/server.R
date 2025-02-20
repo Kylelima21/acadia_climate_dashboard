@@ -189,13 +189,13 @@ server <- function(input, output) {
       rename(
         Year = year, 
         `Year-Month` = year.month, 
-        `Monthly Mean Sea Level (m)` = mean.sea.level.m,
+        `Monthly Mean Sea Level (mm)` = mean.sea.level.mm,
       ) %>%
       mutate(
         `Year-Month` = as.Date(`Year-Month`),
         monthly_sea_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>Mean Sea Level (m):", round(`Monthly Mean Sea Level (m)`, 3)
+          "<br>Mean Sea Level (mm):", round(`Monthly Mean Sea Level (mm)`, 3)
         )
       ) %>%
       # Add filter based on slider input
@@ -210,12 +210,12 @@ server <- function(input, output) {
     frenchman.annual.clean %>%
       rename(
         Year = year, 
-        `Annual Mean Sea Level (m)` = mean.sea.level.m,
+        `Annual Mean Sea Level (mm)` = mean.sea.level.mm,
       ) %>%
       mutate(
         annual_sea_hover_text = paste(
           "Year:", Year,
-          "<br>Mean Sea Level (m):", round(`Annual Mean Sea Level (m)`, 3)
+          "<br>Mean Sea Level (mm):", round(`Annual Mean Sea Level (mm)`, 3)
         )
       ) %>%
       # Add filter based on slider input
@@ -232,7 +232,7 @@ server <- function(input, output) {
     
     list(
       monthly_sea = if ("lm_monthly_sea" %in% input$linesToShowMonthlySea) 
-        lm(`Monthly Mean Sea Level (m)` ~ Year, data = data)
+        lm(`Monthly Mean Sea Level (mm)` ~ Year, data = data)
     )
   })
   
@@ -243,7 +243,7 @@ server <- function(input, output) {
     
     list(
       annual_sea = if ("lm_annual_sea" %in% input$linesToShowAnnualSea) 
-        lm(`Annual Mean Sea Level (m)` ~ Year, data = data)
+        lm(`Annual Mean Sea Level (mm)` ~ Year, data = data)
     )
   })
   
@@ -1159,7 +1159,7 @@ server <- function(input, output) {
   
   create_sea_level_plot <- function(data,
                                     x_col = "Year-Month",
-                                    y_col = "Monthly Mean Sea Level (m)",
+                                    y_col = "Monthly Mean Sea Level (mm)",
                                     hover_text_col = "monthly_sea_hover_text",
                                     plot_title = NULL,
                                     show_trend = FALSE,
@@ -1252,14 +1252,14 @@ server <- function(input, output) {
     create_sea_level_plot(
       data = data,
       x_col = "Year-Month",
-      y_col = "Monthly Mean Sea Level (m)",
+      y_col = "Monthly Mean Sea Level (mm)",
       hover_text_col = "monthly_sea_hover_text",
-      plot_title = "Monthly Mean Sea Level",
+      plot_title = NULL,
       show_trend = "lm_monthly_sea" %in% input$linesToShowMonthlySea,
       model = models$monthly_sea,
       is_date = TRUE,
       line_color = "blue",
-      line_label = "Monthly Mean Sea Level (m)",
+      line_label = "Monthly Mean Sea Level (mm)",
       input_check = input$linesToShowMonthlySea
     )
   })
@@ -1271,14 +1271,14 @@ server <- function(input, output) {
     create_sea_level_plot(
       data = data,
       x_col = "Year",
-      y_col = "Annual Mean Sea Level (m)",
+      y_col = "Annual Mean Sea Level (mm)",
       hover_text_col = "annual_sea_hover_text",
-      plot_title = "Annual Mean Sea Level",
+      plot_title = NULL,
       show_trend = "lm_annual_sea" %in% input$linesToShowAnnualSea,
       model = models$annual_sea,
       is_date = FALSE,
       line_color = "blue",
-      line_label = "Annual Mean Sea Level (m)",
+      line_label = "Annual Mean Sea Level (mm)",
       input_check = input$linesToShowAnnualSea
     )
   })

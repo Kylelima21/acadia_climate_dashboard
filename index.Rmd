@@ -9,6 +9,7 @@ output:
 ```{r echo = FALSE, include = FALSE}
 ```
 
+
 <!-- Wrap everything in the page wrapper -->
 
 <div class="page-wrapper">
@@ -25,7 +26,7 @@ Acadia Climate Data Dashboard Project
 </div>
 
 <div class = "titlepage-subtitle">
-This site is for downloading Acadia National Park climate data and data cleaning scripts. This data is used in the Acadia Climate Data R Shiny Dashboard. Cleaning scripts only require the input of the downloaded datasets to run in R. 
+This site is for downloading Acadia National Park climate data and associated data compiling and cleaning scripts. This data is used in the Acadia Climate Data R Shiny Dashboard. Cleaning scripts only require the input of the downloaded datasets to run in R. 
 </div>
 </div>
 
@@ -52,6 +53,8 @@ Data Download
 </div>
 
 <div class="descripbox">
+
+<!--  NOAA  -->
 <section class="data-section">
 
 <h3>National Oceanic and Atmospheric Administration (NOAA)</h3>
@@ -60,7 +63,7 @@ Data Download
 
 <li class="primary-item">
 
-<a href="https://www.ncei.noaa.gov/products/land-based-station/nclimgrid-daily">Daily NOAA Data</a>
+<a href="https://doi.org/10.25921/c4gt-r169">Daily NOAA Data</a>
 
 <ul class="secondary-list">
 
@@ -76,7 +79,7 @@ Data compiling and cleaning script: <a href="https://github.com/Kylelima21/acadi
 
 <li class="primary-item">
 
-<a href="https://www.ncei.noaa.gov/access/metadata/landing-page/bin/iso?id=gov.noaa.ncdc:C00332">Monthly NOAA Data</a>
+<a href="doi:10.7289/V5SX6B56">Monthly NOAA Data</a>
 
 <ul class="secondary-list">
 
@@ -98,8 +101,22 @@ Data download requires cleaning scripts by Kyle Lima that build off Kate Miller'
 
 </ul>
 
-</section>
+<!-- Drop-down button -->
+<details>
+<summary>Daily Download Instructions</summary>
+<br>
+Daily NClimGrid data can be downloaded at the link provided by using your computer's terminal to download each year/month of daily data from the https server. First, you will need to install “wget” software for your operating system. Once you have it installed, on Mac/Linux open the Terminal app or on Windows open the Command Prompt (cmd). Next, decide where you would like to store the downloaded data in your files and use the cd command to move to that folder (e.g. cd C:\Users\YourUsername\Desktop\projects\acadia_climate_dashboard\data\nClimGrid_nc). Next use “wget” to download the data (e.g. wget -r -np -nd -A "*.nc" "https://www.ncei.noaa.gov/data/nclimgrid-daily/access/grids/"). After all daily data is downloaded, the data compiling R script above can be downloaded and used to help gather and clean daily NClimGrid data.
+</details>
 
+<!-- Drop-down button -->
+<details>
+<summary>Monthly Download Instructions</summary>
+<br>
+Monthly NClimGrid data can be downloaded at the link provided by selecting “NCEI Direct Download (archive)” or “NCEI THREDDS Catalog” in the download data selection of the page. Datasets for each climate variable available can be downloaded directly from the “NCEI Direct Download (archive)”. Once downloaded, the data compiling R script above can be downloaded and used to help gather and clean monthly NClimGrid data; each dataset containing each climate variable will simply need to be pulled in using its file path corresponding to where it’s downloaded or kept in your files. 
+</details>
+
+
+<!--  McFarland  -->
 <section class="data-section">
 
 <h3>McFarland Hill Atmospheric Research Station</h3>
@@ -121,6 +138,17 @@ Data cleaning script: <a href="https://github.com/Kylelima21/acadia_climate_dash
 </ul>
 
 </li>
+
+<!-- Drop-down button -->
+<details>
+<summary>Download Instructions</summary>
+<br>
+The data exporting process for McFarland Hill data can be initiated at the link provided by inputting the desired time period of the data, selecting the site (ACAD-MH Acadia National Park McFarland Hill), and parameter intervals and parameters available for that time period. Then, the corresponding dataset with those specifications can be exported and downloaded as a .csv. 
+
+The data cleaning R script above can be downloaded and used to help clean McFarland Hill data; the McFarland Hill dataset will simply need to be pulled in using its file path corresponding to where it’s downloaded or kept in your files. 
+</details>
+
+<!--  SERC  -->
 
 </section>
 
@@ -145,6 +173,50 @@ Data cleaning script: <a href="https://github.com/Kylelima21/acadia_climate_dash
 </ul>
 
 </li>
+
+<!-- Drop-down button -->
+<details>
+<summary>Download Instructions</summary>
+<br>
+The data exporting process for SERC data can be initiated at the link provided by clicking “Download Data” on the left hand panel. At that site, you can immediately download station data a day at a time, create a MesoWest account to download a year of data at a time, or use <a href="https://docs.synopticdata.com/">Synoptic Data API Services</a> to download larger amounts of data. At Synoptic Data API Services, you must first make an account to access its services. Then station data can be downloaded by going to “Data Services” to access the “Data Download Tool”; there, you can click “New Download” where you can choose the station you’d like to download from (SERC station ID: D2258) and the desired time period and variables. Clicking “Request Data” will process your request and bring you to a page where you can download the dataset as a .csv. 
+
+The data cleaning R script above can be downloaded and used to help clean SERC station data; the SERC dataset will simply need to be pulled in using its file path corresponding to where it’s downloaded or kept in your files. 
+
+</details>
+
+<!--  Sea level  -->
+</section>
+
+<section class="data-section">
+
+<h3>Bar Harbor, Frenchman Bay, ME Station</h3>
+
+<ul class="primary-list">
+
+<li class="primary-item">
+
+<a href="https://psmsl.org/data/obtaining/stations/525.php">Tide gauge sea level data</a>
+
+<ul class="secondary-list">
+
+<li class="secondary-item">
+
+Data cleaning script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/dev/scripts/2-3_tidy_sea_level_data.R">Sea Level Data Cleaning Function</a>
+
+</li>
+
+</ul>
+
+</li>
+
+<!-- Drop-down button -->
+<details>
+<summary>Download Instructions</summary>
+<br>
+Both monthly and annual sea level trend data can be downloaded at the link provided by clicking “Download monthly mean sea level data” or “Download annual mean sea level data”. This will bring you to a .txt file version of the data which can be downloaded by right clicking the page and selecting  “Save as…” to save the file to where you’d like in your files. 
+
+The data cleaning R script above can be downloaded and used to help clean Bar Harbor, Frenchman Bay, ME Station data from this source; the downloaded datasets will simply need to be pulled in using the file paths corresponding to where they are downloaded or kept in your files.
+</details>
 
 </section>
 

@@ -9,11 +9,11 @@ library(dplyr)
 library(ggplot2)
 library(lubridate)
 
-#-----------------------#
-####    Read Data    ####
-#-----------------------#
+#--------------------------#
+####    Read-In Data    ####
+#--------------------------#
 
-#Reading in CSV as a tibble
+# Read-in CSV as a tibble
 
 serc.data <- read.csv("data/raw_data/SERC_D2258_export_20241119.csv") %>%
   as_tibble()
