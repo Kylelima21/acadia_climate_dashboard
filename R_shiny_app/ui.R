@@ -114,13 +114,14 @@ ui <- dashboardPage(
                              width = 8,
                              div(
                                style = "font-size: 16px; line-height: 1.6;",
-                               p("This R Shiny Dashboard summarizes climate data from the Acadia National Park region gathered from local weather stations and the National Oceanic and Atmospheric Administration (NOAA). Local data was gathered from the McFarland Hill Atmospheric Research Station and the Winter Harbor-SERC weather station. Climate data was compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes."),
+                               p("This R Shiny Dashboard summarizes climate data from Acadia National Park gathered from local weather stations, the National Oceanic and Atmospheric Administration (NOAA), and the National Oceanography Centre (NOC). Local data was gathered from the McFarland Hill Atmospheric Research Station, the Winter Harbor-SERC weather station, and the Bar Harbor, Frenchman Bay, ME Station. Climate data was compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes as well as long-term sea level trends."),
                                tags$ul(
                                  style = "font-size: 16px;",
                                  tags$li(HTML('Climate summaries were created from daily and monthly gridded climate data downloaded from NOAA\'s National Centers for Environmental Information (<a href="https://www.ncei.noaa.gov" target="_blank">NCEI </a>). Climate data was compiled and cleaned using R scripts by Kyle Lima, built from the climateNETN package by Kate Miller (<a href="https://github.com/KateMMiller/climateNETN" target="_blank">climateNETN </a>).')),
                                  tags$li("Climate summaries were created from hourly data collected by the McFarland Hill Atmospheric Research Station."),
-                                 tags$li("Climate summaries were created from 15 minute interval data collected by the Winter Harbor-SERC weather station (ID: D2258).")),
-                               p(HTML("<strong>Data Access</strong>: data from all sources used in this app and R scripts for data cleaning can be downloaded and found at this page: link."))
+                                 tags$li("Climate summaries were created from 15 minute interval data collected by the Winter Harbor-SERC weather station (ID: D2258)."),
+                                 tags$li(HTML('Sea level trend visualizations were created from monthly and annual mean sea level data collected by the Bar Harbor, Frenchman Bay, ME Station (ID: 525) and documented by the Permanent Service for Mean Sea Level (<a href="https://psmsl.org/" target="_blank">PSMSL </a>), based at the NOC, which specializes in providing tide gauge data around the world.'))),
+                               p(HTML("<strong>Data Access</strong>: data from all sources used in this app and R scripts for data compiling and cleaning can be downloaded at this page: link. Instructions for data downloading and R script use are also provided."))
                              )
                            )
                          )
@@ -151,6 +152,19 @@ ui <- dashboardPage(
                 tabPanel(
                   "Temperature Trends",
                   
+                  # Add figure/descriptive text 
+                  br(),
+                  fluidRow(
+                    column(width = 12,
+                           box(
+                             status = "primary",
+                             solidHeader = TRUE,
+                             width = 12,
+                             p("Plotted below are annual average maximum, minimum, and mean temperature trends from 1895 to 2024 for data derived from NOAA NClimGrid datasets. Also plotted are McFarland Hill annual average temperature data which spans from 1999 to 2024 and SERC annual average temperature data which spans from 2009 to 2024. The data tools on the left can be used to add or remove elements from the plot; if linear models are added, the corresponding model statistics are calculated and provided in the model statistics box below.")
+                           )
+                    )
+                  ),
+                  
                   # Add fluidRow for the checkbox group and plot
                   fluidRow(
                     # Column for the checkbox group input
@@ -166,17 +180,17 @@ ui <- dashboardPage(
                           inputId = "linesToShow",
                           label = "Select Temperature Data to Display:",
                           choices = c("NOAA Average Maximum Temp." = "NOAA Average Max Temp",
-                                      "NOAA Average Temp." = "NOAA Average Temp",
+                                      "NOAA Average Mean Temp." = "NOAA Average Mean Temp",
                                       "NOAA Average Minimum Temp." = "NOAA Average Min Temp",
                                       "McFarland Average Temp." = "McFarland Average Temp",
                                       "SERC Average Temp." = "SERC Average Temp",
                                       "Linear Model for NOAA Average Max Temp" = "lm_noaa_max_temp",
-                                      "Linear Model for NOAA Average Temp" = "lm_noaa_temp",
+                                      "Linear Model for NOAA Average Mean Temp" = "lm_noaa_temp",
                                       "Linear Model for NOAA Average Min Temp" = "lm_noaa_min_temp",
                                       "Linear Model for McFarland Average Temp" = "lm_mcfarland_temp",
                                       "Linear Model for SERC Average Temp" = "lm_serc_temp"
                           ),
-                          selected = c("NOAA Average Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp", "SERC Average Temp")
+                          selected = c("NOAA Average Mean Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp", "SERC Average Temp")
                         ),
                       
                       # Add slider for year range
@@ -195,7 +209,7 @@ ui <- dashboardPage(
                     column(
                       width = 8,
                       box(
-                        title = "Long-Term Temperature Trends", 
+                        title = "Long-Term Annual Temperature Trends", 
                         status = "primary", 
                         solidHeader = TRUE, 
                         width = 12,
@@ -217,7 +231,7 @@ ui <- dashboardPage(
                         # NOAA average temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_noaa_temp')",
-                          h4("NOAA Average Temperature Model"),
+                          h4("NOAA Average Mean Temperature Model"),
                           verbatimTextOutput("noaa_temp_model_summary")
                         ),
                         
@@ -256,9 +270,10 @@ ui <- dashboardPage(
                 tabPanel(
                   "Temperature Anomalies", 
                   
-                  # Add fluidRow for the checkbox group and plot
+                  # First fluidRow with slider and text box side by side
                   fluidRow(
-                    # Column for the checkbox group input
+                    # Column for the slider (left side)
+                    br(),
                     column(
                       width = 4,
                       box(
@@ -266,17 +281,6 @@ ui <- dashboardPage(
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
-                        # # Add checkbox group for line selection
-                        # checkboxGroupInput(
-                        #   inputId = "linesToShowAnom",
-                        #   label = "Select Temperature Anomaly Data to Display:",
-                        #   choices = c("NOAA Temp Anomaly" = "NOAA Temp Anom",
-                        #               "McFarland Temp Anomaly" = "McFarland Temp Anom"
-                        #   ),
-                        #   selected = c("NOAA Temp Anom", "McFarland Temp Anom")
-                        # ),
-
-                        # Add slider for year range
                         sliderInput(
                           inputId = "year_range_temp_anom",
                           label = "Select Year Range:",
@@ -286,8 +290,23 @@ ui <- dashboardPage(
                           sep = ""
                         )
                       )
-                    )
-                  ),
+                    ),
+                    
+                    # Column for the explanatory text (right side)
+                    column(
+                      width = 8,
+                      box(
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        p("Plotted below are monthly temperature anomalies which represent the difference between observed temperatures and historic baseline temperatures. Positive anomalies (above the baseline in red) indicate temperatures that are above (warmer than) the historic baseline. Negative anomalies (below the baseline in blue) indicate temperatures that are below (cooler than) the historic baseline."),
+                        tags$ul(
+                          tags$li("NOAA monthly temperature anomalies were calculated for 1895 to 2024. The historic baseline was calculated by averaging the mean temperature for each month of the year from 1901-2000 to generate a 20th century baseline. Data was derived from the Monthly NOAA nClimGrid dataset for these calculations and anomaly plot visualization."),
+                          tags$li("McFarland Hill monthly temperature anomalies were calculated for 1999 to 2024. The historic baseline was derived from NOAA average temperature normals for 1981 to 2010 legacy period."),
+                          tags$li("SERC monthly temperature anomalies were calculated for 2009 to 2024. The historic baseline was derived from NOAA average temperature normals for the 1981 to 2010 legacy period."))
+                        )
+                      )
+                    ),
                   
                   #NOAA temp anom plot
                   fluidRow(
@@ -337,60 +356,79 @@ ui <- dashboardPage(
                 tabPanel(
                   "Temperature Records and Extremes",
                   
+                  # Add figure/descriptive text 
+                  br(),
+                  fluidRow(
+                    column(width = 12,
+                           box(
+                             status = "primary",
+                             solidHeader = TRUE,
+                             width = 12,
+                             p("Plotted below are monthly and daily temperature records and extremes:"),
+                             tags$ul(
+                               tags$li("Highest monthly mean and maximum temperature records of each year."),
+                               tags$li("Lowest monthly mean and minimum temperature records of each year."),
+                               tags$li("Highest daily mean and maximum temperature records of each year."),
+                               tags$li("Lowest daily mean and minimum temperature records of each year.")),
+                             p("Data are derived from NOAA NClimGrid datasets.")
+                           )
+                    )
+                  ),
+                  
                   create_temp_records_panel(
                     list(
                       # First plot (monthly maximum temperatures)
                       list(
-                        plot_title = "Monthly Maximum NOAA Temperature Records",
+                        plot_title = "Highest Monthly NOAA Temperature Records",
                         year_range_id = "year_range_records",
                         checkbox_id = "temp_records_display",
                         plot_id = "MaxTempRecordsPlot",
-                        data_source = record.noaa.monthly,
+                        data_source = records.noaa.monthly,
                         checkbox_choices = c(
-                          "Monthly Maximum Mean Temperature Records" = "mean_max_temp",
-                          "Monthly Maximum Temperature Records" = "max_temp"
+                          "Highest Monthly Mean Temperature Records" = "mean_max_temp",
+                          "Highest Monthly Maximum Temperature Records" = "max_temp"
                         ),
                         default_selected = c("mean_max_temp")
                       ),
                       
                       # Second plot (monthly minimum temperatures)
                       list(
-                        plot_title = "Monthly Minimum NOAA Temperature Records",
+                        plot_title = "Lowest Monthly NOAA Temperature Records",
                         year_range_id = "year_range_records2",
                         checkbox_id = "min_temp_records_display",
                         plot_id = "MinTempRecordsPlot",
-                        data_source = record.noaa.monthly,
+                        data_source = records.noaa.monthly,
                         checkbox_choices = c(
-                          "Monthly Minimum Mean Temperature Records" = "mean_min_temp",
-                          "Monthly Minimum Temperature Records" = "min_temp"
+                          "Lowest Monthly Mean Temperature Records" = "mean_min_temp",
+                          "Lowest Monthly Minimum Temperature Records" = "min_temp"
                         ),
                         default_selected = c("mean_min_temp")
                       ),
                       
                       # Third plot (daily maximum temperatures)
                       list(
-                        plot_title = "Daily Maximum NOAA Temperature Records",
+                        plot_title = "Highest Daily NOAA Temperature Records",
                         year_range_id = "year_range_records3",
                         checkbox_id = "daily_max_temp_display",
                         plot_id = "DailyMaxRecordsPlot",
                         data_source = records.noaa.daily,  
                         checkbox_choices = c(
-                          "Daily Maximum Mean Temperature Records" = "daily_mean_max_temp",
-                          "Daily Maximum Temperature Records" = "daily_max_temp"
+                          "Highest Daily Mean Temperature Records" = "daily_mean_max_temp",
+                          "Highest Daily Maximum Temperature Records" = "daily_max_temp"
                         ),
                         default_selected = c("daily_mean_max_temp")
                       ),
                       
                       # Fourth plot (daily maximum temperatures)
                       list(
-                        plot_title = "Daily Minimum NOAA Temperature Records",
+                        plot_title = "Lowest Daily NOAA Temperature Records",
                         year_range_id = "year_range_records4",
                         checkbox_id = "daily_min_temp_display",
                         plot_id = "DailyMinRecordsPlot",
                         data_source = records.noaa.daily,  
                         checkbox_choices = c(
-                          "Daily Minimum Mean Temperature Records" = "daily_mean_min_temp",
-                          "Daily Minimum Temperature Records" = "daily_min_temp"
+                          "Lowest Daily Mean Temperature Records" = "daily_mean_min_temp",
+                          "Lowest Daily Minimum Temperature Records" = "daily_min_temp"
                         ),
                         default_selected = c("daily_mean_min_temp")
                       )
@@ -407,6 +445,19 @@ ui <- dashboardPage(
               tabsetPanel(
                 tabPanel(
                   "Precipitation Trends",
+                  
+                  # Add figure/descriptive text 
+                  br(),
+                  fluidRow(
+                    column(width = 12,
+                           box(
+                             status = "primary",
+                             solidHeader = TRUE,
+                             width = 12,
+                             p("Plotted below are annual average total precipitation trends from 1895 to 2024 for data derived from NOAA NClimGrid datasets. Also plotted are McFarland Hill annual average total precipitation data which spans from 1999 to 2024 and SERC annual average total precipitation data which spans from 2009 to 2024. The data tools on the left can be used to add or remove elements from the plot; if linear models are added, the corresponding model statistics are calculated and provided in the model statistics box below.")
+                           )
+                    )
+                  ),
                   
                   fluidRow(
                     column(
@@ -443,7 +494,7 @@ ui <- dashboardPage(
                     column(
                       width = 8,
                       box(
-                        title = "Long-Term Precipitation Trends",
+                        title = "Long-Term Annual Precipitation Trends",
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
@@ -491,9 +542,10 @@ ui <- dashboardPage(
                 tabPanel(
                   "Precipitation Anomalies", 
                   
-                  # Add fluidRow for the checkbox group and plot
+                  # First fluidRow with slider and text box side by side
                   fluidRow(
-                    # Column for the checkbox group input
+                    # Column for the slider (left side)
+                    br(),
                     column(
                       width = 4,
                       box(
@@ -501,17 +553,6 @@ ui <- dashboardPage(
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
-                        # # Add checkbox group for line selection
-                        # checkboxGroupInput(
-                        #   inputId = "linesToShowAnom",
-                        #   label = "Select Temperature Anomaly Data to Display:",
-                        #   choices = c("NOAA Temp Anomaly" = "NOAA Temp Anom",
-                        #               "McFarland Temp Anomaly" = "McFarland Temp Anom"
-                        #   ),
-                        #   selected = c("NOAA Temp Anom", "McFarland Temp Anom")
-                        # ),
-                        
-                        # Add slider for year range
                         sliderInput(
                           inputId = "year_range_precip_anom",
                           label = "Select Year Range:",
@@ -520,6 +561,21 @@ ui <- dashboardPage(
                           value = c(min(anom.precip.merged$year), max(anom.precip.merged$year)),
                           sep = ""
                         )
+                      )
+                    ),
+                    
+                    # Column for the explanatory text (right side)
+                    column(
+                      width = 8,
+                      box(
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        p("Plotted below are monthly percent precipitation anomalies which represent the percent difference between observed precipitation and historic baseline precipitation totals. Positive anomalies (red) indicate precipitation totals that are higher- or wetter-than-average conditions, while negative anomalies (blue) indicate precipitation totals that are lower- or drier-than-average conditions."),
+                        tags$ul(
+                          tags$li("NOAA monthly percent precipitation anomalies were calculated for 1895 to 2024. Historic baselines were calculated by averaging the total precipitation for each month of the year from 1901-2000 to generate a 20th century baseline. Data was derived from the Monthly NOAA NClimGrid dataset for these calculations and anomaly plot visualization."),
+                          tags$li("McFarland Hill monthly percent precipitation anomalies were calculated for 1999 to 2024. The historic baseline was derived from NOAA average precipitation normals for 1981 to 2010 legacy period."),
+                          tags$li("SERC monthly percent precipitation anomalies were calculated for 2009 to 2024. The historic baseline was derived from NOAA average precipitation normals for the 1981 to 2010 legacy period."))
                       )
                     )
                   ),
@@ -571,9 +627,10 @@ ui <- dashboardPage(
                 tabPanel(
                   "Precipitation Records and Extremes",
                   
-                  # Add fluidRow for the checkbox group and plot
+                  # First fluidRow with slider and text box side by side
                   fluidRow(
-                    # Column for the checkbox group input
+                    # Column for the slider (left side)
+                    br(),
                     column(
                       width = 4,
                       box(
@@ -581,36 +638,36 @@ ui <- dashboardPage(
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
-                        # # Add checkbox group for line selection
-                        # checkboxGroupInput(
-                        #   "temp_records_display",
-                        #   "Select NOAA Temperature Records Data to Display:",
-                        #   choices = c("Maximum Mean Temperature Records" = "mean_max_temp",
-                        #               "Maximum Temperature Records" = "max_temp",
-                        #               "Minimum Mean Temperature Records" = "mean_min_temp",
-                        #               "Minimum Temperature Records" = "min_temp"
-                        #   ),
-                        #   selected = c("mean_max_temp", "max_temp", "mean_min_temp", "min_temp")
-                        # ),
-
-                      sliderInput(
-                        inputId = "year_range_precip",
-                        label = "Select Year Range:",
-                        min = min(record.noaa.monthly$year),
-                        max = max(record.noaa.monthly$year),
-                        value = c(min(record.noaa.monthly$year), max(record.noaa.monthly$year)),
-                        sep = "" # Prevent commas in year values
+                        sliderInput(
+                          inputId = "year_range_temp_anom",
+                          label = "Select Year Range:",
+                          min = min(records.noaa.monthly$year),
+                          max = max(records.noaa.monthly$year),
+                          value = c(min(records.noaa.monthly$year), max(records.noaa.monthly$year)),
+                          sep = ""
+                        )
+                      )
+                    ),
+                    
+                    # Column for the explanatory text (right side)
+                    br(),
+                    column(
+                      width = 8,
+                      box(
+                        status = "primary",
+                        solidHeader = TRUE,
+                        width = 12,
+                        p("Plotted below are the highest monthly precipitation records of each year and the lowest monthly precipitation records of each year. Data are derived from NOAA NClimGrid datasets.")
                       )
                     )
-                  )
-                ),
+                  ),
 
                   # max precip record plot output
                   fluidRow(
                     column(
                     width = 12,
                     box(
-                      title = "Maximim NOAA Precipitation Records", 
+                      title = "Highest NOAA Precipitation Records", 
                       status = "primary", 
                       solidHeader = TRUE, 
                       width = 12,
@@ -623,7 +680,7 @@ ui <- dashboardPage(
                     column(
                       width = 12,
                       box(
-                        title = "Minimum NOAA Precipitation Records", 
+                        title = "Lowest NOAA Precipitation Records", 
                         status = "primary", 
                         solidHeader = TRUE, 
                         width = 12,
@@ -637,12 +694,143 @@ ui <- dashboardPage(
       
       # Tab for interactive sea level plots
       tabItem(tabName = "sea",
-              h2("Sea Level Trends"),
-              p("Plots for sea level trends.")
+              
+              # Add figure/descriptive text 
+              br(),
+              fluidRow(
+                column(width = 12,
+                       box(
+                         status = "primary",
+                         solidHeader = TRUE,
+                         width = 12,
+                         p("Plotted below are monthly sea level trends from 1947 to 2024 and annual sea level trends from 1948 to 2024 from the Bar Harbor, Frenchman Bay, ME Station (Station ID: 525). Data are derived from PSMSL. The data tools on the left can be used to add or remove elements from the plots; if linear models are added, the corresponding model statistics are calculated and provided in the model statistics boxes below the plots.")
+                       )
+                )
+              ),
+              
+              # First fluidRow with slider and text box side by side
+              fluidRow(
+                # Column for the slider (left side)
+                column(
+                  width = 4,
+                  box(
+                    title = "Data Tools",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    # Add checkbox group for line selection
+                    checkboxGroupInput(
+                      inputId = "linesToShowMonthlySea",
+                      label = "Select Temperature Data to Display:",
+                      choices = c("Monthly Mean Sea Level (mm)" = "Monthly Mean Sea Level (mm)",
+                                  "Linear Model for Monthly Sea Level" = "lm_monthly_sea"),
+                      selected = c("Monthly Mean Sea Level (mm)")
+                    ),
+                    
+                    sliderInput(
+                      inputId = "year_range_monthly_sea_level",
+                      label = "Select Year Range:",
+                      min = min(frenchman.monthly.clean$year),
+                      max = max(frenchman.monthly.clean$year),
+                      value = c(min(frenchman.monthly.clean$year), max(frenchman.monthly.clean$year)),
+                      sep = ""
+                    )
+                  )
+                ),
+              
+              #Monthly Sea Level Plot
+                column(
+                  width = 8,
+                  box(
+                    title = "Bar Harbor Monthly Sea Level Trends",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    plotlyOutput("MonthlySeaLevel", height = "600px")
+                  )
+                )
+              ),
+              
+              # fluidRow for model statistics
+              fluidRow(
+                column(
+                  width = 12,
+                  box(
+                    title = "Model Statistics",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    
+                    # NOAA average temp model stats
+                    conditionalPanel(
+                      condition = "input.linesToShowMonthlySea.includes('lm_monthly_sea')",
+                      h4("Monthly Mean Sea Level Model"),
+                      verbatimTextOutput("monthly_sea_model_summary")
+                    )))),
+              
+              # First fluidRow with slider and text box side by side
+              fluidRow(
+                # Column for the slider (left side)
+                column(
+                  width = 4,
+                  box(
+                    title = "Data Tools",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    # Add checkbox group for line selection
+                    checkboxGroupInput(
+                      inputId = "linesToShowAnnualSea",
+                      label = "Select Temperature Data to Display:",
+                      choices = c("Annual Mean Sea Level (mm)" = "Annual Mean Sea Level (mm)",
+                                  "Linear Model for Annual Sea Level" = "lm_annual_sea"),
+                      selected = c("Annual Mean Sea Level (mm)")
+                    ),
+                    sliderInput(
+                      inputId = "year_range_annual_sea_level",
+                      label = "Select Year Range:",
+                      min = min(frenchman.annual.clean$year),
+                      max = max(frenchman.annual.clean$year),
+                      value = c(min(frenchman.annual.clean$year), max(frenchman.annual.clean$year)),
+                      sep = ""
+                    )
+                  )
+                ),
+              
+              # annual sea level plot
+                column(
+                  width = 8,
+                  box(
+                    title = "Bar Harbor Annual Sea Level Trends",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    plotlyOutput("AnnualSeaLevel", height = "600px")
+                  )
+                )
+              ),
+              
+              # fluidRow for model statistics
+              fluidRow(
+                column(
+                  width = 12,
+                  box(
+                    title = "Model Statistics",
+                    status = "primary",
+                    solidHeader = TRUE,
+                    width = 12,
+                    
+                    # NOAA average temp model stats
+                    conditionalPanel(
+                      condition = "input.linesToShowAnnualSea.includes('lm_annual_sea')",
+                      h4("Annual Mean Sea Level Model"),
+                      verbatimTextOutput("annual_sea_model_summary")
+                    ))))
+              
+        )
       )
     )
   )
- )
 
 
 

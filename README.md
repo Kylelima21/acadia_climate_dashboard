@@ -1,2 +1,2 @@
 # acadia_climate_dashboard
-Cliamte data dashboard for Acadia National Park
+This GitHub repository stores the Acadia Climate Dashboard Project and the associated scripts used to compile, clean, and visualize climate data from Acadia National Park. The R Shiny Dashboard [link] summarizes climate data gathered from local weather stations, the National Oceanic and Atmospheric Administration (NOAA), and the National Oceanography Centre (NOC). A GitHub page [link] has been created to provide access to climate data sources and facilitate data downloads. It includes scripts for compiling and cleaning data, along with detailed instructions for downloading data and using the scripts for each data source. 

@@ -349,7 +349,7 @@ ui <- dashboardPage(
                         year_range_id = "year_range_records",
                         checkbox_id = "temp_records_display",
                         plot_id = "MaxTempRecordsPlot",
-                        data_source = record.noaa.monthly,
+                        data_source = records.noaa.monthly,
                         checkbox_choices = c(
                           "Monthly Maximum Mean Temperature Records" = "mean_max_temp",
                           "Monthly Maximum Temperature Records" = "max_temp"
@@ -363,7 +363,7 @@ ui <- dashboardPage(
                         year_range_id = "year_range_records2",
                         checkbox_id = "min_temp_records_display",
                         plot_id = "MinTempRecordsPlot",
-                        data_source = record.noaa.monthly,
+                        data_source = records.noaa.monthly,
                         checkbox_choices = c(
                           "Monthly Minimum Mean Temperature Records" = "mean_min_temp",
                           "Monthly Minimum Temperature Records" = "min_temp"
@@ -600,9 +600,9 @@ ui <- dashboardPage(
                         sliderInput(
                           inputId = "year_range_precip",
                           label = "Select Year Range:",
-                          min = min(record.noaa.monthly$year),
-                          max = max(record.noaa.monthly$year),
-                          value = c(min(record.noaa.monthly$year), max(record.noaa.monthly$year)),
+                          min = min(records.noaa.monthly$year),
+                          max = max(records.noaa.monthly$year),
+                          value = c(min(records.noaa.monthly$year), max(records.noaa.monthly$year)),
                           sep = "" # Prevent commas in year values
                         )
                       )
@@ -1394,7 +1394,7 @@ server <- function(input, output) {
   # max temp record plot output
   output$MaxTempRecordsPlot <- renderPlotly({
     create_record_plot(
-      data = record.noaa.monthly,
+      data = records.noaa.monthly,
       date_col1 = "tmean.max.ym",    
       date_col2 = "tmax.max.ym",    
       value_col1 = "tmean.max",

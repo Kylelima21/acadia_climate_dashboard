@@ -32,3 +32,7 @@ records.noaa.daily <- read.csv("data/processed_data/records_noaa_daily.csv")
 
 records.noaa.monthly <- read.csv("data/processed_data/records_noaa_monthly.csv")
 
+frenchman.monthly.clean <- read.csv("data/processed_data/frenchman_monthly_clean.csv")
+
+frenchman.annual.clean <- read.csv("data/processed_data/frenchman_annual_clean.csv")
+

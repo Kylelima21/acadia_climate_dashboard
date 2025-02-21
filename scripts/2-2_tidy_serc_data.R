@@ -114,6 +114,7 @@ process_precipitation_data <- function(data, datetime_col, precip_col) {
     # Select only needed columns
     select(
       year,
+      month,
       date,
       datetime,
       precipitation = !!sym(precip_col)
@@ -146,12 +147,12 @@ filtered_data_2 <- process_precipitation_data(
 serc.precip.midnight <- filtered_data %>%
   drop_na(precipitation, year) %>%
   mutate(precipitation = precipitation * 0.0393701) %>% #convert mm of rain into inches of rain
-  group_by(year) %>%
+  group_by(year, month) %>%
   summarize(serc.precip = sum(precipitation, na.rm = TRUE))
 
 #isolate 24hr precip data and get the yearly mean precip from SERC data
 serc.precip.24hr <- filtered_data_2 %>%
   drop_na(precipitation, year) %>%
   mutate(precipitation = precipitation * 0.0393701) %>% #convert mm of rain into inches of rain
-  group_by(year) %>%
+  group_by(year, month) %>%
   summarize(serc.precip = sum(precipitation, na.rm = TRUE))

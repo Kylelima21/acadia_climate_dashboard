@@ -9,11 +9,11 @@ library(dplyr)
 library(ggplot2)
 library(lubridate)
 
-#-----------------------#
-####    Read Data    ####
-#-----------------------#
+#--------------------------#
+####    Read-In Data    ####
+#--------------------------#
 
-#Reading in CSV as a tibble
+# Read-in CSV as a tibble
 
 serc.data <- read.csv("data/raw_data/SERC_D2258_export_20241119.csv") %>%
   as_tibble()
@@ -21,9 +21,9 @@ serc.data <- read.csv("data/raw_data/SERC_D2258_export_20241119.csv") %>%
 mcfarland.data <- read.csv("data/raw_data/McFarland_Hill_export_20241022.csv") %>%
   as_tibble()
 
-#-----------------------#
-####    Data Manip   ####
-#-----------------------#
+#-----------------------------------#
+####    Data Cleaning Function   ####
+#-----------------------------------#
 
 clean_weather_data <- function(data, station_type = c("serc", "mcfarland")) {
   

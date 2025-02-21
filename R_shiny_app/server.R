@@ -8,28 +8,47 @@ server <- function(input, output) {
   
   output$LocationMap <- renderLeaflet({
   # Define location data
-  locations <- data.frame(
+  station_locations <- data.frame(
     name = c("McFarland Hill Atmospheric Research Station", "Winter Harbor-SERC Weather Station", "NOAA - Acadia National Park"),
     lat = c(44.3772, 44.33567, 44.372907),
     lng = c(-68.2608, -68.062, -68.258257)
   )
   
+  buoy_locations <- data.frame(
+    name = c("Bar Harbor, Frenchman Bay Station"),
+    lat = c(44.391667),
+    lng = c(-68.205)
+  )
+  
   # Create the map
   leaflet() %>%
     # Add both base layers
-    addProviderTiles("Esri.WorldTopoMap", 
-                     group = "Topographic") %>%
-    addProviderTiles("Esri.WorldImagery", 
-                     group = "Satellite") %>%
+    addProviderTiles("Esri.WorldTopoMap", group = "Topographic") %>%
+    addProviderTiles("Esri.WorldImagery", group = "Satellite") %>%
     setView(lng = -68.19, lat = 44.3386, zoom = 11) %>%  # Center on Acadia
+    
+    #Add markers for stations
     addMarkers(
-      data = locations,
+      data = station_locations,
       lng = ~lng, 
       lat = ~lat,
-      popup = ~paste0("<strong>", name, "</strong><br>",
-                      lat, lng),
+      popup = ~paste0("<strong>", name, "</strong><br>", lat, ", ", lng),
       group = "Stations"
     ) %>%
+    
+    # Add marker for buoys
+    addCircleMarkers(
+      data = buoy_locations,
+      lng = ~lng, 
+      lat = ~lat,
+      radius = 6,  # Adjust marker size
+      color = "green",  # Outline color
+      fillColor = "yellow",  # Fill color
+      fillOpacity = 0.8,
+      popup = ~paste0("<strong>", name, "</strong><br>", lat, ", ", lng),
+      group = "Stations"
+    ) %>%
+    
     addLayersControl(
       baseGroups = c("Topographic", "Satellite"),
       overlayGroups = c("Stations"),
@@ -47,7 +66,7 @@ server <- function(input, output) {
     temp.data.merged %>% 
       rename(
         Year = year, 
-        `NOAA Average Temp` = noaa.temp,
+        `NOAA Average Mean Temp` = noaa.temp,
         `NOAA Average Max Temp` = noaa.max.temp, 
         `NOAA Average Min Temp` = noaa.min.temp, 
         `McFarland Average Temp` = mcfarland.temp,
@@ -137,7 +156,7 @@ server <- function(input, output) {
     
     list(
       noaa_avg = if ("lm_noaa_temp" %in% input$linesToShow) 
-        lm(`NOAA Average Temp` ~ Year, data = data),
+        lm(`NOAA Average Mean Temp` ~ Year, data = data),
       noaa_max = if ("lm_noaa_max_temp" %in% input$linesToShow) 
         lm(`NOAA Average Max Temp` ~ Year, data = data),
       noaa_min = if ("lm_noaa_min_temp" %in% input$linesToShow) 
@@ -161,6 +180,70 @@ server <- function(input, output) {
         lm(`McFarland Precip` ~ Year, data = data),
       serc_precip = if ("lm_serc_precip" %in% input$linesToShowPrecip) 
         lm(`SERC Precip` ~ Year, data = data)
+    )
+  })
+  
+  # Reactive for monthly sea level data
+  monthly_sea_level_data <- reactive({
+    frenchman.monthly.clean %>%
+      rename(
+        Year = year, 
+        `Year-Month` = year.month, 
+        `Monthly Mean Sea Level (mm)` = mean.sea.level.mm,
+      ) %>%
+      mutate(
+        `Year-Month` = as.Date(`Year-Month`),
+        monthly_sea_hover_text = paste(
+          "Year-Month:", format(`Year-Month`, "%Y-%m"),
+          "<br>Mean Sea Level (mm):", round(`Monthly Mean Sea Level (mm)`, 3)
+        )
+      ) %>%
+      # Add filter based on slider input
+      filter(
+        Year >= input$year_range_monthly_sea_level[1],
+        Year <= input$year_range_monthly_sea_level[2]
+      )
+  })
+  
+  # Reactive for annual sea level data
+  annual_sea_level_data <- reactive({
+    frenchman.annual.clean %>%
+      rename(
+        Year = year, 
+        `Annual Mean Sea Level (mm)` = mean.sea.level.mm,
+      ) %>%
+      mutate(
+        annual_sea_hover_text = paste(
+          "Year:", Year,
+          "<br>Mean Sea Level (mm):", round(`Annual Mean Sea Level (mm)`, 3)
+        )
+      ) %>%
+      # Add filter based on slider input
+      filter(
+        Year >= input$year_range_annual_sea_level[1],
+        Year <= input$year_range_annual_sea_level[2]
+      )
+  })
+  
+  # Reactive for monthly sea level model
+  monthly_sea_model <- reactive({
+    data <- monthly_sea_level_data() %>%
+      filter(Year >= input$year_range_monthly_sea_level[1], Year <= input$year_range_monthly_sea_level[2])
+    
+    list(
+      monthly_sea = if ("lm_monthly_sea" %in% input$linesToShowMonthlySea) 
+        lm(`Monthly Mean Sea Level (mm)` ~ Year, data = data)
+    )
+  })
+  
+  # Reactive for annual sea level model
+  annual_sea_model <- reactive({
+    data <-  annual_sea_level_data() %>%
+      filter(Year >= input$year_range_annual_sea_level[1], Year <= input$year_range_annual_sea_level[2])
+    
+    list(
+      annual_sea = if ("lm_annual_sea" %in% input$linesToShowAnnualSea) 
+        lm(`Annual Mean Sea Level (mm)` ~ Year, data = data)
     )
   })
   
@@ -242,7 +325,7 @@ server <- function(input, output) {
     #create ggplot output
     p <- ggplot(filtered_data, aes(x = Year)) +
       scale_x_continuous(breaks = pretty(filtered_data$Year)) +
-      labs(title = "Average Temperature (1895-2024)",
+      labs(title = NULL,
            x = "Year",
            y = "Temperature (°C)") +
       theme_minimal()
@@ -261,13 +344,13 @@ server <- function(input, output) {
     }
     
     #add noaa average temp
-    if ("NOAA Average Temp" %in% input$linesToShow) {
+    if ("NOAA Average Mean Temp" %in% input$linesToShow) {
           p <- p + geom_line(aes(x = Year,
-                                 y = `NOAA Average Temp`,
-                                 color = "NOAA Average Temp."))
+                                 y = `NOAA Average Mean Temp`,
+                                 color = "NOAA Average Mean Temp."))
           
       if (!is.null(models$noaa_avg)) {
-        p <- add_model_line(p, models$noaa_avg, "NOAA Average Temp")
+        p <- add_model_line(p, models$noaa_avg, "NOAA Average Mean Temp")
         
       }
     }
@@ -311,20 +394,26 @@ server <- function(input, output) {
     # Customize the legend and colors
     p <- p + scale_color_manual(
       values = c(
-        "NOAA Average Temp." = "#000000", 
+        "NOAA Average Mean Temp." = "#000000", 
         "NOAA Average Maximum Temp." = "#CC3300", 
         "NOAA Average Minimum Temp." = "#003399", 
         "McFarland Average Temp." = "#00CC00",
         "SERC Average Temp." = "#996633"
       ),
-      name = "Temperature Type"
+      name = NULL
     )
     
     # Convert to plotly and customize hover text
     temp_plt <- ggplotly(p) %>%
       layout(
         showlegend = TRUE, 
-        legend = list(itemclick = FALSE, itemdoubleclick = FALSE),
+        legend = list(
+          itemclick = FALSE, 
+          itemdoubleclick = FALSE,
+          orientation = "h", 
+          x = 0.5, 
+          y = -0.2,
+          xanchor = "center"),
         hovermode = "x unified",
         hoverlabel = list(bgcolor = "white"),
         xaxis = list(hoverformat = "%Y")
@@ -371,7 +460,7 @@ server <- function(input, output) {
     
     p2 <- ggplot(filtered_data, aes(x = Year)) +
       scale_x_continuous(breaks = pretty(filtered_data$Year)) +
-      labs(title = "Total Precipitation (1895-2024)",
+      labs(title = NULL,
            x = "Year",
            y = "Total Precipitation (in)") +
       theme_minimal()
@@ -420,14 +509,20 @@ server <- function(input, output) {
       "McFarland Total Precip." = "#00CC00",
       "SERC Average Precip." = "#996633"
     ),
-    name = "Precipitation Data"
+    name = NULL
   )
   
   # Convert to plotly and customize hover text
   precip_plt <- ggplotly(p2) %>%
     layout(
       showlegend = TRUE,
-      legend = list(itemclick = FALSE, itemdoubleclick = FALSE),
+      legend = list(
+        itemclick = FALSE, 
+        itemdoubleclick = FALSE,
+        orientation = "h", 
+        x = 0.5, 
+        y = -0.2,
+        xanchor = "center"),
       hovermode = "x unified",
       hoverlabel = list(bgcolor = "white"),
       xaxis = list(hoverformat = "%Y")
@@ -495,7 +590,11 @@ server <- function(input, output) {
         showlegend = TRUE,
         legend = list(
           itemclick = FALSE, 
-          itemdoubleclick = FALSE),
+          itemdoubleclick = FALSE,
+          orientation = "h", 
+          x = 0.5, 
+          y = -0.2,
+          xanchor = "center"),
         hovermode = "x unified",
         hoverlabel = list(bgcolor = "white"),
         xaxis = list(title = "Year")
@@ -511,7 +610,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "NOAA Temp Anomaly (°C)",
       hover_text_col = "noaa_hover_text",
-      legend_title = "NOAA Temp Anomaly Data",
+      legend_title = NULL,
       break_interval = "10 years"
     )
   })
@@ -523,7 +622,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "McFarland Temp Anomaly (°C)",
       hover_text_col = "mcfarland_hover_text",
-      legend_title = "McFarland Temp Anomaly Data",
+      legend_title = NULL,
       break_interval = "5 years"
     )
   })
@@ -535,7 +634,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "SERC Temp Anomaly (°C)",
       hover_text_col = "serc_hover_text",
-      legend_title = "SERC Temp Anomaly Data",
+      legend_title = NULL,
       break_interval = "5 years"
     )
   })
@@ -547,7 +646,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "NOAA Precip Anomaly (%)",
       hover_text_col = "noaa_precip_hover_text",
-      legend_title = "NOAA Precip Anomaly Data",
+      legend_title = NULL,
       break_interval = "10 years"
     )
   })
@@ -559,7 +658,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "McFarland Precip Anomaly (%)",
       hover_text_col = "mcfarland_precip_hover_text",
-      legend_title = "McFarland Precip Anomaly Data",
+      legend_title = NULL,
       break_interval = "5 years"
     )
   })
@@ -571,7 +670,7 @@ server <- function(input, output) {
       x_col = "Year-Month",
       y_col = "SERC Precip Anomaly (%)",
       hover_text_col = "serc_precip_hover_text",
-      legend_title = "SERC Precip Anomaly Data",
+      legend_title = NULL,
       break_interval = "5 years"
     )
   })
@@ -704,7 +803,7 @@ server <- function(input, output) {
           if (!is.null(color_top2)) setNames(color_top2, label_highlight2) else NULL,
           if (!is.null(color_other2)) setNames(color_other2, label_other2) else NULL
         ),
-        name = "Records"
+        name = NULL
       ) +
       scale_x_date(
         breaks = seq(
@@ -743,7 +842,7 @@ server <- function(input, output) {
   # max temp record plot output
   output$MaxTempRecordsPlot <- renderPlotly({
     create_record_plot(
-      data = record.noaa.monthly,
+      data = records.noaa.monthly,
       date_col1 = "tmean.max.ym",    
       date_col2 = "tmax.max.ym",    
       value_col1 = "tmean.max",
@@ -941,7 +1040,7 @@ server <- function(input, output) {
           if (!is.null(color_top2)) setNames(color_top2, label_highlight2) else NULL,
           if (!is.null(color_other2)) setNames(color_other2, label_other2) else NULL
         ),
-        name = "Records"
+        name = NULL
       ) +
       scale_x_date(
         breaks = seq(
@@ -1018,8 +1117,8 @@ server <- function(input, output) {
       y_label = "Daily average temperature (°C)",
       label_highlight1 = "Top 10 Lowest Mean Temperatures",
       label_other1 = "Lowest Mean Temperatures",
-      label_highlight2 = "Top 10 Lowest Max Temperatures",
-      label_other2 = "Lowest Max Temperatures",
+      label_highlight2 = "Top 10 Lowest Min Temperatures",
+      label_other2 = "Lowest Min Temperatures",
       color_top1 = "black",
       color_other1 = "grey",
       color_top2 = "darkblue",
@@ -1051,6 +1150,149 @@ server <- function(input, output) {
       units = "in",
       date_format = "%Y-%m"
     )
+  })
+  
+  
+  #-----------------------------#
+  ####  Sea Level Plot Function  ####
+  #-----------------------------#  
+  
+  create_sea_level_plot <- function(data,
+                                    x_col = "Year-Month",
+                                    y_col = "Monthly Mean Sea Level (mm)",
+                                    hover_text_col = "monthly_sea_hover_text",
+                                    plot_title = NULL,
+                                    show_trend = FALSE,
+                                    model = NULL,
+                                    is_date = TRUE,
+                                    line_color = "#000000",
+                                    line_label = "Sea Level",
+                                    input_check) {
+    
+    
+     # Create base plot
+    s <- ggplot(data) +
+      labs(title = plot_title,
+           x = "Year",
+           y = y_col) +
+      theme_minimal()
+    
+    # Add main sea level line ONLY if it is selected
+    if (line_label %in% input_check) {
+      s <- s + geom_line(aes(
+        x = .data[[x_col]],
+        y = .data[[y_col]],
+        text = .data[[hover_text_col]],
+        color = line_label,
+        group = 1  # Ensures correct grouping for Plotly
+      ), size = 0.3)
+    }
+    
+    # Add appropriate scale based on x-axis type
+    if (is_date) {
+      s <- s + scale_x_date(
+        breaks = scales::breaks_width("10 years"),
+        labels = scales::date_format("%Y")
+      )
+    } else {
+      s <- s + scale_x_continuous(
+        breaks = scales::pretty_breaks(n = 10)
+      )
+    }
+    
+    # Add color scale
+    s <- s + scale_color_manual(
+      values = c(
+        setNames(line_color, line_label)
+      ),
+      name = NULL
+    )
+    
+    # Add trend line if requested
+    if (show_trend && !is.null(model)) {
+      s <- s + 
+        geom_smooth(
+          aes(x = .data[[x_col]], y = .data[[y_col]]),
+          method = "lm",
+          se = TRUE,
+          fill = "grey80",
+          alpha = 0.5,
+          color = NA
+        ) +
+        geom_line(
+          aes(x = .data[[x_col]], y = .data[[y_col]]),
+          stat = "smooth",
+          method = "lm",
+          color = "black",
+          linewidth = 0.8
+        )
+    }
+    
+    # Convert to plotly and customize
+    ggplotly(s, tooltip = "text") %>%
+      layout(
+        showlegend = TRUE,
+        legend = list(
+          itemclick = FALSE, 
+          itemdoubleclick = FALSE,
+          orientation = "h", 
+          x = 0.5, 
+          y = -0.2,
+          xanchor = "center"),
+        hovermode = "x unified",
+        hoverlabel = list(bgcolor = "white")
+      )
+  }
+  
+  # Use the function in your outputs
+  output$MonthlySeaLevel <- renderPlotly({
+    data <- monthly_sea_level_data()
+    models <- monthly_sea_model()
+    
+    create_sea_level_plot(
+      data = data,
+      x_col = "Year-Month",
+      y_col = "Monthly Mean Sea Level (mm)",
+      hover_text_col = "monthly_sea_hover_text",
+      plot_title = NULL,
+      show_trend = "lm_monthly_sea" %in% input$linesToShowMonthlySea,
+      model = models$monthly_sea,
+      is_date = TRUE,
+      line_color = "blue",
+      line_label = "Monthly Mean Sea Level (mm)",
+      input_check = input$linesToShowMonthlySea
+    )
+  })
+  
+  output$AnnualSeaLevel <- renderPlotly({
+    data <- annual_sea_level_data()
+    models <- annual_sea_model()
+    
+    create_sea_level_plot(
+      data = data,
+      x_col = "Year",
+      y_col = "Annual Mean Sea Level (mm)",
+      hover_text_col = "annual_sea_hover_text",
+      plot_title = NULL,
+      show_trend = "lm_annual_sea" %in% input$linesToShowAnnualSea,
+      model = models$annual_sea,
+      is_date = FALSE,
+      line_color = "blue",
+      line_label = "Annual Mean Sea Level (mm)",
+      input_check = input$linesToShowAnnualSea
+    )
+  })
+  
+  # sea level model summaries -----------------------------------------
+  
+  output$monthly_sea_model_summary <- renderPrint({
+    req("lm_monthly_sea" %in% input$linesToShowMonthlySea)
+    summary(monthly_sea_model()$monthly_sea)
+  })
+  
+  output$annual_sea_model_summary <- renderPrint({
+    req("lm_annual_sea" %in% input$linesToShowAnnualSea)
+    summary(annual_sea_model()$annual_sea)
   })
   
   
