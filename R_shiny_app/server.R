@@ -66,7 +66,7 @@ server <- function(input, output) {
     temp.data.merged %>% 
       rename(
         Year = year, 
-        `NOAA Average Temp` = noaa.temp,
+        `NOAA Average Mean Temp` = noaa.temp,
         `NOAA Average Max Temp` = noaa.max.temp, 
         `NOAA Average Min Temp` = noaa.min.temp, 
         `McFarland Average Temp` = mcfarland.temp,
@@ -156,7 +156,7 @@ server <- function(input, output) {
     
     list(
       noaa_avg = if ("lm_noaa_temp" %in% input$linesToShow) 
-        lm(`NOAA Average Temp` ~ Year, data = data),
+        lm(`NOAA Average Mean Temp` ~ Year, data = data),
       noaa_max = if ("lm_noaa_max_temp" %in% input$linesToShow) 
         lm(`NOAA Average Max Temp` ~ Year, data = data),
       noaa_min = if ("lm_noaa_min_temp" %in% input$linesToShow) 
@@ -344,13 +344,13 @@ server <- function(input, output) {
     }
     
     #add noaa average temp
-    if ("NOAA Average Temp" %in% input$linesToShow) {
+    if ("NOAA Average Mean Temp" %in% input$linesToShow) {
           p <- p + geom_line(aes(x = Year,
-                                 y = `NOAA Average Temp`,
-                                 color = "NOAA Average Temp."))
+                                 y = `NOAA Average Mean Temp`,
+                                 color = "NOAA Average Mean Temp."))
           
       if (!is.null(models$noaa_avg)) {
-        p <- add_model_line(p, models$noaa_avg, "NOAA Average Temp")
+        p <- add_model_line(p, models$noaa_avg, "NOAA Average Mean Temp")
         
       }
     }
@@ -394,7 +394,7 @@ server <- function(input, output) {
     # Customize the legend and colors
     p <- p + scale_color_manual(
       values = c(
-        "NOAA Average Temp." = "#000000", 
+        "NOAA Average Mean Temp." = "#000000", 
         "NOAA Average Maximum Temp." = "#CC3300", 
         "NOAA Average Minimum Temp." = "#003399", 
         "McFarland Average Temp." = "#00CC00",
@@ -1117,8 +1117,8 @@ server <- function(input, output) {
       y_label = "Daily average temperature (°C)",
       label_highlight1 = "Top 10 Lowest Mean Temperatures",
       label_other1 = "Lowest Mean Temperatures",
-      label_highlight2 = "Top 10 Lowest Max Temperatures",
-      label_other2 = "Lowest Max Temperatures",
+      label_highlight2 = "Top 10 Lowest Min Temperatures",
+      label_other2 = "Lowest Min Temperatures",
       color_top1 = "black",
       color_other1 = "grey",
       color_top2 = "darkblue",

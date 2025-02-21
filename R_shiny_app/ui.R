@@ -114,14 +114,14 @@ ui <- dashboardPage(
                              width = 8,
                              div(
                                style = "font-size: 16px; line-height: 1.6;",
-                               p("This R Shiny Dashboard summarizes climate data from Acadia National Park gathered from local weather stations, the National Oceanic and Atmospheric Administration (NOAA), and the National Oceanography Centre (NOC). Local data was gathered from the McFarland Hill Atmospheric Research Station and Winter Harbor-SERC weather station. Climate data was compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes as well as long-term sea level trends. "),
+                               p("This R Shiny Dashboard summarizes climate data from Acadia National Park gathered from local weather stations, the National Oceanic and Atmospheric Administration (NOAA), and the National Oceanography Centre (NOC). Local data was gathered from the McFarland Hill Atmospheric Research Station, the Winter Harbor-SERC weather station, and the Bar Harbor, Frenchman Bay, ME Station. Climate data was compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes as well as long-term sea level trends."),
                                tags$ul(
                                  style = "font-size: 16px;",
                                  tags$li(HTML('Climate summaries were created from daily and monthly gridded climate data downloaded from NOAA\'s National Centers for Environmental Information (<a href="https://www.ncei.noaa.gov" target="_blank">NCEI </a>). Climate data was compiled and cleaned using R scripts by Kyle Lima, built from the climateNETN package by Kate Miller (<a href="https://github.com/KateMMiller/climateNETN" target="_blank">climateNETN </a>).')),
                                  tags$li("Climate summaries were created from hourly data collected by the McFarland Hill Atmospheric Research Station."),
                                  tags$li("Climate summaries were created from 15 minute interval data collected by the Winter Harbor-SERC weather station (ID: D2258)."),
-                                 tags$li("Sea level trend visualizations were created from monthly and annual mean sea level data collected by the Bar Harbor, Frenchman Bay, ME Station (ID: 525) and documented by the Permanent Service for Mean Sea Level (PSMSL), based at the NOC, which specializes in providing tide gauge data around the world.")),
-                               p(HTML("<strong>Data Access</strong>: data from all sources used in this app and R scripts for data cleaning can be downloaded and found at this page: link."))
+                                 tags$li(HTML('Sea level trend visualizations were created from monthly and annual mean sea level data collected by the Bar Harbor, Frenchman Bay, ME Station (ID: 525) and documented by the Permanent Service for Mean Sea Level (<a href="https://psmsl.org/" target="_blank">PSMSL </a>), based at the NOC, which specializes in providing tide gauge data around the world.'))),
+                               p(HTML("<strong>Data Access</strong>: data from all sources used in this app and R scripts for data compiling and cleaning can be downloaded at this page: link. Instructions for data downloading and R script use are also provided."))
                              )
                            )
                          )
@@ -160,7 +160,7 @@ ui <- dashboardPage(
                              status = "primary",
                              solidHeader = TRUE,
                              width = 12,
-                             p("Plotted are annual average maximum, minimum, and mean temperature trends from 1895 to 2024 for data derived from NOAA NClimGrid datasets. Also plotted are McFarland Hill annual average temperature data which spans from 1999 to 2024 and SERC annual average temperature data which spans from 2009 to 2024. The check-box on the right can be used to add or remove elements from the plot; if linear models are added, the corresponding model statistics are calculated and provided in the model box below.")
+                             p("Plotted below are annual average maximum, minimum, and mean temperature trends from 1895 to 2024 for data derived from NOAA NClimGrid datasets. Also plotted are McFarland Hill annual average temperature data which spans from 1999 to 2024 and SERC annual average temperature data which spans from 2009 to 2024. The data tools on the left can be used to add or remove elements from the plot; if linear models are added, the corresponding model statistics are calculated and provided in the model statistics box below.")
                            )
                     )
                   ),
@@ -180,17 +180,17 @@ ui <- dashboardPage(
                           inputId = "linesToShow",
                           label = "Select Temperature Data to Display:",
                           choices = c("NOAA Average Maximum Temp." = "NOAA Average Max Temp",
-                                      "NOAA Average Temp." = "NOAA Average Temp",
+                                      "NOAA Average Mean Temp." = "NOAA Average Mean Temp",
                                       "NOAA Average Minimum Temp." = "NOAA Average Min Temp",
                                       "McFarland Average Temp." = "McFarland Average Temp",
                                       "SERC Average Temp." = "SERC Average Temp",
                                       "Linear Model for NOAA Average Max Temp" = "lm_noaa_max_temp",
-                                      "Linear Model for NOAA Average Temp" = "lm_noaa_temp",
+                                      "Linear Model for NOAA Average Mean Temp" = "lm_noaa_temp",
                                       "Linear Model for NOAA Average Min Temp" = "lm_noaa_min_temp",
                                       "Linear Model for McFarland Average Temp" = "lm_mcfarland_temp",
                                       "Linear Model for SERC Average Temp" = "lm_serc_temp"
                           ),
-                          selected = c("NOAA Average Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp", "SERC Average Temp")
+                          selected = c("NOAA Average Mean Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp", "SERC Average Temp")
                         ),
                       
                       # Add slider for year range
@@ -231,7 +231,7 @@ ui <- dashboardPage(
                         # NOAA average temp model stats
                         conditionalPanel(
                           condition = "input.linesToShow.includes('lm_noaa_temp')",
-                          h4("NOAA Average Temperature Model"),
+                          h4("NOAA Average Mean Temperature Model"),
                           verbatimTextOutput("noaa_temp_model_summary")
                         ),
                         
@@ -293,17 +293,20 @@ ui <- dashboardPage(
                     ),
                     
                     # Column for the explanatory text (right side)
-                    br(),
                     column(
                       width = 8,
                       box(
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
-                        p("Plotted are temperature anomalies or deviations from historic baseline temperatures. Positive anomalies (above the baseline in red) are temperatures that are warmer than the baseline. Negative anomalies (below the baseline in blue) are temperatures that are cooler than the baseline.")
+                        p("Plotted below are monthly temperature anomalies which represent the difference between observed temperatures and historic baseline temperatures. Positive anomalies (above the baseline in red) indicate temperatures that are above (warmer than) the historic baseline. Negative anomalies (below the baseline in blue) indicate temperatures that are below (cooler than) the historic baseline."),
+                        tags$ul(
+                          tags$li("NOAA monthly temperature anomalies were calculated for 1895 to 2024. The historic baseline was calculated by averaging the mean temperature for each month of the year from 1901-2000 to generate a 20th century baseline. Data was derived from the Monthly NOAA nClimGrid dataset for these calculations and anomaly plot visualization."),
+                          tags$li("McFarland Hill monthly temperature anomalies were calculated for 1999 to 2024. The historic baseline was derived from NOAA average temperature normals for 1981 to 2010 legacy period."),
+                          tags$li("SERC monthly temperature anomalies were calculated for 2009 to 2024. The historic baseline was derived from NOAA average temperature normals for the 1981 to 2010 legacy period."))
+                        )
                       )
-                    )
-                  ),
+                    ),
                   
                   #NOAA temp anom plot
                   fluidRow(
@@ -361,7 +364,13 @@ ui <- dashboardPage(
                              status = "primary",
                              solidHeader = TRUE,
                              width = 12,
-                             p("Plotted below are (1) the monthly highest mean and maximum temperature records of each year, (2) the monthly lowest mean and minimum temperature records of each year, (3) the daily highest mean and maximum temperature records of each year, and (4) the daily lowest mean and minimum temperature records of each year.")
+                             p("Plotted below are monthly and daily temperature records and extremes:"),
+                             tags$ul(
+                               tags$li("Highest monthly mean and maximum temperature records of each year."),
+                               tags$li("Lowest monthly mean and minimum temperature records of each year."),
+                               tags$li("Highest daily mean and maximum temperature records of each year."),
+                               tags$li("Lowest daily mean and minimum temperature records of each year.")),
+                             p("Data are derived from NOAA NClimGrid datasets.")
                            )
                     )
                   ),
@@ -445,7 +454,7 @@ ui <- dashboardPage(
                              status = "primary",
                              solidHeader = TRUE,
                              width = 12,
-                             p("Plotted are annual average total precipitation trends from 1895 to 2024 for data derived from NOAA NClimGrid datasets. Also plotted are McFarland Hill annual average total precipitation data which spans from 1999 to 2024 and SERC annual average total precipitation data which spans from 2009 to 2024. The check-box on the right can be used to add or remove elements from the plot; if linear models are added, the corresponding model statistics are calculated and provided in the model box below.")
+                             p("Plotted below are annual average total precipitation trends from 1895 to 2024 for data derived from NOAA NClimGrid datasets. Also plotted are McFarland Hill annual average total precipitation data which spans from 1999 to 2024 and SERC annual average total precipitation data which spans from 2009 to 2024. The data tools on the left can be used to add or remove elements from the plot; if linear models are added, the corresponding model statistics are calculated and provided in the model statistics box below.")
                            )
                     )
                   ),
@@ -562,7 +571,11 @@ ui <- dashboardPage(
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
-                        p("Plotted are precipitation anomalies or deviations from historic baseline precipitation totals. Precipitation anomalies here are represented as percentages calculated by multiplying precipitation anomalies by 100 producing the percent of average precipitation. Positive anomalies (above the baseline in red) represent precipitation totals that are higher or wetter than the baseline. Negative anomalies (below the baseline in blue) represent precipitation totals that are lower or drier than the baseline.")
+                        p("Plotted below are monthly percent precipitation anomalies which represent the percent difference between observed precipitation and historic baseline precipitation totals. Positive anomalies (red) indicate precipitation totals that are higher- or wetter-than-average conditions, while negative anomalies (blue) indicate precipitation totals that are lower- or drier-than-average conditions."),
+                        tags$ul(
+                          tags$li("NOAA monthly percent precipitation anomalies were calculated for 1895 to 2024. Historic baselines were calculated by averaging the total precipitation for each month of the year from 1901-2000 to generate a 20th century baseline. Data was derived from the Monthly NOAA NClimGrid dataset for these calculations and anomaly plot visualization."),
+                          tags$li("McFarland Hill monthly percent precipitation anomalies were calculated for 1999 to 2024. The historic baseline was derived from NOAA average precipitation normals for 1981 to 2010 legacy period."),
+                          tags$li("SERC monthly percent precipitation anomalies were calculated for 2009 to 2024. The historic baseline was derived from NOAA average precipitation normals for the 1981 to 2010 legacy period."))
                       )
                     )
                   ),
@@ -644,7 +657,7 @@ ui <- dashboardPage(
                         status = "primary",
                         solidHeader = TRUE,
                         width = 12,
-                        p("Plotted are the highest monthly mean precipitation records of each year and the lowest monthly mean precipitation records of each year.")
+                        p("Plotted below are the highest monthly precipitation records of each year and the lowest monthly precipitation records of each year. Data are derived from NOAA NClimGrid datasets.")
                       )
                     )
                   ),
@@ -690,7 +703,7 @@ ui <- dashboardPage(
                          status = "primary",
                          solidHeader = TRUE,
                          width = 12,
-                         p("Plotted are monthly sea level trends from 1947 to 2023 and annual sea level trends from 1948 to 2024 from the Bar Harbor, Frenchman Bay, ME Station (Station ID: 525). Data are derived from the Permanent Service for Mean Sea Level (PSMSL).")
+                         p("Plotted below are monthly sea level trends from 1947 to 2024 and annual sea level trends from 1948 to 2024 from the Bar Harbor, Frenchman Bay, ME Station (Station ID: 525). Data are derived from PSMSL. The data tools on the left can be used to add or remove elements from the plots; if linear models are added, the corresponding model statistics are calculated and provided in the model statistics boxes below the plots.")
                        )
                 )
               ),
@@ -751,7 +764,7 @@ ui <- dashboardPage(
                     # NOAA average temp model stats
                     conditionalPanel(
                       condition = "input.linesToShowMonthlySea.includes('lm_monthly_sea')",
-                      h4("Monthly Average Sea Level Model"),
+                      h4("Monthly Mean Sea Level Model"),
                       verbatimTextOutput("monthly_sea_model_summary")
                     )))),
               
@@ -810,7 +823,7 @@ ui <- dashboardPage(
                     # NOAA average temp model stats
                     conditionalPanel(
                       condition = "input.linesToShowAnnualSea.includes('lm_annual_sea')",
-                      h4("Annual Average Sea Level Model"),
+                      h4("Annual Mean Sea Level Model"),
                       verbatimTextOutput("annual_sea_model_summary")
                     ))))
               

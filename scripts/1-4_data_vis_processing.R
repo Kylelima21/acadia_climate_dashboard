@@ -287,17 +287,17 @@ if (!is.null(results)) {
 # Clean McFarland data (replace values with NA for specific years)
 mcfarland.clean.anom <- mcfarland.clean %>%
   mutate(
-    temp = if_else(year %in% c(1998), NA_real_, temp),
-    ppt = if_else(year %in% c(1998), NA_real_, ppt)
+    temp = replace(temp, year == 1998, NA_real_),
+    ppt = replace(ppt, year == 1998, NA_real_)
   )
 
 # Clean SERC data (replace values with NA for specific years)
 serc.clean.anom <- serc.clean %>%
   mutate(
-    ppt.midnight = if_else(
-      between(year, 2009, 2014) | (year == 2015 & month %in% c(1:6)), 
-      NA_real_, 
-      ppt.midnight
+    ppt.midnight = replace(
+      ppt.midnight,
+      (year %in% 2009:2014) | (year == 2015 & month <= 6),
+      NA_real_
     )
   )
 
@@ -463,7 +463,10 @@ noaa_precip <- process_climate_data(
 
 # McFarland (provided normals)
 mcfarland_temp <- process_climate_data(
-  mcfarland.clean.anom %>% group_by(year, month) %>% summarize(tmean = mean(temp, na.rm = TRUE), .groups = "drop"),
+  mcfarland.clean.anom %>% group_by(year, month) %>% 
+    summarize(tmean = if(all(is.na(temp))) NA_real_ else mean(temp, na.rm = TRUE),
+              .groups = "drop"
+    ),
   "tmean",
   "mcfarland",
   "temp",
@@ -472,7 +475,10 @@ mcfarland_temp <- process_climate_data(
 )
 
 mcfarland_precip <- process_climate_data(
-  mcfarland.clean.anom %>% group_by(year, month) %>% summarize(ppt = sum(ppt, na.rm = TRUE), .groups = "drop"),
+  mcfarland.clean.anom %>% group_by(year, month) %>% 
+    summarize(ppt = if(all(is.na(ppt))) NA_real_ else sum(ppt, na.rm = TRUE),
+              .groups = "drop"
+    ),
   "ppt",
   "mcfarland",
   "precip",
@@ -493,7 +499,9 @@ serc_temp <- process_climate_data(
 serc_precip <- process_climate_data(
   process_serc_precip(serc.clean.anom, "date.time.est", "ppt.midnight") %>% 
     group_by(year, month) %>% 
-    summarize(ppt = sum(ppt.midnight, na.rm = TRUE), .groups = "drop"),
+    summarize(ppt = if(all(is.na(ppt.midnight))) NA_real_ else sum(ppt.midnight, na.rm = TRUE),
+              .groups = "drop"
+    ),
   "ppt",
   "serc",
   "precip",
