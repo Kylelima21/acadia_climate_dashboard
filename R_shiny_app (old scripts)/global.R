@@ -1,6 +1,6 @@
 #global 
 
-#### R shiny dashboard displaying climate data from NOAA (nClimGrid) and McFarland Hill station in Acadia NP ####
+#### R shiny dashboard displaying climate data from Acadia National Park gathered from local weather stations, the National Oceanic and Atmospheric Administration (NOAA), and the National Oceanography Centre (NOC). ####
 
 #---------------------------------------------#
 ####        Load Required Packages         ####
@@ -16,9 +16,9 @@ library(tidyverse)
 library(dplyr)
 library(leaflet)
 
-#-----------------------#
-####    Read Data    ####
-#-----------------------#
+#--------------------------#
+####    Read-In Data    ####
+#--------------------------#
 
 temp.data.merged <- read.csv("data/processed_data/temp_data_merged.csv")
 
