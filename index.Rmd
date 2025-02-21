@@ -198,7 +198,7 @@ The data cleaning R script above can be downloaded and used to help clean SERC s
 
 <li class="secondary-item">
 
-Data cleaning script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/dev/scripts/2-3_tidy_sea_level_data.R">Sea Level Data Cleaning Function</a>
+Data cleaning script: <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/scripts/sea_level_data_cleaning_function.R">Sea Level Data Cleaning Function</a>
 
 </li>
 
