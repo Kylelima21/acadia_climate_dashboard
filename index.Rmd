@@ -35,7 +35,7 @@ This site is for downloading Acadia National Park climate data and associated da
   <img src="www/img/COPY_SchoodicInstitute_Horizontal_CMYK.png" alt="Schoodic Institute at Acadia National Park logo"
         class="image-logo">
   <p class="image-text"> <a href="https://github.com/Kylelima21/acadia_climate_dashboard">Github repository</a></p>
-  <p class="image-text2"> <a href="https://github.com/Kylelima21/acadia_climate_dashboard">R Shiny Dashboard</a></p>
+  <p class="image-text2"> <a href="https://github.com/Kylelima21/acadia_climate_dashboard/blob/main/app.R">R Shiny Dashboard</a></p>
 </div>
   
 </div>
