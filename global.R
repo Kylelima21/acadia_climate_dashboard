@@ -39,6 +39,37 @@ frenchman.monthly.clean <- read.csv("data/processed_data/frenchman_monthly_clean
 frenchman.annual.clean <- read.csv("data/processed_data/frenchman_annual_clean.csv")
 
 
+
+#--------------------------#
+####    Combine Data    ####
+#--------------------------#
+
+# as_tibble(temp.data.merged)
+# as_tibble(precip.data.merged)
+# as_tibble(records.noaa.monthly)
+# as_tibble(records.noaa.daily)
+# as_tibble(frenchman.annual.clean)
+# 
+# as_tibble(anom.temp.merged)
+# as_tibble(anom.precip.merged)
+# as_tibble(frenchman.monthly.clean)
+
+annualdata <- left_join(temp.data.merged, precip.data.merged, by = "year") %>% 
+  as_tibble() %>% 
+  left_join(., records.noaa.monthly, by = "year") %>% 
+  left_join(., records.noaa.daily, by = "year") %>% 
+  left_join(., frenchman.annual.clean, by = "year") %>% 
+  select(year, noaa.temp, noaa.max.temp, noaa.min.temp, mcfarland.temp, serc.temp,
+         noaa.precip, mcfarland.precip, serc.precip, tmean.max.x:ppt.min.ym, 
+         tmean.max.y:ppt.min.date, mean.sea.level.mm)
+
+monthlydata <- left_join(anom.temp.merged, anom.precip.merged, by = c("year", "month")) %>% 
+  as_tibble() %>% 
+  left_join(., frenchman.monthly.clean, by = c("year", "month")) %>% 
+  select(year, month, noaa.date = noaa.year.month.x, noaa.temp.anom:serc.temp.anom,
+         noaa.precip.anom:serc.percent.precip.anom, mean.sea.level.mm)
+
+
 #--------------------------#
 ####     Functions      ####
 #--------------------------#
@@ -65,14 +96,15 @@ create_temp_records_panel <- function(plots_config) {
             label = "Select data to display:",
             choices = config$checkbox_choices,
             selected = config$default_selected
-          ),
+            ),
           sliderInput(
             inputId = config$year_range_id,
             label = "Select year range:",
             min = min(data_source$year),
             max = max(data_source$year),
             value = c(min(data_source$year), max(data_source$year)),
-            sep = ""
+            sep = "",
+            step = 20
           )
         )
       ),
