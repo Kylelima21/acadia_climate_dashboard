@@ -8,34 +8,38 @@ library(tidyverse)
 library(dplyr)
 library(ggplot2)
 
+
+
 #-----------------------#
 ####    Read Data    ####
 #-----------------------#
 
-#Reading in CSVs as a tibble
+# Reading in CSVs as a tibble
 
-#NOAA daily 
+# NOAA daily 
 noaa.daily.data <- read.csv("data/processed_data/nClimGrid_daily_clean.csv") %>%
   as_tibble()
 
-#NOAA monthly
+# NOAA monthly
 noaa.monthly.data <- read.csv("data/processed_data/nClimGrid_monthly_clean.csv") %>%
   as_tibble()
 
-#McFarland
+# McFarland
 mcfarland.clean <- read.csv("data/processed_data/mcfarland_clean.csv")
 
-#SERC 
+# SERC 
 serc.clean <- read.csv("data/processed_data/serc_clean.csv")
 
-#normals
+# normals
 normals.data <- read.csv("data/processed_data/noaa_normals_clean.csv")
 
+
+
 #-----------------------#
-####    Data Manip   ####
+####    Constants    ####
 #-----------------------#
 
-#### FIRST! load constants and get current year---------------------------------
+# FIRST! load constants and get current year
 
 # Constants
 MM_TO_INCHES <- 0.0393701
@@ -46,7 +50,11 @@ get_current_year <- function() {
   as.numeric(format(Sys.Date(), "%Y"))
 }
 
-#### Processing climate data for long-term trend plots--------------------------
+
+
+#---------------------------------------------------------------#
+####    Processing climate data for long-term trend plots    ####
+#---------------------------------------------------------------#
 
 #' Process precipitation data with datetime handling
 #' @param data Dataframe containing precipitation data
@@ -278,11 +286,14 @@ if (!is.null(results)) {
 }
 
 # Save outputs to CSV
-# write.csv(temp.data.merged, "data/processed_data/temp_data_merged.csv", row.names = FALSE)
-# write.csv(precip.data.merged, "data/processed_data/precip_data_merged.csv", row.names = FALSE)
+write.csv(temp.data.merged, "data/processed_data/temp_data_merged.csv", row.names = FALSE)
+write.csv(precip.data.merged, "data/processed_data/precip_data_merged.csv", row.names = FALSE)
 
 
-#### Calculate Anomalies--------------------------------------------------------
+
+#---------------------------------#
+####    Calculate Anomalies    ####
+#---------------------------------#
 
 # Clean McFarland data (replace values with NA for specific years)
 mcfarland.clean.anom <- mcfarland.clean %>%
@@ -399,7 +410,7 @@ process_climate_data <- function(data, value.col, source_prefix, type, baseline_
     data <- process_serc_precip(data, datetime.col, value.col)  # Correct daily totals
   }
   
-  ## Convert precipitation from mm to inches
+  # Convert precipitation from mm to inches
   if (type == "precip") {
     data <- data %>%
       mutate(!!value.col := .data[[value.col]] * MM_TO_INCHES)
@@ -470,8 +481,11 @@ mcfarland_temp <- process_climate_data(
   "tmean",
   "mcfarland",
   "temp",
-  "provided",
-  "tmean.normal"
+  "calculate",
+  start_year = 1999,  
+  end_year = 2018
+  # "provided",
+  # "tmean.normal"
 )
 
 mcfarland_precip <- process_climate_data(
@@ -482,8 +496,11 @@ mcfarland_precip <- process_climate_data(
   "ppt",
   "mcfarland",
   "precip",
-  "provided",
-  "ppt.normal"
+  "calculate",
+  start_year = 1999,  
+  end_year = 2018
+  # "provided",
+  # "ppt.normal"
 )
 
 # SERC (provided normals)
@@ -492,8 +509,11 @@ serc_temp <- process_climate_data(
   "tmean",
   "serc",
   "temp",
-  "provided",
-  "tmean.normal"
+  "calculate",
+  start_year = 2009,  
+  end_year = 2024
+  # "provided",
+  # "tmean.normal"
 )
 
 serc_precip <- process_climate_data(
@@ -505,8 +525,11 @@ serc_precip <- process_climate_data(
   "ppt",
   "serc",
   "precip",
-  "provided",
-  "ppt.normal"
+  "calculate",
+  start_year = 2009,  
+  end_year = 2024
+  # "provided",
+  # "ppt.normal"
 )
 
 # Merge temperature anomalies
@@ -522,8 +545,8 @@ anom.precip.merged.new <- noaa_precip$shiny_data %>%
   left_join(serc_precip$shiny_data, by = c("year", "month"))
 
 # Save outputs as CSV
-# write.csv(anom.temp.merged.new, "data/processed_data/anom_temp_merged.csv", row.names = FALSE)
-# write.csv(anom.precip.merged.new, "data/processed_data/anom_precip_merged.csv", row.names = FALSE)
+write.csv(anom.temp.merged.new, "data/processed_data/anom_temp_merged.csv", row.names = FALSE)
+write.csv(anom.precip.merged.new, "data/processed_data/anom_precip_merged.csv", row.names = FALSE)
 
 
 #### Record plots--------------------------------------------------------------
@@ -643,5 +666,7 @@ records.noaa.daily <- results$daily
 records.noaa.monthly <- results$monthly
 
 # Save outputs
-# write.csv(records.noaa.daily, "data/processed_data/records_noaa_daily.csv", row.names = FALSE)
-# write.csv(records.noaa.monthly, "data/processed_data/records_noaa_monthly.csv", row.names = FALSE)
+write.csv(records.noaa.daily, "data/processed_data/records_noaa_daily.csv", row.names = FALSE)
+write.csv(records.noaa.monthly, "data/processed_data/records_noaa_monthly.csv", row.names = FALSE)
+
+

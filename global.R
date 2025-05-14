@@ -15,6 +15,8 @@ library(plotly)
 library(tidyverse)
 library(dplyr)
 library(leaflet)
+library(bslib)
+
 
 #--------------------------#
 ####    Read-In Data    ####
@@ -36,3 +38,55 @@ frenchman.monthly.clean <- read.csv("data/processed_data/frenchman_monthly_clean
 
 frenchman.annual.clean <- read.csv("data/processed_data/frenchman_annual_clean.csv")
 
+
+#--------------------------#
+####     Functions      ####
+#--------------------------#
+
+## function for generating data manipulation panel next to plots (e.i. check boxes, sliders, etc.)
+create_temp_records_panel <- function(plots_config) {
+  # plots_config should be a list of lists, each containing configuration for one plot
+  lapply(plots_config, function(config) {
+    # Get the data source for the year range
+    data_source <- config$data_source
+    
+    fluidRow(
+      # Column for the checkbox group input
+      column(
+        width = 4,
+        box(
+          title = "Data Filtering Tools",
+          status = "primary",
+          solidHeader = TRUE,
+          width = 10,
+          # Add checkbox group for line selection
+          checkboxGroupInput(
+            inputId = config$checkbox_id,
+            label = "Select data to display:",
+            choices = config$checkbox_choices,
+            selected = config$default_selected
+          ),
+          sliderInput(
+            inputId = config$year_range_id,
+            label = "Select year range:",
+            min = min(data_source$year),
+            max = max(data_source$year),
+            value = c(min(data_source$year), max(data_source$year)),
+            sep = ""
+          )
+        )
+      ),
+      # Plot output
+      column(
+        width = 8,
+        box(
+          #title = config$plot_title,
+          status = "primary",
+          solidHeader = TRUE,
+          width = 12,
+          plotlyOutput(config$plot_id, height = "600px")
+        )
+      )
+    )
+  })
+}

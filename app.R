@@ -82,7 +82,7 @@ ui <- dashboardPage(
   ),
   
   dashboardBody(
-    tags$head(tags$link(type = "text/css", rel = "stylesheet", href = "css/style.css")),
+    # tags$head(tags$link(type = "text/css", rel = "stylesheet", href = "css/style.css")),
     
     # Define tab items
     tabItems(
