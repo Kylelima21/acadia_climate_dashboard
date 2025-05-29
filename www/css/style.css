@@ -441,6 +441,15 @@ label:focus-visible {
     "sum weather"
 }
 
+.summary-box-np {
+  margin: 5rem 0 3rem 0;
+  display: grid;
+  grid-column-gap: 4%;
+  grid-template-columns: 50% 46%;
+  grid-template-areas:
+    "sum sum"
+}
+
 .sumtxt {
   grid-area: sum;
 }
@@ -561,9 +570,9 @@ label:focus-visible {
   box-shadow: 3px 3px 1rem rgba(0, 0, 0, 0.3);
 }
 
-.trend-box .slider {
-  max-width: 380px;
-}
+/*.trend-box .slider {
+  max-width: 450px;
+}*/
 
 .irs .irs--shiny .js-irs-0 .irs-with-grid {
   margin: 0 2rem !important;
@@ -854,11 +863,17 @@ label:focus-visible {
 
 
 
-/* || TAB 3 - SEA LEVEL */
+/* || TAB 4 - SEA LEVEL */
 
 #AnnualSeaLevel {
   max-width: 100rem;
   height: 100% !important;
+}
+
+.sl {}
+
+.slider {
+  max-width: 380px;
 }
 
 
@@ -866,6 +881,66 @@ label:focus-visible {
 
 
 
+
+
+
+
+
+
+/* || TAB 5 - Explore Data */
+
+.datatable-box {
+  background-color: var(--clr-plot-bg);
+  margin: 0 -6.5rem 0rem -5rem !important;
+  padding: 4rem 6.5rem 8rem 5rem;
+  color: var(--clr-da-pur) !important;
+  display: grid;
+  grid-column-gap: 2%;
+  grid-template-columns: 49% 49%;
+  grid-template-areas: 
+  "dtt dtt"
+  "annt mont"
+}
+
+.dt-title {
+  grid-area: dtt;
+  margin-bottom: 3rem;
+}
+
+.table-loc-ann {
+  grid-area: annt;
+}
+
+.table-loc-mon {
+  grid-area: mont;
+}
+
+table.dataTable {
+  background-color: #f9f9f9; /* Light grey background */
+  font-size: 1.5rem;
+}
+table.dataTable tbody td {
+  background-color: #ffffff; /* White background for table cells */
+}
+table.dataTable thead th {
+  background-color: #e0e0e0; /* Light grey for header */
+}
+
+table.dataTable tbody tr:hover {
+    background-color: #cce5ff !important;  /* Light blue on hover */
+  }
+
+table.dataTable tbody tr.selected {
+  background-color: #ffcccb !important;  /* Light red for selected rows */
+}
+
+.antab {
+  margin-bottom: 3rem !important;
+}
+
+.testing > .form-group {
+  margin-bottom: 12rem !important;
+}
 
 
 

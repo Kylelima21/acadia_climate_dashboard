@@ -25,7 +25,7 @@ noaa.monthly.data <- read.csv("data/processed_data/nClimGrid_monthly_clean.csv")
   as_tibble()
 
 # McFarland
-mcfarland.clean <- read.csv("data/processed_data/mcfarland_clean.csv")
+mcfarland.clean <- read.csv("data/processed_data/McFarland_clean.csv")
 
 # SERC 
 serc.clean <- read.csv("data/processed_data/serc_clean.csv")

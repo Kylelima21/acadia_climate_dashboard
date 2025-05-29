@@ -45,9 +45,9 @@ ui <- fluidPage(
         div(class = "header-content",
             HTML("<h1>Acadia Climate <span class='grtxt'>Dashboard</span></h1>"),
             p(class = "headerp",
-              "This dashboard summarizes climate data from Acadia National Park gathered from local weather stations and modeled data that covers the park. The goal of this dashboard is to make it easier to access and view local climate, weather, and sea level data and trends over time. We also try to emphasize extreme events and allow for the comparison to historical records."),
+              "This dashboard summarizes climate data from Acadia National Park gathered from local weather stations and modeled data that covers the park. The goal of this dashboard is to make it easier to access and view local climate, weather, and sea level data and trends over time. We also emphasize extreme events and allow for the comparison to historical records."),
             div(class = "header-update",
-                p(class = "updatep", HTML("<i>Updated: March 2025</i>"))
+                p(class = "updatep", HTML("<i>Updated: May 2025</i>"))
             ),
         ),
     ),
@@ -61,59 +61,50 @@ ui <- fluidPage(
                 
                 div(class = "summary-box",
                     div(class = "sumtxt",
+                        h2("Climate Data Overview"),
+                        p(HTML("Acadia National Park is not buffered from the statewide trends of climate change.
+                          State level analyses have shown a 3.9 ˚F increase in temperature and nearly 6 inches 
+                          more rain each year since 1895, and 8 inches of sea level rise over the last century (<a href='https://climatechange.umaine.edu/climate-matters/maines-climate-future/' target='_blank'>Fernandez et al., 2020</a>;
+                          <a href ='https://www.maine.gov/future/sites/maine.gov.future/files/inline-files/STS_2024_digital.pdf' target='_blank'>Arnold et al., 2024</a>). 
+                          These trends are all reflected locally as shown in this dashboard. Explore the different tabs for a more in-depth look at local climate data."))),
+                    tags$img(class = "sumimg",
+                             src = "img/overview_graphs_static.png",
+                             alt = "Three graphs show the rising trends of temperature, precipitation, and sea level from local data here in Acadia National Park.")
+                ),
+                
+                
+                div(class = "summary-box",
+                    div(class = "sumtxt",
                         h2("About this Dashboard"),
-                        p("This dashboard summarizes climate data from Acadia National Park gathered from local weather stations and climate models that cover the park. Local data was gathered from the McFarland Hill Atmospheric Research Station in Bar Harbor, the MesoWest Winter Harbor-SERC Station at Schoodic Point, and the National Oceanography Centre (NOC) Station in Frenchman Bay. We also use the National Oceanic and Atmospheric Administration (NOAA) gridded climate model data for long term trends. These data are compiled and cleaned to produce visualizations of temperature and precipitation long-term trends, anomalies, and extremes as well as long-term sea level trends. The dashboard design was inspired by the Organisation for Economic Co-operation and Development's Climate Action Dashboard.")),
+                        p(HTML("This dashboard summarizes climate data from Acadia National Park gathered from local weather stations and climate models that cover the park. 
+                          Local data is gathered from the McFarland Hill Atmospheric Research Station in Bar Harbor, the MesoWest Winter Harbor-SERC Station at Schoodic Point, 
+                          and the National Oceanography Centre (NOC) Station in Frenchman Bay. We also use the National Oceanic and Atmospheric Administration (NOAA) gridded climate 
+                          model data for long term trends. The dashboard design was inspired by the Organisation for Economic Co-operation and Development's 
+                          <a href = 'https://www.oecd.org/en/data/dashboards/climate-action-dashboard.html' target='_blank'>Climate Action Dashboard</a>."))),
                     tags$img(class = "sumimg",
                              src = "img/IMG_2172.png",
                              alt = "A twig sticking out of the snow in the forest with the afternoon sun in the background.")
                 ),
-                
-                div(class = "map-box",
-                    div(class = "maptxt",
-                        h2("Station Locations"),
-                        p("Explore the map to see the locations of the weather stations that we have included data from in this dashboard. Click on a marker to see the station name and coordinates.")),
-                    
-                    div(class = "maploc",
-                        leafletOutput("LocationMap"))
-                ),
-                
-                div(
-                  h2(class = "wstxt", "About the Data"),
-                  tags$ul(
-                    tags$li(HTML('Climate summaries were created from daily and monthly gridded climate data (NClimGrid Daily and Monthly) downloaded from NOAA\'s National Centers for Environmental Information (<a href="https://www.ncei.noaa.gov" target="_blank">NCEI</a>).')),
-                    tags$li(HTML('Climate data was compiled and cleaned using R scripts by Kyle Lima, built from the <a href="https://github.com/KateMMiller/climateNETN" target="_blank">climateNETN package</a> by Kate Miller.')),
-                    tags$li("Climate summaries were created from hourly data collected by the McFarland Hill Atmospheric Research Station."),
-                    tags$li("Climate summaries were created from 15 minute interval data collected by the MesoWest Winter Harbor-SERC station (ID: D2258)."),
-                    tags$li(HTML('Sea level trend visualizations were created from monthly and annual mean sea level data collected by the NOC Station in Frenchman Bay (ID: 525) and documented by the Permanent Service for Mean Sea Level (<a href="https://psmsl.org/" target="_blank">PSMSL</a>), based at the NOC, which specializes in providing global tide gauge data.'))),
-                ),
-                
-                div(
-                  h2(class = "wstxt", "Data Access"),
-                  p(HTML('Data from all sources used in this app and R scripts for data compiling and cleaning can be downloaded following the instructions on the <a href="https://kylelima21.github.io/acadia_climate_dashboard/" target="_blank">data download page</a>. Instructions for data downloading and R script use are also provided.')),
-                ),
-                
-                div(
-                  h2(class = "wstxt", "Contact"),
-                  p(HTML('Found an error, have questions, or want to connect? Contact us at klima@schoodicinstitute.org.')),
-                )
       ),
       
       
       ## ¬ Temperature Trends ----
       nav_panel(icon = icon("thermometer-half"), "Temperature",
                 
-                div(class = "summary-box add-marg",
+                div(class = "summary-box-np add-marg",
                     div(class = "sumtxt",
-                        h2("Temperature Trends, Anomolies, and Extremes"),
-                        p(HTML("Maine's average annual temperature has increased by over 3.2 ˚F since 1895 and we've 
-                        seen a drastic increase in the rate of warming since 1960 (<a href='https://climatechange.umaine.edu/climate-matters/maines-climate-future/' target='_blank'>Fernandez et al., 2020</a>). Additionally, 
+                        h2("Temperature Trends, Anomalies, and Extremes"),
+                        p(HTML("Maine's average annual temperature has increased by over 3.9 ˚F since 1895 and we've 
+                        seen a drastic increase in the rate of warming since 1960 (<a href='https://climatechange.umaine.edu/climate-matters/maines-climate-future/' target='_blank'>Fernandez et al., 2020</a>;
+                        <a href ='https://www.maine.gov/future/sites/maine.gov.future/files/inline-files/STS_2024_digital.pdf' target='_blank'>Arnold et al., 2024</a>). Additionally, 
                         the ten warmest years on record have all occurred since 1998. In this section,
                         you can explore these temperature trends, visualize anomalies, and identify temperature records 
                         from here in Acadia National Park."))),
-                    tags$img(class = "sumimg",
-                             src = "img/acad_back.jpg",
-                             alt = "The hot summer sun setting near Cadillac Mountain.")
+                    # tags$img(class = "sumimg",
+                    #          src = "img/acad_back.jpg",
+                    #          alt = "The hot summer sun setting near Cadillac Mountain.")
                     ),
+                
                 
                 div(class = "trend-box add-p-marg",
                     div(class = "lt-title",
@@ -121,25 +112,26 @@ ui <- fluidPage(
                         p("View annual average maximum, minimum, and mean temperature trends from 1895 to 2024 for 
                           data derived from NOAA NClimGrid datasets. Also included are McFarland Hill annual average 
                           temperature data which spans from 1999 to 2024 and SERC annual average temperature data which spans from 2009 to 2024. 
-                          The data filtering tools can be used to add or remove elements from the plot. If linear models are added, 
-                          the corresponding model statistics are calculated and provided in the model statistics box below.")
+                          The data filtering tools can be used to add or remove elements from the plot. Using your cursor, hover over sections of 
+                          the plot to see the values for each year. Use the tools in the upper right of the graph to zoom in or out and pan around.")
                     ),
+                    
                     
                     div(class = "leg-t-box",
                         h3("Data Filtering Tools"),
                         checkboxGroupInput(
                           inputId = "linesToShow",
                           label = "Select data to display:",
-                          choices = c("NOAA Average Maximum Temp." = "NOAA Average Max Temp",
-                                      "NOAA Average Mean Temp." = "NOAA Average Mean Temp",
-                                      "NOAA Average Minimum Temp." = "NOAA Average Min Temp",
-                                      "McFarland Average Temp." = "McFarland Average Temp",
-                                      "SERC Average Temp." = "SERC Average Temp",
-                                      "Linear Model for NOAA Average Max Temp." = "lm_noaa_max_temp",
-                                      "Linear Model for NOAA Average Mean Temp." = "lm_noaa_temp",
-                                      "Linear Model for NOAA Average Min Temp." = "lm_noaa_min_temp",
-                                      "Linear Model for McFarland Average Temp." = "lm_mcfarland_temp",
-                                      "Linear Model for SERC Average Temp." = "lm_serc_temp"),
+                          choices = c("NOAA Average Maximum Temperature" = "NOAA Average Max Temp",
+                                      "NOAA Average Mean Temperature" = "NOAA Average Mean Temp",
+                                      "NOAA Average Minimum Temperature" = "NOAA Average Min Temp",
+                                      "McFarland Average Temperature" = "McFarland Average Temp",
+                                      "SERC Average Temperature" = "SERC Average Temp"),
+                                      # "Linear Model for NOAA Average Max Temp." = "lm_noaa_max_temp",
+                                      # "Linear Model for NOAA Average Mean Temp." = "lm_noaa_temp",
+                                      # "Linear Model for NOAA Average Min Temp." = "lm_noaa_min_temp",
+                                      # "Linear Model for McFarland Average Temp." = "lm_mcfarland_temp",
+                                      # "Linear Model for SERC Average Temp." = "lm_serc_temp"),
                           selected = c("NOAA Average Mean Temp", "NOAA Average Max Temp", "NOAA Average Min Temp", "McFarland Average Temp", "SERC Average Temp")),
     
                           div(class = "slider",
@@ -157,54 +149,23 @@ ui <- fluidPage(
                     )
                 ),
                 
-                div(class = "anom-box add-p-marg",
-                    div(class = "lt-title",
-                        h2("Temperature Anomalies"),
-                        p("Plotted below are monthly temperature anomalies which represent the difference between observed temperatures and historic baseline temperatures. Positive anomalies (above the baseline in red) indicate temperatures that are above (warmer than) the historic baseline. Negative anomalies (below the baseline in blue) indicate temperatures that are below (cooler than) the historic baseline. 
-                        NOAA monthly temperature anomalies were calculated for 1895 to 2024. The baseline was calculated by averaging the mean temperature for each month of the year from 1901-2000 to generate a 20th century baseline. Data was derived from the NOAA NClimGrid Monthly dataset for these calculations and anomaly plot visualization.
-                        McFarland Hill monthly temperature anomalies were calculated for 1999 to 2024. The baseline was calculated from the first 20 years of this dataset.
-                        SERC monthly temperature anomalies were calculated for 2009 to 2024. The baseline was calculated from the full span of this dataset.")
-                    ),
-                    
-                    div(class = "leg-t-box anom-slider",
-                        h3("Data Filtering Tools"),
-                        div(class = "slider",
-                          sliderInput(
-                            inputId = "year_range_temp_anom",
-                            label = "Select year range:",
-                            min = min(anom.temp.merged$year),
-                            max = max(anom.temp.merged$year),
-                            value = c(min(anom.temp.merged$year), max(anom.temp.merged$year)),
-                            sep = ""))
-                    ),
-                    
-                    div(class = "plot-t-box fig-boxes noaa",
-                        plotlyOutput("NOAAAnomPlot")
-                    ),
-                      
-                    div(class = "plot-t-box fig-boxes mcfar",
-                      plotlyOutput("McFarlandAnomPlot")
-                    ),
-                      
-                    div(class = "plot-t-box fig-boxes serc",
-                      plotlyOutput("SERCAnomPlot")
-                    )
-                ),
                 
                 div(class = "xtreme-box add-p-marg",
                     div(class = "lt-title",
                         h2("Temperature Extremes"),
-                        p("Explore monthly and daily temperature records and extremes including hottest monthly and daily temperature records of each year and 
-                        coldest monthly and daily temperature records of each year. Default plots show the records for the hottest mean monthly and daily temperatures, but
-                        you can see the true maximum and minum temperatures by selecting the box in the data filtering tools. Data are derived from NOAA NClimGrid datasets.")
+                        p("Explore annual, monthly, and daily temperature records and extremes including hottest temperature records and 
+                        coldest temperature records since 1895. Default plots show the records for the hottest mean temperatures, but
+                        you can see the true maximum and minimum temperatures by selecting the corresponding box in the data filtering tools. 
+                        These data are derived from NOAA NClimGrid datasets. Using your cursor, hover over sections of 
+                        the plot to see the values for each year and that year's rank.")
                     ),
                     
                     
                     div(class = "rainnav",
                         navset_card_underline(
-
+                          
                           nav_panel("Annual",
-
+                                    
                                     div(class = "plot-t-box fig-boxes urecs",
                                         create_temp_records_panel(
                                           # Annual maximum temps
@@ -231,12 +192,12 @@ ui <- fluidPage(
                                               default_selected = c("annual_low_temp")
                                             )
                                           )
-                                    )
+                                        )
                                     )
                           ),
-
+                          
                           nav_panel("Monthly",
-
+                                    
                                     div(class = "plot-t-box fig-boxes urecs",
                                         create_temp_records_panel(
                                           list(
@@ -252,7 +213,7 @@ ui <- fluidPage(
                                               ),
                                               default_selected = c("mean_max_temp")
                                             ),
-  
+                                            
                                             # Monthly minimum temps
                                             list(
                                               year_range_id = "year_range_records2",
@@ -267,8 +228,8 @@ ui <- fluidPage(
                                             )
                                           )
                                         )
-                                        )
-
+                                    )
+                                    
                           ),
                           
                           nav_panel("Daily",
@@ -304,100 +265,49 @@ ui <- fluidPage(
                                           )
                                         )
                                     )
-                                    
                           )
-                          
-                          
-                          
-                          
                         )
-
-
+                    )
+                ),
+                
+                
+                div(class = "anom-box add-p-marg",
+                    div(class = "lt-title",
+                        h2("Temperature Anomalies"),
+                        p(HTML("Plotted below are monthly temperature anomalies which represent the difference between observed temperatures and historic baseline temperatures. Positive anomalies (above the baseline in red) indicate temperatures that are above (warmer than) the historic baseline. Negative anomalies (below the baseline in blue) indicate temperatures that are below (cooler than) the historic baseline. 
+                        NOAA monthly temperature anomalies were calculated for 1895 to 2024. The baseline was calculated by averaging the mean temperature for each month of the year from 1901-2000 to generate a 20th century baseline. Data are derived from the NOAA NClimGrid Monthly dataset for these calculations and anomaly plot visualization.
+                        McFarland Hill monthly temperature anomalies were calculated for 1999 to 2024, and SERC monthly temperature anomalies were calculated for 2009 to 2024. The baselines for both were calculated from the full span of the dataset.
+                        <br><br>
+                        Hover over the plot to reveal a popup box that will show the year and month, the temperature anomaly, and a rank. 
+                        The rank corresponds to how each month compares to all other months and the blue and red anomalies are ranked separate. 
+                        For example, the month of December 2015 had the highest temperature anomaly compared to all other Decembers and therefore has a rank of 1. 
+                        Similarly, February 2015 has a rank of 1 since it had the lowest temperature anomaly of all Februarys."))
                     ),
                     
-                    # div(class = "plot-t-box fig-boxes urecs",
-                    #     
-                    #     create_temp_records_panel(
-                    #       # First plot (annual maximum temperatures)
-                    #       list(
-                    #         list(
-                    #           year_range_id = "year_range_records5",
-                    #           checkbox_id = "annual_temp_records_display",
-                    #           plot_id = "AnnualRecordsPlot",
-                    #           data_source = temp.data.merged,
-                    #           checkbox_choices = c(
-                    #             "Highest Annual Mean Temperature Records" = "annual_mean_temp"
-                    #           ),
-                    #           default_selected = c("annual_mean_temp")
-                    #         ),
-                    #         
-                    #         # Second plot (annual minimum temperatures)
-                    #         # list(
-                    #         #   year_range_id = "year_range_records6",
-                    #         #   checkbox_id = "annual_low_records_display",
-                    #         #   plot_id = "AnnualLowRecordsPlot",
-                    #         #   data_source = temp.data.merged,
-                    #         #   checkbox_choices = c(
-                    #         #     "Lowest Annual Mean Temperature Records" = "annual_low_temp"
-                    #         #   ),
-                    #         #   default_selected = c("annual_low_temp")
-                    #         # ),
-                    #         
-                    #         # Third plot (monthly maximum temperatures)
-                    #         list(
-                    #           year_range_id = "year_range_records",
-                    #           checkbox_id = "temp_records_display",
-                    #           plot_id = "MaxTempRecordsPlot",
-                    #           data_source = records.noaa.monthly,
-                    #           checkbox_choices = c(
-                    #             "Highest Monthly Mean Temperature Records" = "mean_max_temp",
-                    #             "Highest Monthly Maximum Temperature Records" = "max_temp"
-                    #           ),
-                    #           default_selected = c("mean_max_temp")
-                    #         ),
-                    #         
-                    #         # Fourth plot (monthly minimum temperatures)
-                    #         list(
-                    #           year_range_id = "year_range_records2",
-                    #           checkbox_id = "min_temp_records_display",
-                    #           plot_id = "MinTempRecordsPlot",
-                    #           data_source = records.noaa.monthly,
-                    #           checkbox_choices = c(
-                    #             "Lowest Monthly Mean Temperature Records" = "mean_min_temp",
-                    #             "Lowest Monthly Minimum Temperature Records" = "min_temp"
-                    #           ),
-                    #           default_selected = c("mean_min_temp")
-                        #     ),
-                        # 
-                        #     # Fifth plot (daily maximum temperatures)
-                        #     list(
-                        #       year_range_id = "year_range_records3",
-                        #       checkbox_id = "daily_max_temp_display",
-                        #       plot_id = "DailyMaxRecordsPlot",
-                        #       data_source = records.noaa.daily,
-                        #       checkbox_choices = c(
-                        #         "Highest Daily Mean Temperature Records" = "daily_mean_max_temp",
-                        #         "Highest Daily Maximum Temperature Records" = "daily_max_temp"
-                        #       ),
-                        #       default_selected = c("daily_mean_max_temp")
-                        #     ),
-                        # 
-                        #     # Sixth plot (daily maximum temperatures)
-                        #     list(
-                        #       year_range_id = "year_range_records4",
-                        #       checkbox_id = "daily_min_temp_display",
-                        #       plot_id = "DailyMinRecordsPlot",
-                        #       data_source = records.noaa.daily,
-                        #       checkbox_choices = c(
-                        #         "Lowest Daily Mean Temperature Records" = "daily_mean_min_temp",
-                        #         "Lowest Daily Minimum Temperature Records" = "daily_min_temp"
-                        #       ),
-                        #       default_selected = c("daily_mean_min_temp")
-                        #     )
-                        #   )
-                        # )
-                    # )
-                )
+                    div(class = "leg-t-box anom-slider",
+                        h3("Data Filtering Tools"),
+                        div(class = "slider",
+                          sliderInput(
+                            inputId = "year_range_temp_anom",
+                            label = "Select year range:",
+                            min = min(anom.temp.merged$year),
+                            max = max(anom.temp.merged$year),
+                            value = c(min(anom.temp.merged$year), max(anom.temp.merged$year)),
+                            sep = ""))
+                    ),
+                    
+                    div(class = "plot-t-box fig-boxes noaa",
+                        plotlyOutput("NOAAAnomPlot")
+                    ),
+                      
+                    div(class = "plot-t-box fig-boxes mcfar",
+                      plotlyOutput("McFarlandAnomPlot")
+                    ),
+                      
+                    div(class = "plot-t-box fig-boxes serc",
+                      plotlyOutput("SERCAnomPlot")
+                    )
+                ),
                 
       ),
       
@@ -405,16 +315,18 @@ ui <- fluidPage(
       ## ¬ Precip Trends ----
       nav_panel(icon = icon("cloud-rain"), "Precipitation",
                 
-                div(class = "summary-box add-marg",
+                div(class = "summary-box-np add-marg",
                     div(class = "sumtxt",
-                        h2("Precipitation Trends, Anomolies, and Extremes"),
-                        p(HTML("Average annual precipitation has increased since the late 1800s by almost 6 inches (<a href='https://climatechange.umaine.edu/climate-matters/maines-climate-future/' target='_blank'>Fernandez et al., 2020</a>).
-                          We are seeing more rain and less snow, yet this increased rain is coming in fewer, but more
-                          extreme rainfall events. In this section, you can explore precipitation trends, visualize anomalies,
-                          and identify rain or snowfall records in Acadia National Park."))),
-                    tags$img(class = "sumimg",
-                             src = "img/rain_cropped.jpg",
-                             alt = "Rain falling against a car windshield.")
+                        h2("Precipitation Trends, Anomalies, and Extremes"),
+                        p(HTML("Average annual precipitation has increased since the late 1800s by almost 6 inches (<a href='https://climatechange.umaine.edu/climate-matters/maines-climate-future/' target='_blank'>Fernandez et al., 2020</a>;
+                        <a href ='https://www.maine.gov/future/sites/maine.gov.future/files/inline-files/STS_2024_digital.pdf' target='_blank'>Arnold et al., 2024</a>).
+                          We are seeing more rainfall, yet this increased amount of rain is coming in fewer, more
+                          extreme rainfall events. In this section, you can explore precipitation trends, anomalies,
+                          and extremes from Acadia National Park. If you'd like to help monitor precipitation near you,
+                          consider getting involved with <a href = 'https://www.cocorahs.org/' target='_blank'>CoCoRaHS</a>."))),
+                    # tags$img(class = "sumimg",
+                    #          src = "img/rain_cropped.jpg",
+                    #          alt = "Rain falling against a car windshield.")
                 ),
                 
                 div(class = "trend-box add-p-marg",
@@ -423,8 +335,8 @@ ui <- fluidPage(
                         p("Explore annual average total precipitation trends from 1895 to 2024 for data derived 
                           from NOAA NClimGrid datasets. Also plotted are McFarland Hill annual average total precipitation 
                           data which spans from 1999 to 2024 and SERC annual average total precipitation data which spans from 2009 to 2024. 
-                          The data tools can be used to add or remove elements from the plot. If linear models are added, the corresponding 
-                          model statistics are calculated and provided in the model statistics box below.")
+                          The data tools can be used to add or remove elements from the plot. Using your cursor, hover over sections of 
+                          the plot to see the values for each year. Use the tools in the upper right of the graph to zoom in or out and pan around.")
                     ),
                     
                     div(class = "leg-t-box",
@@ -432,12 +344,12 @@ ui <- fluidPage(
                         checkboxGroupInput(
                           inputId = "linesToShowPrecip",
                           label = "Select data to display:",
-                          choices = c("NOAA Total Precip." = "NOAA Precip",
-                                      "McFarland Total Precip." = "McFarland Precip",
-                                      "SERC Total Precip." = "SERC Precip",
-                                      "Linear Model for NOAA Precip" = "lm_noaa_precip",
-                                      "Linear Model for McFarland Precip" = "lm_mcfarland_precip",
-                                      "Linear Model for SERC Precip" = "lm_serc_precip"),
+                          choices = c("NOAA Total Precipitation" = "NOAA Precip",
+                                      "McFarland Total Precipitation" = "McFarland Precip",
+                                      "SERC Total Precipitation" = "SERC Precip"),
+                                      # "Linear Model for NOAA Precip" = "lm_noaa_precip",
+                                      # "Linear Model for McFarland Precip" = "lm_mcfarland_precip",
+                                      # "Linear Model for SERC Precip" = "lm_serc_precip"),
                           selected = c("NOAA Precip", "McFarland Precip", "SERC Precip")),
                         
                         div(class = "slider",
@@ -456,13 +368,61 @@ ui <- fluidPage(
                 ),
                 
                 
+                div(class = "xtreme-box-rain add-p-marg",
+                    div(class = "lt-title",
+                        h2("Precipitation Extremes"),
+                        p("Plotted below are the highest and lowest monthly precipitation records of each year, as well as the highest and lowest records annually.
+                          These data are derived from NOAA NClimGrid datasets. Using your cursor, hover over sections of the plot to see the values for each year and that year's rank.")
+                    ),
+                    
+                    div(class = "leg-t-box xtreme-slider",
+                        h3("Data Filtering Tools"),
+                        div(class = "slider",
+                            sliderInput(
+                              inputId = "year_range_precip_record",
+                              label = "Select year range:",
+                              min = min(records.noaa.monthly$year),
+                              max = max(records.noaa.monthly$year),
+                              value = c(min(records.noaa.monthly$year), max(records.noaa.monthly$year)),
+                              sep = "")),
+                    ),
+                    
+                    
+                    div(class = "rainnav",
+                        navset_card_underline(
+                          
+                          nav_panel("Annual",
+                                    
+                                    div(class = "plot-t-box fig-boxes",
+                                        plotlyOutput("AnnualPrecipRecordsPlot"),
+                                        plotlyOutput("AnnualDroughtRecordsPlot")),
+                          ),
+                          
+                          
+                          nav_panel("Monthly",
+                                    
+                                    div(class = "plot-t-box fig-boxes thehigh",
+                                        plotlyOutput("MaxPrecipRecordsPlot"),
+                                        plotlyOutput("MinPrecipRecordsPlot")),
+                          ),
+                        )
+                    )
+                ),
+                
+                
                 div(class = "anom-box",
                     div(class = "lt-title",
                         h2("Precipitation Anomalies"),
-                        p("Plotted below are monthly precipitation anomalies which represent the percent difference between observed precipitation and historic baseline precipitation totals. Positive anomalies (red) indicate precipitation totals that are higher or wetter than average conditions, while negative anomalies (blue) indicate precipitation totals that are lower or drier than average conditions.
-                        NOAA precipitation anomalies were calculated for 1895 to 2024. The baseline was calculated by averaging the total precipitation for each month of the year from 1901-2000 to generate a 20th century baseline. Data was derived from the Monthly NOAA NClimGrid dataset for these calculations and anomaly plot visualization.
-                        McFarland Hill precipitation anomalies were calculated for 1999 to 2024; the baseline was calculated from the first 20 years of this dataset.
-                        SERC precipitation anomalies were calculated for 2009 to 2024; the  baseline was calcualted from the full span of this dataset.")
+                        p(HTML("Plotted below are monthly precipitation anomalies which represent the difference between observed precipitation totals and 
+                          the historic baseline. Positive anomalies (red) indicate precipitation totals that are higher or wetter than average conditions, 
+                          while negative anomalies (blue) indicate precipitation totals that are lower or drier than average conditions. 
+                          NOAA precipitation anomalies were calculated for 1895 to 2024. The baseline was calculated by averaging the total precipitation for each
+                          month of the year from 1901-2000 to generate a 20th century baseline. Data are derived from the Monthly NOAA NClimGrid dataset for these calculations 
+                          and anomaly plot visualization. McFarland Hill precipitation anomalies were calculated for 1999 to 2024, and SERC precipitation anomalies were calculated 
+                          for 2009 to 2024. The baselines for both were calculated from the full span of the dataset.
+                          <br><br>
+                          Hover over the plot to reveal a popup box that will show the year and month, the precipitation anomaly in inches, and a rank. The rank corresponds to how each month compares to all other months and the blue and red
+                          anomalies are ranked separate. For example, the month of October 2005 had the highest precipitation anomaly compared to all other Octobers and therefore has a rank of 1. Similarly, November 1939 has a rank of 1 since it was the driest November on record."))
                     ),
                     
                     div(class = "leg-t-box anom-slider",
@@ -490,78 +450,33 @@ ui <- fluidPage(
                     )
                 ),
                 
-                div(class = "xtreme-box-rain add-p-marg",
-                    div(class = "lt-title",
-                        h2("Precipitation Extremes"),
-                        p("Plotted below are the highest monthly precipitation records of each year and the lowest monthly precipitation records of each year. Data are derived from NOAA NClimGrid datasets.")
-                    ),
-                    
-                    div(class = "leg-t-box xtreme-slider",
-                        h3("Data Filtering Tools"),
-                        div(class = "slider",
-                            sliderInput(
-                              inputId = "year_range_precip_record",
-                              label = "Select year range:",
-                              min = min(records.noaa.monthly$year),
-                              max = max(records.noaa.monthly$year),
-                              value = c(min(records.noaa.monthly$year), max(records.noaa.monthly$year)),
-                              sep = "")),
-                    ),
-                    
-                    
-                    div(class = "rainnav",
-                    navset_card_underline(
-                      
-                      nav_panel("Annual",
-                                
-                                div(class = "plot-t-box fig-boxes",
-                                    plotlyOutput("AnnualPrecipRecordsPlot"),
-                                    plotlyOutput("AnnualDroughtRecordsPlot")),
-                                ),
-                      
-                      
-                      nav_panel("Monthly",
-                                
-                                div(class = "plot-t-box fig-boxes thehigh",
-                                    plotlyOutput("MaxPrecipRecordsPlot"),
-                                    plotlyOutput("MinPrecipRecordsPlot")),
-                                ),
-                    )
-                    )
-                )
       ),
       
       
       ## ¬ Sea Level Trends ----
       nav_panel(icon = icon("water"), "Sea Level",
                 
-                div(class = "summary-box add-marg",
+                div(class = "summary-box-np add-marg",
                     div(class = "sumtxt",
                         h2("Sea Level Trends"),
-                        p(HTML("Acadia National Park has experienced about 7.5 inches of sea level rise over the last century (<a href='https://climatechange.umaine.edu/climate-matters/maines-climate-future/' target='_blank'>Fernandez et al., 2020</a>) 
-                          which has led to freuquent nuisance flooding, rapid coastal eriosion, and sometimes severe damage to homes and infrastructure
+                        p(HTML("Acadia National Park has experienced about 8 inches of sea level rise over the last century (<a href='https://climatechange.umaine.edu/climate-matters/maines-climate-future/' target='_blank'>Fernandez et al., 2020</a>) 
+                          which has led to frequent high tide flooding, rapid coastal erosion, and severe damage to lands and infrastructure
                           during storms. Here you can explore the trends in sea level in this region. If you'd like to help monitor sea level rise,
-                          consider contributing to the <a href='https://www.anecdata.org/projects/view/59/about' target='_blank'>Gulf of Maine King Tides</a> project"))),
-                    tags$img(class = "sumimg",
-                             src = "img/PXL_20240110_143245249.jpg",
-                             alt = "Waves washing over a road during a storm.")
+                          consider contributing to the <a href='https://www.anecdata.org/projects/view/59/about' target='_blank'>Gulf of Maine King Tides</a> project."))),
+                    # tags$img(class = "sumimg",
+                    #          src = "img/PXL_20240110_143245249.jpg",
+                    #          alt = "Waves washing over a road during a storm.")
                 ),
                 
                 div(class = "trend-box add-p-marg",
                     div(class = "lt-title",
                         h2("Long-term Annual Sea Level Trend"),
-                        p("Explore annual sea level trends from 1948 to 2024 from the NOC Station in Frenchman Bay. Data are derived from the PSMSL. The data filtering tools can be used to add or remove elements from the plots; if linear models are added, the corresponding model statistics are calculated and provided in the model statistics boxes below the plots.")
+                        p("Explore annual sea level trends from 1948 to 2024 from the NOC Station in Frenchman Bay. Data are derived from the PSMSL. The data filtering tools can be used to add or remove elements from the plots. Using your cursor, hover over sections of 
+                          the plot to see the values for each year. Use the tools in the upper right of the graph to zoom in or out and pan around.")
                     ),
                     
-                    div(class = "leg-t-box",
+                    div(class = "leg-t-box sl",
                         h3("Data Filtering Tools"),
-                        checkboxGroupInput(
-                          inputId = "linesToShowAnnualSea",
-                          label = "Select data to display:",
-                          choices = c("Annual Mean Sea Level (mm)" = "Annual Mean Sea Level (mm)",
-                                      "Linear Model for Annual Sea Level" = "lm_annual_sea"),
-                          selected = c("Annual Mean Sea Level (mm)")),
-                        
                         div(class = "slider",
                           sliderInput(
                             inputId = "year_range_annual_sea_level",
@@ -569,8 +484,7 @@ ui <- fluidPage(
                             min = min(frenchman.annual.clean$year),
                             max = max(frenchman.annual.clean$year),
                             value = c(min(frenchman.annual.clean$year), max(frenchman.annual.clean$year)),
-                            sep = "",
-                            step = 10)),
+                            sep = "")),
                     ),
                     
                     div(class = "plot-t-box fig-boxes",
@@ -582,18 +496,15 @@ ui <- fluidPage(
                 
                 div(class = "trend-box add-p-marg",
                     div(class = "lt-title",
-                        h2("Long-term Monthly Sea Level Trend"),
-                        p("Explore monthly sea level trends from 1948 to 2024 from the NOC Station in Frenchman Bay. Data are derived from the PSMSL. The data filtering tools can be used to add or remove elements from the plots; if linear models are added, the corresponding model statistics are calculated and provided in the model statistics boxes below the plots.")
+                        h2("Sea Level Anomalies"),
+                        p("Explore monthly sea level anomalies which represent the difference between observed sea level and the historic baseline. 
+                          Positive anomalies (red) indicate sea levels higher than average conditions, while negative anomalies (blue) indicate levels lower than average conditions. 
+                          Sea level anomalies were calculated from 1948 to 2024 from the NOC Station in Frenchman Bay. Data are derived from the PSMSL. 
+                          The baseline was calculated by averaging the mean sea levels across each month of the year from the full dataset.")
                     ),
                     
                     div(class = "leg-t-box",
                         h3("Data Filtering Tools"),
-                        checkboxGroupInput(
-                          inputId = "linesToShowMonthlySea",
-                          label = "Select data to display:",
-                          choices = c("Monthly Mean Sea Level (mm)" = "Monthly Mean Sea Level (mm)",
-                                      "Linear Model for Monthly Sea Level" = "lm_monthly_sea"),
-                          selected = c("Monthly Mean Sea Level (mm)")),
                         
                         div(class = "slider",
                           sliderInput(
@@ -602,46 +513,95 @@ ui <- fluidPage(
                             min = min(frenchman.monthly.clean$year),
                             max = max(frenchman.monthly.clean$year),
                             value = c(min(frenchman.monthly.clean$year), max(frenchman.monthly.clean$year)),
-                            sep = "",
-                            step = 10)),
+                            sep = "")),
                         ),
                     
                     div(class = "plot-t-box fig-boxes",
-                      plotlyOutput("MonthlySeaLevel", height = "600px")
+                      plotlyOutput("SLAnomPlot", height = "600px")
                     ),
                 ),
                 
       ),
       
       
-      ## ¬ Custom Data Exploration ----
+      ## ¬ Explore Data ----
       nav_panel(icon = icon("table"), "Explore Data",
                 
-                div(class = "summary-box add-marg",
+                div(class = "summary-box-np add-marg",
                     div(class = "sumtxt",
                         h2("Explore and Compare Dates"),
-                        p("This tab allows you to dive a little deeper into the data. Use the various data summarizing
-                          and filtering tools provided below to look for answers to specific questions you may have.")),
-                    tags$img(class = "sumimg",
-                             src = "img/cadillac_from_schoodic.jpg",
-                             alt = "Cadillac Mountain in the distance on a sunny dat through red spruce trees taken from a rocky outcropping on Schoodic Head.")
+                        p("This page allows you to dive a little deeper into the data. Use the various data tables
+                          and filtering tools provided below to the data in greater detail.")),
+                    # tags$img(class = "sumimg",
+                    #          src = "img/cadillac_from_schoodic.jpg",
+                    #          alt = "Cadillac Mountain in the distance on a sunny dat through red spruce trees taken from a rocky outcropping on Schoodic Head.")
                 ),
                 
-                div(class = "trend-box add-p-marg",
-                    div(class = "lt-title",
-                        h2("Date Look-up"),
-                        p("Enter a date to start.")
+                div(class = "datatable-box add-marg",
+                    div(class = "dt-title",
+                        h2("Data Tables"),
                     ),
                     
-                    div(
-                      selectInput("yr",
-                                  "Year:",
-                                  c("All",
-                                    unique(as.numeric(annualdata$year)))),
+                    div(class = "table-loc-ann",
+                        h3("Annually summarized data:"),
+                      div(class = "testing",
+                        selectInput("yr",
+                                  "Filter by Year:",
+                                  sort(unique(as.numeric(annualdata$year)), decreasing = TRUE)),
+                      ),
                       
                       DT::dataTableOutput("exploretable")
-                      
                     ),
+                    
+                    div(class = "table-loc-mon",
+                        h3("Monthly summarized data:"),
+                        selectInput("yr2",
+                                    "Filter by Year:",
+                                    sort(unique(as.numeric(monthlydata$year)), decreasing = TRUE)),
+                        
+                        selectInput("mon",
+                                    "Filter by Month:",
+                                    unique(as.numeric(monthlydata$month))),
+                        
+                        DT::dataTableOutput("exploretable2")
+                      ),
+                ),
+      ),
+      
+      
+      ## ¬ About these data ----
+      nav_panel(icon = icon("database"), "About these Data",
+                
+                div(
+                  h2(class = "wstxt", "About the Data"),
+                  tags$ul(
+                    tags$li(HTML('Climate summaries were created from daily and monthly gridded climate data (NClimGrid Daily and Monthly) downloaded from NOAA\'s National Centers for Environmental Information (<a href="https://www.ncei.noaa.gov" target="_blank">NCEI</a>).')),
+                    tags$li(HTML('Climate data was compiled and cleaned using R scripts by Kyle Lima (Schoodic Institute at Acadia National Park), built from the <a href="https://github.com/KateMMiller/climateNETN" target="_blank">climateNETN package</a> by Kate Miller (Inventory and Monitoring Division, U.S. National Park Service).')),
+                    tags$li("Climate summaries were created from hourly data collected by the McFarland Hill Atmospheric Research Station."),
+                    tags$li("Climate summaries were created from 15 minute interval data collected by the MesoWest Winter Harbor-SERC station (ID: D2258)."),
+                    tags$li(HTML('Sea level trend visualizations were created from monthly and annual mean sea level data collected by the NOC Station in Frenchman Bay (ID: 525) and documented by the Permanent Service for Mean Sea Level (<a href="https://psmsl.org/" target="_blank">PSMSL</a>), based at the NOC, which specializes in providing global tide gauge data.'))),
+                ),
+                
+                div(class = "map-box",
+                    div(class = "maptxt",
+                        h2("Station Locations"),
+                        p("Explore the map to see the locations of weather stations where data used in this dashboard were collected. Click on a marker to see the station name and coordinates.")),
+                    
+                    div(class = "maploc",
+                        leafletOutput("LocationMap"))
+                ),
+                
+                
+                div(
+                  h2(class = "wstxt", "Data Access"),
+                  p(HTML('Data from all sources used in this app and R scripts for data compiling and cleaning can be downloaded following the instructions on the <a href="https://kylelima21.github.io/acadia_climate_dashboard/" target="_blank">data download page</a>. 
+                         Instructions for data downloading and R script use are also provided.')),
+                ),
+                
+                
+                div(
+                  h2(class = "wstxt", "Contact"),
+                  p(HTML('Found an error, have questions, or want to connect? Contact us at klima@schoodicinstitute.org.')),
                 )
       )
     ),
@@ -671,7 +631,6 @@ ui <- fluidPage(
               h1("About"),
               p(HTML("<a href='https://github.com/Kylelima21/acadia_climate_dashboard' target='_blank'>Source code</a>")),
               p(HTML("<a href='https://schoodicinstitute.org/' target='_blank'>Visit our website</a>")),
-              p(HTML("<a href='mailto:klima@schoodicinstitute.org' target='_blank'>Contact us</a>")),
             ),
             
             # div(
@@ -777,23 +736,26 @@ server <- function(input, output) {
       rename(
         Year = year, 
         `Year-Month` = noaa.year.month, 
-        `NOAA Temp Anomaly (°C)` = noaa.temp.anom,
-        `McFarland Temp Anomaly (°C)` = mcfarland.temp.anom,
-        `SERC Temp Anomaly (°C)` = serc.temp.anom
+        `NOAA Temp Anomaly (°F)` = noaa.temp.anom,
+        `McFarland Temp Anomaly (°F)` = mcfarland.temp.anom,
+        `SERC Temp Anomaly (°F)` = serc.temp.anom
       ) %>%
       mutate(
         `Year-Month` = as.Date(`Year-Month`),
         noaa_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>NOAA Temp Anomaly:", round(`NOAA Temp Anomaly (°C)`, 4)
+          "<br>NOAA temperature anomaly:", round(`NOAA Temp Anomaly (°F)`, 4),
+          "<br>Rank:", noaa.rank
         ),
         mcfarland_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>McFarland Temp Anomaly:", round(`McFarland Temp Anomaly (°C)`, 4)
+          "<br>McFarland temperature anomaly:", round(`McFarland Temp Anomaly (°F)`, 4),
+          "<br>Rank:", mcfarland.rank
         ),
         serc_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>SERC Temp Anomaly:", round(`SERC Temp Anomaly (°C)`, 4)
+          "<br>SERC temperature anomaly:", round(`SERC Temp Anomaly (°F)`, 4),
+          "<br>Rank:", serc.rank
         )
       )  %>%
       # Add filter based on slider input
@@ -803,29 +765,62 @@ server <- function(input, output) {
       )
   })
   
-  # Reactive for precipitation anomaly data
+  ## Reactive for precipitation anomaly data
+  # precip_anomaly_data <- reactive({
+  #   anom.precip.merged %>%
+  #     rename(
+  #       Year = year, 
+  #       `Year-Month` = noaa.year.month, 
+  #       `NOAA Precip Anomaly (%)` = noaa.percent.precip.anom,
+  #       `McFarland Precip Anomaly (%)` = mcfarland.percent.precip.anom,
+  #       `SERC Precip Anomaly (%)` = serc.percent.precip.anom
+  #     ) %>%
+  #     mutate(
+  #       `Year-Month` = as.Date(`Year-Month`),
+  #       noaa_precip_hover_text = paste(
+  #         "Year-Month:", format(`Year-Month`, "%Y-%m"),
+  #         "<br>NOAA Precip Anomaly:", round(`NOAA Precip Anomaly (%)`, 4)
+  #       ),
+  #       mcfarland_precip_hover_text = paste(
+  #         "Year-Month:", format(`Year-Month`, "%Y-%m"),
+  #         "<br>McFarland Precip Anomaly:", round(`McFarland Precip Anomaly (%)`, 4)
+  #       ),
+  #       serc_precip_hover_text = paste(
+  #         "Year-Month:", format(`Year-Month`, "%Y-%m"),
+  #         "<br>SERC Precip Anomaly:", round(`SERC Precip Anomaly (%)`, 4)
+  #       )
+  #     ) %>%
+  #     # Add filter based on slider input
+  #     filter(
+  #       Year >= input$year_range_precip_anom[1],
+  #       Year <= input$year_range_precip_anom[2]
+  #     )
+  # })
   precip_anomaly_data <- reactive({
     anom.precip.merged %>%
       rename(
         Year = year, 
         `Year-Month` = noaa.year.month, 
-        `NOAA Precip Anomaly (%)` = noaa.percent.precip.anom,
-        `McFarland Precip Anomaly (%)` = mcfarland.percent.precip.anom,
-        `SERC Precip Anomaly (%)` = serc.percent.precip.anom
+        `NOAA Precip Anomaly (in)` = noaa.precip.anom,
+        `McFarland Precip Anomaly (in)` = mcfarland.precip.anom,
+        `SERC Precip Anomaly (in)` = serc.precip.anom
       ) %>%
       mutate(
         `Year-Month` = as.Date(`Year-Month`),
         noaa_precip_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>NOAA Precip Anomaly:", round(`NOAA Precip Anomaly (%)`, 4)
+          "<br>NOAA precipitation anomaly:", round(`NOAA Precip Anomaly (in)`, 4),
+          "<br>Rank:", noaa.rank
         ),
         mcfarland_precip_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>McFarland Precip Anomaly:", round(`McFarland Precip Anomaly (%)`, 4)
+          "<br>McFarland precipitation anomaly:", round(`McFarland Precip Anomaly (in)`, 4),
+          "<br>Rank:", mcfarland.rank
         ),
         serc_precip_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>SERC Precip Anomaly:", round(`SERC Precip Anomaly (%)`, 4)
+          "<br>SERC precipitation anomaly:", round(`SERC Precip Anomaly (in)`, 4),
+          "<br>Rank:", serc.rank
         )
       ) %>%
       # Add filter based on slider input
@@ -875,13 +870,13 @@ server <- function(input, output) {
       rename(
         Year = year, 
         `Year-Month` = year.month, 
-        `Monthly Mean Sea Level (mm)` = mean.sea.level.mm,
+        `Monthly Mean Sea Level (in)` = mean.sea.level.in,
       ) %>%
       mutate(
         `Year-Month` = as.Date(`Year-Month`),
         monthly_sea_hover_text = paste(
           "Year-Month:", format(`Year-Month`, "%Y-%m"),
-          "<br>Mean Sea Level (mm):", round(`Monthly Mean Sea Level (mm)`, 3)
+          "<br>Mean Sea Level (in):", round(`Monthly Mean Sea Level (in)`, 3)
         )
       ) %>%
       # Add filter based on slider input
@@ -896,12 +891,12 @@ server <- function(input, output) {
     frenchman.annual.clean %>%
       rename(
         Year = year, 
-        `Annual Mean Sea Level (mm)` = mean.sea.level.mm,
+        `Annual mean sea level (in)` = mean.sea.level.in,
       ) %>%
       mutate(
         annual_sea_hover_text = paste(
           "Year:", Year,
-          "<br>Mean Sea Level (mm):", round(`Annual Mean Sea Level (mm)`, 3)
+          "<br>Mean Sea Level (in):", round(`Annual mean sea level (in)`, 3)
         )
       ) %>%
       # Add filter based on slider input
@@ -918,7 +913,7 @@ server <- function(input, output) {
     
     list(
       monthly_sea = if ("lm_monthly_sea" %in% input$linesToShowMonthlySea) 
-        lm(`Monthly Mean Sea Level (mm)` ~ Year, data = data)
+        lm(`Monthly Mean Sea Level (in)` ~ Year, data = data)
     )
   })
   
@@ -929,41 +924,74 @@ server <- function(input, output) {
     
     list(
       annual_sea = if ("lm_annual_sea" %in% input$linesToShowAnnualSea) 
-        lm(`Annual Mean Sea Level (mm)` ~ Year, data = data)
+        lm(`Annual mean sea level (in)` ~ Year, data = data)
     )
   })
+  
+  # Reactive for sea level anomalies
+  anom_sea_level <- reactive({
+    data <- frenchman.monthly.clean %>%
+      as_tibble() %>% 
+      rename(
+        Year = year, 
+        `Year-Month` = year.month, 
+        `Monthly Mean Sea Level (in)` = mean.sea.level.in) %>%
+      mutate(
+        `Year-Month` = as.Date(`Year-Month`),
+        monthly_sea_hover_text = paste(
+          "Year-Month:", format(`Year-Month`, "%Y-%m"),
+          "<br>Mean sea level (in):", round(`Monthly Mean Sea Level (in)`, 3)))
+  })
+  
   
   
   #----------------------#
   ####   Functions    ####
   #----------------------# 
   
-  # Helper function for adding hover text 
+  #Helper function for adding hover text
+  # customize_hover_text <- function(plt, units = "°C") {
+  #   for(i in seq_along(plt$x$data)) {
+  #     if(!is.null(plt$x$data[[i]]$name)) {
+  #       if(!is.null(plt$x$data[[i]]$mode) &&
+  #          !is.null(plt$x$data[[i]]$line$color) &&
+  #          plt$x$data[[i]]$mode == "lines" &&
+  #          identical(plt$x$data[[i]]$line$color, "black")) {
+  # 
+  #         base_name <- gsub("\\.$", "", plt$x$data[[i]]$name)
+  #         base_name <- gsub("fitted values", paste(base_name, "trend"), base_name)
+  # 
+  #         plt$x$data[[i]]$hovertemplate <- paste0(
+  #           base_name, ": %{y:.1f} ", units, "<br>",
+  #           "<extra></extra>"
+  #         )
+  #       } else if(!is.null(plt$x$data[[i]]$fill) &&
+  #                 plt$x$data[[i]]$fill == "tonexty") {
+  #         plt$x$data[[i]]$hovertemplate <- paste0(
+  #           "95% Confidence Interval: %{y:.1f} ", units, "<br>",
+  #           "<extra></extra>"
+  #         )
+  #       } else if(!is.null(plt$x$data[[i]]$mode) &&
+  #                 plt$x$data[[i]]$mode == "lines") {
+  #         plt$x$data[[i]]$hovertemplate <- paste0(
+  #           "%{data.name}: %{y:.1f} ", units, "<br>",
+  #           "<extra></extra>"
+  #         )
+  #         plt$x$data[[i]]$name <- gsub("\\.$", "", plt$x$data[[i]]$name)
+  #       }
+  #     }
+  #   }
+  #   plt
+  # }
+  
   customize_hover_text <- function(plt, units = "°C") {
     for(i in seq_along(plt$x$data)) {
       if(!is.null(plt$x$data[[i]]$name)) {
-        if(!is.null(plt$x$data[[i]]$mode) && 
-           !is.null(plt$x$data[[i]]$line$color) && 
-           plt$x$data[[i]]$mode == "lines" && 
-           identical(plt$x$data[[i]]$line$color, "black")) {
-          
-          base_name <- gsub("\\.$", "", plt$x$data[[i]]$name)
-          base_name <- gsub("fitted values", paste(base_name, "trend"), base_name)
-          
-          plt$x$data[[i]]$hovertemplate <- paste0(
-            base_name, ": %{y:.1f} ", units, "<br>",
-            "<extra></extra>"
-          )
-        } else if(!is.null(plt$x$data[[i]]$fill) && 
-                  plt$x$data[[i]]$fill == "tonexty") {
-          plt$x$data[[i]]$hovertemplate <- paste0(
-            "95% Confidence Interval: %{y:.1f} ", units, "<br>",
-            "<extra></extra>"
-          )
-        } else if(!is.null(plt$x$data[[i]]$mode) && 
+        if(!is.null(plt$x$data[[i]]$mode) &&
                   plt$x$data[[i]]$mode == "lines") {
           plt$x$data[[i]]$hovertemplate <- paste0(
-            "%{data.name}: %{y:.1f} ", units, "<br>",
+            #"Year: %{x:.0f}<br>",
+            "%{data.name}: %{y:.1f} ", units, #"<br>",
             "<extra></extra>"
           )
           plt$x$data[[i]]$name <- gsub("\\.$", "", plt$x$data[[i]]$name)
@@ -978,15 +1006,14 @@ server <- function(input, output) {
   add_model_line <- function(plot, model, var_name) {
     plot +
       geom_smooth(
-        aes(y = .data[[var_name]]),
+        aes(y = round(.data[[var_name]], 0)),
         method = "lm",
         se = TRUE,
         fill = "grey80",
         alpha = 0.5,
-        color = NA
-      ) +
+        color = NA) +
       geom_line(
-        aes(y = .data[[var_name]]),
+        aes(y = round(.data[[var_name]], 0)),
         stat = "smooth",
         method = "lm",
         color = "black",
@@ -996,122 +1023,125 @@ server <- function(input, output) {
   }
   
   
-  #----------------------#
-  ####  Plot outputs  ####
-  #----------------------#
-  
   #-------------------------------#
   ####  Long-Term Trend Plots  ####
   #-------------------------------# 
   
-  # Temperature plot output ----------------------------------------------------
+  ## ¬ Temperature plot output ----
   output$myInteractivePlot <- renderPlotly({
     data <- temperature_data()
     models <- temp_models()
     
-    # Filter data based on year range from slider
+    #Filter data based on year range from slider
     filtered_data <- data %>%
       filter(Year >= input$year_range_temp[1], Year <= input$year_range_temp[2])
     
     #create ggplot output
     p <- ggplot(filtered_data, aes(x = Year)) +
-      scale_y_continuous(breaks = c(0,2,4,6,8,10,12,14)) +
+      scale_y_continuous(breaks = c(30,35,40,45,50,55)) +
       scale_x_continuous(breaks = pretty(filtered_data$Year)) +
       labs(title = NULL,
            x = "Year",
-           y = "Temperature (°C)") +
+           y = "Temperature (°F)") +
       theme_classic()
-      #theme_minimal() #+
-      #theme(axis.text = element_text(size = "1rem"),
-            #axis.title = element_text(size = "1rem", margin = unit(c(0, 0, 5, 0), "mm")),
-            #legend.text = element_text(size = "1rem"))
     
-    # Add temperature lines based on selection
+    #Add temperature lines based on selection
     #add noaa max temp
     if ("NOAA Average Max Temp" %in% input$linesToShow) {
       p <- p + geom_line(aes(x = Year,
                              y = `NOAA Average Max Temp`,
-                             color = "NOAA Average Maximum Temp.",
-                             linetype = "NOAA Average Maximum Temp."))
+                             color = "NOAA average maximum temperature",
+                             linetype = "NOAA average maximum temperature"))
       
-      if (!is.null(models$noaa_max)) {
-        p <- add_model_line(p, models$noaa_max, "NOAA Average Max Temp")
-        
-      }
+      p <- add_model_line(p, models$noaa_max, "NOAA Average Max Temp")
+      
+      # if (!is.null(models$noaa_max)) {
+      #   p <- add_model_line(p, models$noaa_max, "NOAA Average Max Temp")
+      #   
+      # }
     }
     
     #add noaa average temp
     if ("NOAA Average Mean Temp" %in% input$linesToShow) {
       p <- p + geom_line(aes(x = Year,
                              y = `NOAA Average Mean Temp`,
-                             color = "NOAA Average Mean Temp.",
-                             linetype = "NOAA Average Mean Temp."))
+                             color = "NOAA average mean temperature",
+                             linetype = "NOAA average mean temperature"))
       
-      if (!is.null(models$noaa_avg)) {
-        p <- add_model_line(p, models$noaa_avg, "NOAA Average Mean Temp")
-        
-      }
+      p <- add_model_line(p, models$noaa_avg, "NOAA Average Mean Temp")
+      
+      # if (!is.null(models$noaa_avg)) {
+      #   p <- add_model_line(p, models$noaa_avg, "NOAA Average Mean Temp")
+      #   
+      # }
     }
     
     #add noaa min temp
     if ("NOAA Average Min Temp" %in% input$linesToShow) {
       p <- p + geom_line(aes(x = Year,
                              y = `NOAA Average Min Temp`,
-                             color = "NOAA Average Minimum Temp.",
-                             linetype = "NOAA Average Minimum Temp."))
+                             color = "NOAA average minimum temperature",
+                             linetype = "NOAA average minimum temperature"))
       
-      if (!is.null(models$noaa_min)) {
-        p <- add_model_line(p, models$noaa_min, "NOAA Average Min Temp")
-        
-      }
+      p <- add_model_line(p, models$noaa_min, "NOAA Average Min Temp")
+      
+      # if (!is.null(models$noaa_min)) {
+      #   p <- add_model_line(p, models$noaa_min, "NOAA Average Min Temp")
+      #   
+      # }
     }
     
     #add McFarland temp
     if ("McFarland Average Temp" %in% input$linesToShow) {
       p <- p + geom_line(aes(x = Year,
                              y = `McFarland Average Temp`,
-                             color = "McFarland Average Temp.",
-                             linetype = "McFarland Average Temp."))
+                             color = "McFarland average temperature",
+                             linetype = "McFarland average temperature"))
       
-      if (!is.null(models$mcfarland)) {
-        p <- add_model_line(p, models$mcfarland, "McFarland Average Temp")
-        
-      }
+      p <- add_model_line(p, models$mcfarland, "McFarland Average Temp")
+      
+      # if (!is.null(models$mcfarland)) {
+      #   p <- add_model_line(p, models$mcfarland, "McFarland Average Temp")
+      #   
+      # }
     }
     
     #add SERC temp
     if ("SERC Average Temp" %in% input$linesToShow) {
       p <- p + geom_line(aes(x = Year,
                              y = `SERC Average Temp`,
-                             color = "SERC Average Temp.",
-                             linetype = "SERC Average Temp."))
+                             color = "SERC average temperature",
+                             linetype = "SERC average temperature"))
       
-      if (!is.null(models$serc)) {
-        p <- add_model_line(p, models$serc, "SERC Average Temp")
-        
-      }
+      p <- add_model_line(p, models$serc, "SERC Average Temp")
+      
+      # if (!is.null(models$serc)) {
+      #   p <- add_model_line(p, models$serc, "SERC Average Temp")
+      #   
+      # }
     }
     
     # Customize the legend and colors
     p <- p + scale_color_manual(
       values = c(
-        "NOAA Average Mean Temp." = "gray50", 
-        "NOAA Average Maximum Temp." = "#CC3300", 
-        "NOAA Average Minimum Temp." = "#003399", 
-        "McFarland Average Temp." = "black",
-        "SERC Average Temp." = "black"),
+        "NOAA average mean temperature" = "black", 
+        "NOAA average maximum temperature" = "#CC3300", 
+        "NOAA average minimum temperature" = "#003399", 
+        "McFarland average temperature" = "gray40",
+        "SERC average temperature" = "black"),
       name = NULL) +
       scale_linetype_manual(
         values = c(
-          "NOAA Average Mean Temp." = "solid", 
-          "NOAA Average Maximum Temp." = "solid", 
-          "NOAA Average Minimum Temp." = "solid", 
-          "McFarland Average Temp." = "dashed",
-          "SERC Average Temp." = "dotted"),
+          "NOAA average mean temperature" = "solid", 
+          "NOAA average maximum temperature" = "solid", 
+          "NOAA average minimum temperature" = "solid", 
+          "McFarland average temperature" = "dashed",
+          "SERC average temperature" = "dotted"),
         name = NULL)
     
     # Convert to plotly and customize hover text
     temp_plt <- ggplotly(p) %>%
+      style(hoverinfo = "skip", traces = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)) %>%
       layout(
         showlegend = TRUE, 
         legend = list(
@@ -1122,14 +1152,13 @@ server <- function(input, output) {
           y = -0.2,
           xanchor = "center"),
         hovermode = "x unified",
-        hoverlabel = list(bgcolor = "white"),
-        xaxis = list(hoverformat = "%Y")
-      ) %>%
+        hoverlabel = list(bgcolor = "#F2F2F2"),
+        xaxis = list(hoverformat = ".0f")) %>%
       customize_hover_text(units = "°C") 
   })
   
   
-  # Temp model summaries -------------------------------------------------------
+  # Temp model summaries
   
   output$noaa_temp_model_summary <- renderPrint({
     req("lm_noaa_temp" %in% input$linesToShow)
@@ -1156,20 +1185,24 @@ server <- function(input, output) {
     summary(temp_models()$serc)
   })
   
-  # Precipitation plot output --------------------------------------------------
+  
+  
+  
+  ## ¬ Precipitation plot output ----
   output$PrecipPlot <- renderPlotly({
     data <- precipitation_data()
     models <- precip_models()
     
     # Filter data based on year range from slider
     filtered_data <- data %>%
-      filter(Year >= input$year_range_precip[1], Year <= input$year_range_precip[2])
+      filter(Year >= input$year_range_precip[1], Year <= input$year_range_precip[2]) %>% 
+      mutate(Year = round(Year, 0))
     
     p2 <- ggplot(filtered_data, aes(x = Year)) +
       scale_x_continuous(breaks = pretty(filtered_data$Year)) +
       labs(title = NULL,
            x = "Year",
-           y = "Total Precipitation (in)") +
+           y = "Total precipitation (in)") +
       theme_classic()
     
     # Add precipitation lines based on selection
@@ -1177,47 +1210,53 @@ server <- function(input, output) {
     if ("NOAA Precip" %in% input$linesToShowPrecip) {
       p2 <- p2 + geom_line(aes(x = Year,
                                y = `NOAA Precip`,
-                               color = "NOAA Total Precip.",
-                               linetype = "NOAA Total Precip."))
+                               color = "NOAA total precipitation",
+                               linetype = "NOAA total precipitation"))
       
-      if (!is.null(models$noaa_precip)) {
-        p2 <- add_model_line(p2, models$noaa_precip, "NOAA Precip")
-        
-      }
+      p2 <- add_model_line(p2, models$noaa_precip, "NOAA Precip")
+      
+      # if (!is.null(models$noaa_precip)) {
+      #   p2 <- add_model_line(p2, models$noaa_precip, "NOAA Precip")
+      #   
+      # }
     }
     
     #add McFarland precip data
     if ("McFarland Precip" %in% input$linesToShowPrecip) {
       p2 <- p2 + geom_line(aes(x = Year,
                                y = `McFarland Precip`,
-                               color = "McFarland Total Precip.",
-                               linetype = "McFarland Total Precip."))
+                               color = "McFarland total precipitation",
+                               linetype = "McFarland total precipitation"))
       
-      if (!is.null(models$mcfarland_precip)) {
-        p2 <- add_model_line(p2, models$mcfarland_precip, "McFarland Precip")
-        
-      }
+      p2 <- add_model_line(p2, models$mcfarland_precip, "McFarland Precip")
+      
+      # if (!is.null(models$mcfarland_precip)) {
+      #   p2 <- add_model_line(p2, models$mcfarland_precip, "McFarland Precip")
+      #   
+      # }
     }
     
     #add SERC precip data
     if ("SERC Precip" %in% input$linesToShowPrecip) {
       p2 <- p2 + geom_line(aes(x = Year,
                                y = `SERC Precip`,
-                               color = "SERC Average Precip.",
-                               linetype = "SERC Average Precip."))
+                               color = "SERC average precipitation",
+                               linetype = "SERC average precipitation"))
       
-      if (!is.null(models$serc_precip)) {
-        p2 <- add_model_line(p2, models$serc_precip, "SERC Precip")
-        
-      }
+      p2 <- add_model_line(p2, models$serc_precip, "SERC Precip")
+      
+      # if (!is.null(models$serc_precip)) {
+      #   p2 <- add_model_line(p2, models$serc_precip, "SERC Precip")
+      #   
+      # }
     }
     
     # Customize the legend and colors
     p2 <- p2 + scale_color_manual(
       values = c(
-        "NOAA Total Precip." = "#000000", 
-        "McFarland Total Precip." = "darkblue",
-        "SERC Average Precip." = "gray30"
+        "NOAA total precipitation" = "#000000", 
+        "McFarland total precipitation" = "darkblue",
+        "SERC average precipitation" = "gray30"
       ),
       name = NULL) +
       scale_linetype_manual(
@@ -1229,6 +1268,7 @@ server <- function(input, output) {
     
     # Convert to plotly and customize hover text
     precip_plt <- ggplotly(p2) %>%
+      style(hoverinfo = "skip", traces = c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)) %>%
       layout(
         showlegend = TRUE,
         legend = list(
@@ -1239,13 +1279,12 @@ server <- function(input, output) {
           y = -0.2,
           xanchor = "center"),
         hovermode = "x unified",
-        hoverlabel = list(bgcolor = "white")
-        #xaxis = list(hoverformat = "%Y")
-      ) %>%
+        hoverlabel = list(bgcolor = "#F2F2F2"),
+        xaxis = list(hoverformat = ".0f")) %>%
       customize_hover_text(units = "in")
   })
   
-  # Precip model summaries -----------------------------------------------------
+  # Precip model summaries
   
   output$noaa_precip_model_summary <- renderPrint({
     req("lm_noaa_precip" %in% input$linesToShowPrecip)
@@ -1269,13 +1308,14 @@ server <- function(input, output) {
   ## Create anomaly plot function
   create_anomaly_plot <- function(data, 
                                   x_col = "Year-Month", 
-                                  y_col = "NOAA Temp Anomaly (°C)", 
+                                  y_col = "NOAA Temp Anomaly (°F)", 
                                   hover_text_col = "noaa_hover_text",
                                   legend_title = "Anomaly Data",
                                   plot_title = NULL,
                                   date_start = "1900",
                                   break_interval = "10 years",
-                                  type = "temp") {
+                                  type = "temp",
+                                  ylabel) {
     
     # Get date range for x-axis
     min_date <- min(data[[x_col]], na.rm = TRUE)
@@ -1301,7 +1341,7 @@ server <- function(input, output) {
                                                  to = max(x), 
                                                  by = break_interval),  
         labels = scales::date_format("%Y"))  +
-      labs(title = plot_title, x = "Year") +
+      labs(title = plot_title, x = "Year", y = ylabel) +
       theme_classic() +
       theme(panel.border = element_rect(linewidth = 1, fill = "transparent"))
     
@@ -1328,8 +1368,7 @@ server <- function(input, output) {
           y = -0.2,
           xanchor = "center"),
         hovermode = "x unified",
-        hoverlabel = list(bgcolor = "white")
-        #xaxis = list(title = "Year")
+        hoverlabel = list(bgcolor = "#F2F2F2")
       )
   }
   
@@ -1341,13 +1380,14 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = temp_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "NOAA Temp Anomaly (°C)",
+      y_col = "NOAA Temp Anomaly (°F)",
       hover_text_col = "noaa_hover_text",
       legend_title = NULL,
       plot_title = "NOAA Temperature Anomalies",
       date_start = as.Date("1900-01-01"),
       break_interval = "20 years",
-      type = "temp"
+      type = "temp",
+      ylabel = "Difference from mean (˚F)"
     )
   })
   
@@ -1356,13 +1396,14 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = temp_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "McFarland Temp Anomaly (°C)",
+      y_col = "McFarland Temp Anomaly (°F)",
       hover_text_col = "mcfarland_hover_text",
       legend_title = NULL,
       plot_title = "McFarland Hill Temperature Anomalies",
       date_start = as.Date("2000-01-01"),
       break_interval = "5 years",
-      type = "temp"
+      type = "temp",
+      ylabel = "Difference from mean (˚F)"
     )
   })
   
@@ -1371,13 +1412,14 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = temp_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "SERC Temp Anomaly (°C)",
+      y_col = "SERC Temp Anomaly (°F)",
       hover_text_col = "serc_hover_text",
       legend_title = NULL,
       plot_title = "SERC Temperature Anomalies",
       date_start = as.Date("2010-01-01"),
       break_interval = "2 years",
-      type = "temp"
+      type = "temp",
+      ylabel = "Difference from mean (˚F)"
     )
   })
   
@@ -1386,13 +1428,14 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = precip_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "NOAA Precip Anomaly (%)",
+      y_col = "NOAA Precip Anomaly (in)",
       hover_text_col = "noaa_precip_hover_text",
       legend_title = NULL,
       plot_title = "NOAA Precipitation Anomalies",
       date_start = as.Date("1901-01-01"),
       break_interval = "20 years",
-      type = "precip"
+      type = "precip",
+      ylabel = "Difference from mean (in)"
     )
   })
   
@@ -1401,13 +1444,14 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = precip_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "McFarland Precip Anomaly (%)",
+      y_col = "McFarland Precip Anomaly (in)",
       hover_text_col = "mcfarland_precip_hover_text",
       legend_title = NULL,
       plot_title = "McFarland Hill Precipitation Anomalies",
       date_start = as.Date("2000-01-01"),
       break_interval = "5 years",
-      type = "precip"
+      type = "precip",
+      ylabel = "Difference from mean (in)"
     )
   })
   
@@ -1416,13 +1460,91 @@ server <- function(input, output) {
     create_anomaly_plot(
       data = precip_anomaly_data(),
       x_col = "Year-Month",
-      y_col = "SERC Precip Anomaly (%)",
+      y_col = "SERC Precip Anomaly (in)",
       hover_text_col = "serc_precip_hover_text",
       legend_title = NULL,
       plot_title = "SERC Precipitation Anomalies",
       date_start = as.Date("2010-01-01"),
       break_interval = "2 years",
-      type = "precip"
+      type = "precip",
+      ylabel = "Difference from mean (in)"
+    )
+  })
+  
+  
+  ## Create anomaly plot function
+  create_sl_anomaly_plot <- function(data, 
+                                  x_col = "Year-Month", 
+                                  y_col = "Monthly Mean Sea Level (in)", 
+                                  hover_text_col = "monthly_sea_hover_text",
+                                  legend_title = NULL,
+                                  plot_title = NULL,
+                                  date_start = "1900",
+                                  break_interval = "10 years",
+                                  type = NA,
+                                  ylabel) {
+    
+    # Get date range for x-axis
+    min_date <- min(data[[x_col]], na.rm = TRUE)
+    max_date <- max(data[[x_col]], na.rm = TRUE)
+    
+    newdat <- data %>% 
+      mutate(total.mean.sl = mean(.$`Monthly Mean Sea Level (in)`, na.rm = T),
+             anom = .$`Monthly Mean Sea Level (in)` - total.mean.sl) %>% 
+      filter(!is.na(.$`Monthly Mean Sea Level (in)`))
+    
+    p <- ggplot(newdat, aes(x = .data[[x_col]])) +
+      geom_bar(aes(
+        y = anom,
+        fill = factor(anom > 0, 
+                      levels = c(TRUE, FALSE), 
+                      labels = c("Above baseline", "Below baseline")),
+        text = .data[[hover_text_col]]), stat = "identity") +
+      scale_fill_manual(
+        values = c("Above baseline" = "red",
+                   "Below baseline" = "blue",
+                   "Baseline" = "black"),
+        name = legend_title) +
+      geom_hline(yintercept = 0, color = "black", linetype = "dotted") +
+      scale_x_date(
+        breaks = function(x) seq.Date(from = date_start, 
+                                      to = max(x), 
+                                      by = break_interval),  
+        labels = scales::date_format("%Y"))  +
+      labs(title = plot_title, x = "Year", y = ylabel) +
+      theme_classic() +
+      theme(panel.border = element_rect(linewidth = 1, fill = "transparent"))
+    
+    
+    # Convert to plotly and disable legend clicking
+    ggplotly(p, tooltip = "text") %>%
+      layout(
+        showlegend = TRUE,
+        legend = list(
+          itemclick = FALSE, 
+          itemdoubleclick = FALSE,
+          orientation = "h", 
+          x = 0.5, 
+          y = -0.2,
+          xanchor = "center"),
+        hovermode = "x unified",
+        hoverlabel = list(bgcolor = "#F2F2F2")
+      )
+  }
+  
+  
+  output$SLAnomPlot <- renderPlotly({
+    create_sl_anomaly_plot(
+      data = anom_sea_level(),
+      x_col = "Year-Month",
+      y_col = "Monthly Mean Sea Level (in)",
+      hover_text_col = "monthly_sea_hover_text",
+      legend_title = NULL,
+      plot_title = NULL,
+      date_start = as.Date("1901-01-01"),
+      break_interval = "20 years",
+      type = NA,
+      ylabel = "Difference from mean (in)"
     )
   })
   
@@ -1452,7 +1574,7 @@ server <- function(input, output) {
                                  color_other2 = "orange",  # Color for other records (var2, optional)
                                  show_var1 = TRUE,
                                  show_var2 = TRUE,
-                                 units = "°C",
+                                 units = "°F",
                                  ptitle,
                                  date_format = "%Y-%m") { 
     
@@ -1609,17 +1731,17 @@ server <- function(input, output) {
       min_year = input$year_range_records5[1],
       max_year = input$year_range_records5[2],
       top_n = 10,
-      y_label = "Temperature (°C)",
-      label_highlight1 = "Top 10 Highest Mean Temperatures",
-      label_other1 = "Highest Mean Temperatures",
-      label_highlight2 = "Top 10 Highest Max Temperatures",
-      label_other2 = "Highest Max Temperatures",
+      y_label = "Temperature (°F)",
+      label_highlight1 = "Top 10 highest mean temperatures",
+      label_other1 = "Highest mean temperatures",
+      label_highlight2 = "Top 10 highest maximum temperatures",
+      label_other2 = "Highest maximum temperatures",
       color_top1 = "black",
       color_other1 = "grey",
       color_top2 = "darkred",
       color_other2 = "orange",
       show_var1 = "annual_mean_temp" %in% input$annual_temp_records_display,
-      units = "°C",
+      units = "°F",
       date_format = "%Y",
       ptitle = "Highest Annual NOAA Temperature Records")
   })
@@ -1635,18 +1757,18 @@ server <- function(input, output) {
       min_year = input$year_range_records[1],
       max_year = input$year_range_records[2],
       top_n = 10,
-      y_label = "Temperature (°C)",
-      label_highlight1 = "Top 10 Highest Mean Temperatures",
-      label_other1 = "Highest Mean Temperatures",
-      label_highlight2 = "Top 10 Highest Max Temperatures",
-      label_other2 = "Highest Max Temperatures",
+      y_label = "Temperature (°F)",
+      label_highlight1 = "Top 10 highest mean temperatures",
+      label_other1 = "Highest mean temperatures",
+      label_highlight2 = "Top 10 highest maximum temperatures",
+      label_other2 = "Highest maximum temperatures",
       color_top1 = "black",
       color_other1 = "grey",
       color_top2 = "darkred",
       color_other2 = "orange",
       show_var1 = "mean_max_temp" %in% input$temp_records_display,
       show_var2 = "max_temp" %in% input$temp_records_display,
-      units = "°C",
+      units = "°F",
       date_format = "%Y-%m",
       ptitle = "Highest Monthly NOAA Temperature Records")
   })
@@ -1662,18 +1784,18 @@ server <- function(input, output) {
       min_year = input$year_range_records3[1],
       max_year = input$year_range_records3[2],
       top_n = 10,
-      y_label = "Temperature (°C)",
-      label_highlight1 = "Top 10 Highest Mean Temperatures",
-      label_other1 = "Highest Mean Temperatures",
-      label_highlight2 = "Top 10 Highest Max Temperatures",
-      label_other2 = "Highest Max Temperatures",
+      y_label = "Temperature (°F)",
+      label_highlight1 = "Top 10 highest mean temperatures",
+      label_other1 = "Highest mean temperatures",
+      label_highlight2 = "Top 10 highest maximum temperatures",
+      label_other2 = "Highest maximum temperatures",
       color_top1 = "black",
       color_other1 = "grey",
       color_top2 = "darkred",
       color_other2 = "orange",
       show_var1 = "daily_mean_max_temp" %in% input$daily_max_temp_display,
       show_var2 = "daily_max_temp" %in% input$daily_max_temp_display,
-      units = "°C",
+      units = "°F",
       date_format = "%Y-%m-%d",
       ptitle = "Highest Daily NOAA Temperature Records"
     )
@@ -1692,8 +1814,8 @@ server <- function(input, output) {
       max_year = input$year_range_precip_record[2],
       top_n = 10,
       y_label = "Total precipitation (in)",
-      label_highlight1 = "Top 10 Highest Precipitation Records",
-      label_other1 = "Highest Precipitation Records",
+      label_highlight1 = "Top 10 highest precipitation records",
+      label_other1 = "Highest precipitation records",
       color_top1 = "darkblue",
       color_other1 = "lightblue",
       # show_var1 = "max_precip" %in% input$precip_records_display,
@@ -1715,8 +1837,8 @@ server <- function(input, output) {
       max_year = input$year_range_precip_record[2],
       top_n = 10,
       y_label = "Monthly precipitation (in)",
-      label_highlight1 = "Top 10 Highest Precipitation Records",
-      label_other1 = "Highest Precipitation Records",
+      label_highlight1 = "Top 10 highest precipitation records",
+      label_other1 = "Highest precipitation records",
       color_top1 = "darkblue",
       color_other1 = "lightblue",
       # show_var1 = "max_precip" %in% input$precip_records_display,
@@ -1749,7 +1871,7 @@ server <- function(input, output) {
                           color_other2 = "light blue",
                           show_var1 = TRUE,
                           show_var2 = TRUE,
-                          units = "°C",
+                          units = "°F",
                           date_format = "%Y-%m",
                           ptitle) { 
     
@@ -1908,17 +2030,17 @@ server <- function(input, output) {
       min_year = input$year_range_records6[1],
       max_year = input$year_range_records6[2],
       top_n = 10,
-      y_label = "Temperature (°C)",
-      label_highlight1 = "Top 10 Lowest Mean Temperatures",
-      label_other1 = "Lowest Mean Temperatures",
-      label_highlight2 = "Top 10 Lowest Minimum Temperatures",
-      label_other2 = "Lowest Minimum Temperatures",
+      y_label = "Temperature (°F)",
+      label_highlight1 = "Top 10 lowest mean temperatures",
+      label_other1 = "Lowest mean temperatures",
+      label_highlight2 = "Top 10 lowest minimum temperatures",
+      label_other2 = "Lowest minimum temperatures",
       color_top1 = "black",
       color_other1 = "grey",
       color_top2 = "darkblue",
       color_other2 = "lightblue",
       show_var1 = "annual_low_temp" %in% input$annual_low_records_display,
-      units = "°C",
+      units = "°F",
       date_format = "%Y",
       ptitle = "Lowest Annual NOAA Temperature Records")
   })
@@ -1934,18 +2056,18 @@ server <- function(input, output) {
       min_year = input$year_range_records2[1],
       max_year = input$year_range_records2[2],
       top_n = 10,
-      y_label = "Temperature (°C)",
-      label_highlight1 = "Top 10 Lowest Mean Temperatures",
-      label_other1 = "Lowest Mean Temperatures",
-      label_highlight2 = "Top 10 Lowest Minimum Temperatures",
-      label_other2 = "Lowest Minimum Temperatures",
+      y_label = "Temperature (°F)",
+      label_highlight1 = "Top 10 lowest mean temperatures",
+      label_other1 = "Lowest mean temperatures",
+      label_highlight2 = "Top 10 lowest minimum temperatures",
+      label_other2 = "Lowest minimum temperatures",
       color_top1 = "black",
       color_other1 = "grey",
       color_top2 = "darkblue",
       color_other2 = "lightblue",
       show_var1 = "mean_min_temp" %in% input$min_temp_records_display,
       show_var2 = "min_temp" %in% input$min_temp_records_display,
-      units = "°C",
+      units = "°F",
       date_format = "%Y-%m",
       ptitle = "Lowest Monthly NOAA Temperature Records"
     )
@@ -1962,18 +2084,18 @@ server <- function(input, output) {
       min_year = input$year_range_records4[1],
       max_year = input$year_range_records4[2],
       top_n = 10,
-      y_label = "Temperature (°C)",
-      label_highlight1 = "Top 10 Lowest Mean Temperatures",
-      label_other1 = "Lowest Mean Temperatures",
-      label_highlight2 = "Top 10 Lowest Min Temperatures",
-      label_other2 = "Lowest Min Temperatures",
+      y_label = "Temperature (°F)",
+      label_highlight1 = "Top 10 lowest mean temperatures",
+      label_other1 = "Lowest mean temperatures",
+      label_highlight2 = "Top 10 lowest minimum temperatures",
+      label_other2 = "Lowest minimum temperatures",
       color_top1 = "black",
       color_other1 = "grey",
       color_top2 = "darkblue",
       color_other2 = "lightblue",
       show_var1 = "daily_mean_min_temp" %in% input$daily_min_temp_display,
       show_var2 = "daily_min_temp" %in% input$daily_min_temp_display,
-      units = "°C",
+      units = "°F",
       date_format = "%Y-%m-%d",
       ptitle = "Lowest Daily NOAA Temperature Records"
     )
@@ -1992,8 +2114,8 @@ server <- function(input, output) {
       max_year = input$year_range_precip_record[2],
       top_n = 10,
       y_label = "Total precipitation (in)",
-      label_highlight1 = "Top 10 Lowest Precipitation Records",
-      label_other1 = "Lowest Precipitation Records",
+      label_highlight1 = "Top 10 lowest precipitation records",
+      label_other1 = "Lowest precipitation records",
       color_top1 = "black",
       color_other1 = "grey",
       # show_var1 = "min_precip" %in% input$precip_records_display,
@@ -2015,8 +2137,8 @@ server <- function(input, output) {
       max_year = input$year_range_precip_record[2],
       top_n = 10,
       y_label = "Monthly precipitation (in)",
-      label_highlight1 = "Top 10 Lowest Precipitation Records",
-      label_other1 = "Lowest Precipitation Records",
+      label_highlight1 = "Top 10 lowest precipitation records",
+      label_other1 = "Lowest precipitation records",
       color_top1 = "black",
       color_other1 = "grey",
       # show_var1 = "min_precip" %in% input$precip_records_display,
@@ -2029,13 +2151,13 @@ server <- function(input, output) {
   
   
   #---------------------------------#
-  ####  Sea Level Plot Function  ####
+  ####     Sea Level Plots       ####
   #---------------------------------#  
   
   # function for mean sea level plots
   create_sea_level_plot <- function(data,
                                     x_col = "Year-Month",
-                                    y_col = "Monthly Mean Sea Level (mm)",
+                                    y_col = "Monthly Mean Sea Level (in)",
                                     hover_text_col = "monthly_sea_hover_text",
                                     plot_title = NULL,
                                     show_trend = FALSE,
@@ -2055,13 +2177,13 @@ server <- function(input, output) {
       theme_classic()
     
     # Add main sea level line ONLY if it is selected
-    if (line_label %in% input_check) {
+    #if (line_label %in% input_check) {
       s <- s + 
         geom_line(aes(x = .data[[x_col]], y = .data[[y_col]],
                       text = .data[[hover_text_col]], color = line_label, 
                       group = 1),  # Ensures correct grouping for Plotly
-                  linewidth = 0.3)
-    }
+                  linewidth = 0.5)
+   # }
     
     # Add appropriate scale based on x-axis type
     if (is_date) {
@@ -2079,29 +2201,30 @@ server <- function(input, output) {
                          name = NULL)
     
     # Add trend line if requested
-    if (show_trend && !is.null(model)) {
+    #if (show_trend && !is.null(model)) {
       s <- s + 
         geom_smooth(
           aes(x = .data[[x_col]], y = .data[[y_col]]),
           method = lm,
           linewidth = 0.5,
-          #se = TRUE,
-          #fill = "grey80",
-          #alpha = 0.8,
-          #color = "black"
-        #) +
-        # geom_line(
-        #   aes(x = .data[[x_col]], y = .data[[y_col]], text = .data[[hover_text_col]],
-        #       group = 1),
-        #   stat = "smooth",
-        #   method = "lm",
-        #   color = "black",
-        #   linewidth = 0.8
+          se = TRUE,
+          fill = "grey80",
+          alpha = 0.8,
+          color = "NA"
+        ) +
+        geom_line(
+          aes(x = .data[[x_col]], y = .data[[y_col]], text = .data[[hover_text_col]],
+              group = 1),
+          stat = "smooth",
+          method = "lm",
+          color = "black",
+          linewidth = 0.5
         )
-    }
+    #}
     
     # Convert to plotly and customize
     plot <- ggplotly(s, tooltip = "text") %>%
+      style(hoverinfo = "skip", traces = c(3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)) %>%
       layout(
         showlegend = TRUE,
         legend = list(
@@ -2112,8 +2235,9 @@ server <- function(input, output) {
           y = -0.2,
           xanchor = "center"),
         hovermode = "x unified",
-        hoverlabel = list(bgcolor = "white")
-      )
+        hoverlabel = list(bgcolor = "#F2F2F2"),
+        xaxis = list(hoverformat = ".0f")) %>%
+        customize_hover_text(units = "in")
   }
   
   # Use the function in your outputs
@@ -2124,14 +2248,14 @@ server <- function(input, output) {
     create_sea_level_plot(
       data = data,
       x_col = "Year-Month",
-      y_col = "Monthly Mean Sea Level (mm)",
+      y_col = "Monthly Mean Sea Level (in)",
       hover_text_col = "monthly_sea_hover_text",
       plot_title = NULL,
       show_trend = "lm_monthly_sea" %in% input$linesToShowMonthlySea,
       model = models$monthly_sea,
       is_date = TRUE,
-      line_color = "blue",
-      line_label = "Monthly Mean Sea Level (mm)",
+      line_color = "black",
+      line_label = "Monthly mean sea level (in)",
       input_check = input$linesToShowMonthlySea
     )
   })
@@ -2143,19 +2267,19 @@ server <- function(input, output) {
     create_sea_level_plot(
       data = data,
       x_col = "Year",
-      y_col = "Annual Mean Sea Level (mm)",
+      y_col = "Annual mean sea level (in)",
       hover_text_col = "annual_sea_hover_text",
       plot_title = NULL,
       show_trend = "lm_annual_sea" %in% input$linesToShowAnnualSea,
       model = models$annual_sea,
       is_date = FALSE,
-      line_color = "blue",
-      line_label = "Annual Mean Sea Level (mm)",
+      line_color = "black",
+      line_label = "Annual mean sea level (in)",
       input_check = input$linesToShowAnnualSea
     )
   })
   
-  # Sea level model summaries --------------------------------------------------
+  # Sea level model summaries
   
   output$monthly_sea_model_summary <- renderPrint({
     req("lm_monthly_sea" %in% input$linesToShowMonthlySea)
@@ -2170,29 +2294,126 @@ server <- function(input, output) {
   
   
   #---------------------------------#
-  ####     Data Explorer Tool    ####
+  ####        Data Tables        ####
   #---------------------------------# 
   
   output$exploretable <- DT::renderDataTable({
     
     data <- annualdata %>% 
+      select(-c(ppt.min.y, ppt.min.date)) %>% 
+      mutate(tmean.max.ym = format(as.Date(tmean.max.ym), "%b %Y"),
+             tmax.max.ym = format(as.Date(tmax.max.ym), "%b %Y"),
+             tmean.min.ym = format(as.Date(tmean.min.ym), "%b %Y"),
+             tmin.min.ym = format(as.Date(tmin.min.ym), "%b %Y"),
+             ppt.max.ym = format(as.Date(ppt.max.ym), "%b %Y"),
+             ppt.min.ym = format(as.Date(ppt.min.ym), "%b %Y"),
+             tmean.max.date = format(as.Date(tmean.max.date), "%d %b %Y"),
+             tmax.max.date = format(as.Date(tmax.max.date), "%d %b %Y"),
+             tmean.min.date = format(as.Date(tmean.min.date), "%d %b %Y"),
+             tmin.min.date = format(as.Date(tmin.min.date), "%d %b %Y"),
+             ppt.max.date = format(as.Date(ppt.max.date), "%d %b %Y")) %>% 
       mutate(across(where(is.numeric), ~round(., digits = 2)),
              across(where(is.numeric), ~as.character(.))) %>%
-      pivot_longer(!year, names_to = "Data Type", values_to = "Values")
+      rename("Year" = "year",
+             `NOAA average temperature (˚F)` = "noaa.temp",
+             `NOAA average maximum temperature (˚F)` = "noaa.max.temp",
+             `NOAA average minimum temperature (˚F)` = "noaa.min.temp",
+             `McFarland average temperature (˚F)` = "mcfarland.temp",
+             `SERC average temperature (˚F)` = "serc.temp",
+             `NOAA total precipitation (in)` = "noaa.precip",
+             `McFarland total precipitation (in)` = "mcfarland.precip",
+             `SERC total precipitation (in)` = "serc.precip",
+             #
+             `NOAA maximum monthly average temperature (˚F)` = "tmean.max.x",
+             `NOAA maximum monthly average temperature date` = "tmean.max.ym",
+             `NOAA maximum monthly temperature (˚F)` = "tmax.max.x",
+             `NOAA maximum monthly temperature date` = "tmax.max.ym",
+             `NOAA minimum monthly average temperature (˚F)` = "tmean.min.x",
+             `NOAA minimum monthly average temperature date` = "tmean.min.ym",
+             `NOAA minimum monthly temperature (˚F)` = "tmin.min.x",
+             `NOAA minimum monthly temperature date` = "tmin.min.ym",
+             `NOAA maximum monthly precipitation (in)` = "ppt.max.x",
+             `NOAA maximum monthly precipitation date` = "ppt.max.ym",
+             `NOAA minimum monthly precipitation (in)` = "ppt.min.x",
+             `NOAA minimum monthly precipitation date` = "ppt.min.ym",
+             #
+             `NOAA maximum daily average temperature (˚F)` = "tmean.max.y",
+             `NOAA maximum daily average temperature date` = "tmean.max.date",
+             `NOAA maximum daily temperature (˚F)` = "tmax.max.y",
+             `NOAA maximum daily temperature date` = "tmax.max.date",
+             `NOAA minimum daily average temperature (˚F)` = "tmean.min.y",
+             `NOAA minimum daily average temperature date` = "tmean.min.date",
+             `NOAA minimum daily temperature (˚F)` = "tmin.min.y",
+             `NOAA minimum daily temperature date` = "tmin.min.date",
+             `NOAA maximum daily precipitation (in)` = "ppt.max.y",
+             `NOAA maximum daily precipitation date` = "ppt.max.date",
+             #
+             `Average sea level (in)` = "mean.sea.level.in") %>% 
+      pivot_longer(cols = -Year, names_to = "Data type", values_to = "Value")
+    
     
     if (input$yr != "All") {
-      data <- data[data$year == input$yr, ]
+      data <- data[data$Year == input$yr, ]
     }
     
+    tabdata <- data %>% arrange(desc(Year))
+    
     DT::datatable(
-      data,
-      options = list(pageLength = 33,
-                     dom = 't'),
+      tabdata,
+      options = list(pageLength = 31, dom = 'ft'),
       rownames = F
     )
 
   })
   
+  
+  
+  output$exploretable2 <- DT::renderDataTable({
+    
+    data <- monthlydata %>% 
+      select(-c(noaa.date, noaa.percent.precip.anom, mcfarland.percent.precip.anom, serc.percent.precip.anom,
+                mcfarland.year.month.x, serc.year.month.x, mcfarland.year.month.y, serc.year.month.y)) %>% 
+      # mutate(tmean.max.ym = format(as.Date(tmean.max.ym), "%b %Y"),
+      #        tmax.max.ym = format(as.Date(tmax.max.ym), "%b %Y"),
+      #        tmean.min.ym = format(as.Date(tmean.min.ym), "%b %Y"),
+      #        tmin.min.ym = format(as.Date(tmin.min.ym), "%b %Y"),
+      #        ppt.max.ym = format(as.Date(ppt.max.ym), "%b %Y"),
+      #        ppt.min.ym = format(as.Date(ppt.min.ym), "%b %Y"),
+      #        tmean.max.date = format(as.Date(tmean.max.date), "%d %b %Y"),
+      #        tmax.max.date = format(as.Date(tmax.max.date), "%d %b %Y"),
+      #        tmean.min.date = format(as.Date(tmean.min.date), "%d %b %Y"),
+      #        tmin.min.date = format(as.Date(tmin.min.date), "%d %b %Y"),
+      #        ppt.max.date = format(as.Date(ppt.max.date), "%d %b %Y"),
+      #        ppt.min.date = format(as.Date(ppt.min.date), "%d %b %Y")) %>% 
+      mutate(across(where(is.numeric), ~round(., digits = 2)),
+             across(where(is.numeric), ~as.character(.))) %>%
+      rename("Year" = "year",
+             "Month" = "month",
+             `NOAA monthly temperature anomaly (˚F)` = "noaa.temp.anom",
+             `McFarland monthly temperature anomaly (˚F)` = "mcfarland.temp.anom",
+             `SERC monthly temperature anomaly (˚F)` = "serc.temp.anom",
+             `NOAA monthly precipitation anomaly (˚F)` = "noaa.precip.anom",
+             `McFarland monthly precipitation anomaly (˚F)` = "mcfarland.precip.anom",
+             `SERC monthly precipitation anomaly (˚F)` = "serc.precip.anom",
+             `Average sea level (in)` = "mean.sea.level.in"
+      ) %>% 
+      pivot_longer(cols = -c(Year, Month), names_to = "Data type", values_to = "Value")
+    
+    if (input$yr2 != "All") {
+      #data <- data[data$Year == input$yr2, ]
+      data <- data %>% 
+        filter(Year == input$yr2 & Month == input$mon)
+    }
+    
+    tabdata <- data %>% arrange(desc(Year))
+    
+    DT::datatable(
+      tabdata,
+      options = list(pageLength = 7, dom = 'ft'),
+      rownames = F
+    )
+    
+  })
   
   
 }
