@@ -54,14 +54,14 @@ ui <- fluidPage(
     
     
     ### Tab Content
-    navset_card_underline(selected = "Explore Data",
+    navset_card_underline(selected = "Dashboard Overview",
       
       ## ¬ Dashboard Overview ----
       nav_panel(icon = icon("home"), "Dashboard Overview",
                 
                 div(class = "summary-box",
                     div(class = "sumtxt",
-                        h2("Climate Data Overview"),
+                        h2("Climate Data Summary"),
                         p(HTML("Acadia National Park is not buffered from the statewide trends of climate change.
                           State level analyses have shown a 3.9 ˚F increase in temperature and nearly 6 inches 
                           more rain each year since 1895, and 8 inches of sea level rise over the last century (<a href='https://climatechange.umaine.edu/climate-matters/maines-climate-future/' target='_blank'>Fernandez et al., 2020</a>;
@@ -76,7 +76,7 @@ ui <- fluidPage(
                 div(class = "summary-box",
                     div(class = "sumtxt",
                         h2("About this Dashboard"),
-                        p(HTML("This dashboard summarizes climate data from Acadia National Park gathered from local weather stations and climate models that cover the park. 
+                        p(HTML("This dashboard summarizes climate data from Acadia National Park gathered from local weather stations and climate models that encompass the park. 
                           Local data is gathered from the McFarland Hill Atmospheric Research Station in Bar Harbor, the MesoWest Winter Harbor-SERC Station at Schoodic Point, 
                           and the National Oceanography Centre (NOC) Station in Frenchman Bay. We also use the National Oceanic and Atmospheric Administration (NOAA) gridded climate 
                           model data for long term trends. The dashboard design was inspired by the Organisation for Economic Co-operation and Development's 
@@ -1240,8 +1240,8 @@ server <- function(input, output) {
     if ("SERC Precip" %in% input$linesToShowPrecip) {
       p2 <- p2 + geom_line(aes(x = Year,
                                y = `SERC Precip`,
-                               color = "SERC average precipitation",
-                               linetype = "SERC average precipitation"))
+                               color = "SERC total precipitation",
+                               linetype = "SERC total precipitation"))
       
       p2 <- add_model_line(p2, models$serc_precip, "SERC Precip")
       
@@ -1256,14 +1256,14 @@ server <- function(input, output) {
       values = c(
         "NOAA total precipitation" = "#000000", 
         "McFarland total precipitation" = "darkblue",
-        "SERC average precipitation" = "gray30"
+        "SERC total precipitation" = "gray30"
       ),
       name = NULL) +
       scale_linetype_manual(
         values = c(
-          "NOAA Total Precip." = "solid", 
-          "McFarland Total Precip." = "dashed",
-          "SERC Average Precip." = "dotted"),
+          "NOAA total precipitation" = "solid", 
+          "McFarland total precipitation" = "dashed",
+          "SERC total precipitation" = "dotted"),
         name = NULL)
     
     # Convert to plotly and customize hover text
